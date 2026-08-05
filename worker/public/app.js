@@ -12,6 +12,18 @@ const flightSticky = document.getElementById("flightSticky");
 const searchSticky = document.getElementById("searchSticky");
 const navUtc       = document.getElementById("navUtc");
 
+// 로고/브랜드 클릭 → 홈으로
+document.querySelectorAll(".nav-brand, .sticky-brand").forEach(el => {
+  el.style.cursor = "pointer";
+  el.addEventListener("click", () => {
+    resultsWrap.classList.add("hidden");
+    heroSection.classList.remove("hidden");
+    flightInput.value = "";
+    statusEl.textContent = "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+});
+
 // UTC clock
 function updateUtc() {
   const now = new Date();

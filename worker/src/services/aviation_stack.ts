@@ -1,5 +1,25 @@
 import { LOCAL_ROUTES } from "../data/routes";
 
+// KE 편명 번호 범위 → 운항 구간/기종 추론
+function guessKeRoute(fn: string): { departure_iata: string; arrival_iata: string; aircraft_type: string } | null {
+  if (!fn.startsWith("KE")) return null;
+  const num = parseInt(fn.slice(2), 10);
+  if (isNaN(num)) return null;
+  // 홀수=출발(ICN), 짝수=귀항
+  const outbound = num % 2 === 1;
+  if (num >= 1 && num <= 99)   return outbound ? { departure_iata: "ICN", arrival_iata: "JFK", aircraft_type: "A380-800" }   : { departure_iata: "JFK", arrival_iata: "ICN", aircraft_type: "A380-800" };
+  if (num >= 100 && num <= 199) return outbound ? { departure_iata: "ICN", arrival_iata: "SYD", aircraft_type: "B787-9" }    : { departure_iata: "SYD", arrival_iata: "ICN", aircraft_type: "B787-9" };
+  if (num >= 200 && num <= 299) return outbound ? { departure_iata: "ICN", arrival_iata: "LAX", aircraft_type: "B777-300ER" }: { departure_iata: "LAX", arrival_iata: "ICN", aircraft_type: "B777-300ER" };
+  if (num >= 300 && num <= 399) return outbound ? { departure_iata: "ICN", arrival_iata: "FRA", aircraft_type: "A380-800" }  : { departure_iata: "FRA", arrival_iata: "ICN", aircraft_type: "A380-800" };
+  if (num >= 400 && num <= 499) return outbound ? { departure_iata: "ICN", arrival_iata: "DEL", aircraft_type: "B787-9" }    : { departure_iata: "DEL", arrival_iata: "ICN", aircraft_type: "B787-9" };
+  if (num >= 500 && num <= 599) return outbound ? { departure_iata: "ICN", arrival_iata: "GMP", aircraft_type: "B737-900ER" }: { departure_iata: "GMP", arrival_iata: "ICN", aircraft_type: "B737-900ER" };
+  if (num >= 600 && num <= 699) return outbound ? { departure_iata: "ICN", arrival_iata: "BKK", aircraft_type: "A330-300" }  : { departure_iata: "BKK", arrival_iata: "ICN", aircraft_type: "A330-300" };
+  if (num >= 700 && num <= 799) return outbound ? { departure_iata: "ICN", arrival_iata: "NRT", aircraft_type: "A330-300" }  : { departure_iata: "NRT", arrival_iata: "ICN", aircraft_type: "A330-300" };
+  if (num >= 800 && num <= 899) return outbound ? { departure_iata: "ICN", arrival_iata: "PEK", aircraft_type: "A330-300" }  : { departure_iata: "PEK", arrival_iata: "ICN", aircraft_type: "A330-300" };
+  if (num >= 900 && num <= 999) return outbound ? { departure_iata: "ICN", arrival_iata: "CDG", aircraft_type: "A380-800" }  : { departure_iata: "CDG", arrival_iata: "ICN", aircraft_type: "A380-800" };
+  return null;
+}
+
 export function normalizeFlightNumber(fn: string): string {
   const value = fn.toUpperCase().replace(/[^A-Z0-9]/g, "");
   if (value.startsWith("KAL") && /^\d+$/.test(value.slice(3))) return `KE${value.slice(3)}`;
@@ -74,12 +94,16 @@ export async function getFlight(fn: string, apiKey: string): Promise<[Record<str
 
   if (apiFlight) return [apiFlight as unknown as Record<string, unknown>, null];
 
+  // KE 편명 번호 범위로 노선/기종 추론
+  const keGuess = guessKeRoute(fn);
   const fallback: Record<string, unknown> = {
-    flight_number: fn, airline_iata: fn.slice(0, 2), flight_iata: fn,
-    departure_iata: null, arrival_iata: null,
+    flight_number: fn, airline_iata: "KE", flight_iata: fn,
+    departure_iata: keGuess?.departure_iata ?? null,
+    arrival_iata: keGuess?.arrival_iata ?? null,
     scheduled_departure: null, scheduled_arrival: null,
     estimated_departure: null, estimated_arrival: null,
-    aircraft_type: null, raw: { source: "unresolved" },
+    aircraft_type: keGuess?.aircraft_type ?? null,
+    raw: { source: "ke_range_guess", ...keGuess },
   };
   const msg = fn.startsWith("KE") && /^\d+$/.test(fn.slice(2))
     ? "Flight not found in live/local route data; showing Korean Air flight lookup."
