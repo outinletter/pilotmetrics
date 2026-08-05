@@ -150,9 +150,22 @@ function renderThreats(threats) {
   `;
 }
 
+function normalizeKE(raw) {
+  let fn = raw.trim().toUpperCase().replace(/\s+/g, "");
+  // 숫자만 입력 시 KE 자동 추가
+  if (/^\d+$/.test(fn)) fn = "KE" + fn;
+  // KAL → KE 변환
+  if (fn.startsWith("KAL")) fn = "KE" + fn.slice(3);
+  return fn;
+}
+
 async function loadBriefing(flightNum) {
-  const fn = (flightNum || flightInput.value.trim()).toUpperCase().replace(/\s+/g, "");
-  if (!fn) { statusEl.textContent = "Enter a flight number."; return; }
+  const fn = normalizeKE(flightNum || flightInput.value);
+  if (!fn) { statusEl.textContent = "편명을 입력하세요."; return; }
+  if (!fn.startsWith("KE") || !/^KE\d{1,4}$/.test(fn)) {
+    statusEl.textContent = "대한항공 편명(KE + 숫자)만 검색할 수 있습니다.";
+    return;
+  }
 
   statusEl.textContent = "Analyzing…";
   searchBtn.disabled = true;
