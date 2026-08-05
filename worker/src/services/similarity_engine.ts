@@ -49,14 +49,15 @@ export async function rankedEvents(db: D1Database, context: Record<string, unkno
     loadAllTags(db),
   ]);
 
-  const hasArrival = !!(context.arrival_icao as string);
-  const threshold = hasArrival ? 35 : 20;
+  const arrIcao = (context.arrival_icao as string) || "";
+  const hasArrival = !!arrIcao;
   const scored: [EventRow, number][] = [];
 
   for (const event of results) {
     const eTags = allTags.get(event.id) ?? new Set<string>();
     const score = scoreEvent(event, context, tags, eTags);
-    if ((hasArrival && event.airport_icao === context.arrival_icao) || score >= threshold) {
+    // 도착 공항 있으면 해당 공항 이벤트만, 없으면 임계값 이상
+    if (hasArrival ? event.airport_icao === arrIcao : score >= 20) {
       scored.push([event, score]);
     }
   }
@@ -71,14 +72,14 @@ export async function rankedEventsWithTags(db: D1Database, context: Record<strin
     loadAllTags(db),
   ]);
 
-  const hasArrival = !!(context.arrival_icao as string);
-  const threshold = hasArrival ? 35 : 20;
+  const arrIcao = (context.arrival_icao as string) || "";
+  const hasArrival = !!arrIcao;
   const scored: [EventRow, number, Set<string>][] = [];
 
   for (const event of results) {
     const eTags = allTags.get(event.id) ?? new Set<string>();
     const score = scoreEvent(event, context, tags, eTags);
-    if ((hasArrival && event.airport_icao === context.arrival_icao) || score >= threshold) {
+    if (hasArrival ? event.airport_icao === arrIcao : score >= 20) {
       scored.push([event, score, eTags]);
     }
   }
