@@ -134,13 +134,14 @@ export const LOCAL_ROUTES: Record<string, RouteEntry> = {
   KE644: { departure_iata: "SIN", arrival_iata: "ICN", aircraft_type: "A330-300" },
   KE645: { departure_iata: "ICN", arrival_iata: "SIN", aircraft_type: "A330-300" },
   KE646: { departure_iata: "SIN", arrival_iata: "ICN", aircraft_type: "A330-300" },
-  // KUL (쿠알라룸푸르): KE671~678
+  // KUL (쿠알라룸푸르): KE671~674
   KE671: { departure_iata: "ICN", arrival_iata: "KUL", aircraft_type: "A330-300" },
   KE672: { departure_iata: "KUL", arrival_iata: "ICN", aircraft_type: "A330-300" },
   KE673: { departure_iata: "ICN", arrival_iata: "KUL", aircraft_type: "A330-300" },
   KE674: { departure_iata: "KUL", arrival_iata: "ICN", aircraft_type: "A330-300" },
-  KE677: { departure_iata: "ICN", arrival_iata: "KUL", aircraft_type: "A330-300" },
-  KE678: { departure_iata: "KUL", arrival_iata: "ICN", aircraft_type: "A330-300" },
+  // HKT (푸켓): KE677~678
+  KE677: { departure_iata: "ICN", arrival_iata: "HKT", aircraft_type: "A330-300" },
+  KE678: { departure_iata: "HKT", arrival_iata: "ICN", aircraft_type: "A330-300" },
   // DPS (발리): KE629~630
   KE629: { departure_iata: "ICN", arrival_iata: "DPS", aircraft_type: "A350-900" },
   KE630: { departure_iata: "DPS", arrival_iata: "ICN", aircraft_type: "A350-900" },
