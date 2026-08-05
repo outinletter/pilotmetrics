@@ -317,6 +317,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
 }
 .ctx-flight {
   font-family: var(--font-mono);
@@ -339,6 +340,7 @@ body {
 }
 .risk-badge {
   flex: 0 0 auto;
+  align-self: flex-start;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.1em;
