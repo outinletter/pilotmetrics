@@ -1,0 +1,58 @@
+1. 서버 실행
+
+powershell
+cd D:\Data\Project\PilotBriefing
+.\.venv\Scripts\Activate.ps1
+uvicorn src.main:app --reload
+
+
+--------------------------------------------------
+
+cd D:\Data\Project\PilotBriefing
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+python -m src.seed
+uvicorn src.main:app --reload
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. NTSB 수집 호출 (다른 터미널 또는 브라우저에서)
+
+powershell
+curl -X POST http://127.0.0.1:8000/api/ops-intel/collect-official-recent
+
+또는 브라우저로 http://127.0.0.1:8000/docs 열어서 Swagger UI에서 POST /api/ops-intel/collect-official-recent 실행.
+
+3. 응답 확인
+
+json
+{
+  "sources": {
+    "ntsb": {"checked": ..., "created": ..., "error": "..."}
+  }
+}
+error 필드가 있으면 → 페이로드/필드명이 실제 CAROL API와 안 맞는 것 (제가 추정한 부분이 틀렸을 가능성).
+checked가 0이면 → 요청은 성공했지만 케이스가 없거나 ZIP 파싱 실패.
+checked > 0인데 created가 0이면 → 이미 DB에 있는 것들만 갱신됨(정상).
+
+4. 실제 데이터 확인 (DB 직접 열어보기)
+
+powershell
+python -c "import sqlite3; con=sqlite3.connect('ops_briefing.db'); cur=con.execute(\"SELECT id, event_date, weather_summary, operator, aircraft_type FROM events WHERE id LIKE 'NTSB-%' LIMIT 10\"); [print(r) for r in cur.fetchall()]"
+
+여기서 weather_summary(도시/주), operator, aircraft_type 값이 실제로 채워져 있고 그럴듯한지 눈으로 확인하는 게 핵심입니다. 비어있으면 해당 필드명 추정이 틀린 것이니 저한테 실제 응답 JSON 예시(케이스 1건)를 붙여넣어 주시면 필드 매핑을 정확히 고치겠습니다.
+
+5. 유사도 반영 확인
+아무 KE 항공편으로 브리핑 조회(GET /api/briefing/KE629)해서 top_threats 안에 NTSB-로 시작하는 이벤트가 섞여 나오는지 확인하면 최종적으로 실제 유사도 매칭까지 연결됐는지 알 수 있습니다.

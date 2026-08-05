@@ -1,0 +1,21 @@
+{
+  "name": "pilot-briefing-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create pilot-briefing",
+    "db:migrate": "wrangler d1 execute pilot-briefing --file=./schema.sql",
+    "db:migrate:remote": "wrangler d1 execute pilot-briefing --remote --file=./schema.sql"
+  },
+  "dependencies": {
+    "hono": "^4.4.0",
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240924.0",
+    "typescript": "^5.5.4",
+    "wrangler": "^3.78.0"
+  }
+}
