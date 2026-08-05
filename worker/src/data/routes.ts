@@ -59,8 +59,8 @@ export const LOCAL_ROUTES: Record<string, RouteEntry> = {
   KE958: { departure_iata: "FCO", arrival_iata: "ICN", aircraft_type: "B787-9" },
 
   // ── 중동 / 아프리카 ───────────────────────────────────────
-  KE951: { departure_iata: "ICN", arrival_iata: "DXB", aircraft_type: "B777-300ER" },
-  KE952: { departure_iata: "DXB", arrival_iata: "ICN", aircraft_type: "B777-300ER" },
+  KE971: { departure_iata: "ICN", arrival_iata: "DXB", aircraft_type: "B777-300ER" },
+  KE972: { departure_iata: "DXB", arrival_iata: "ICN", aircraft_type: "B777-300ER" },
   KE961: { departure_iata: "ICN", arrival_iata: "NBO", aircraft_type: "B787-9" },
   KE962: { departure_iata: "NBO", arrival_iata: "ICN", aircraft_type: "B787-9" },
 

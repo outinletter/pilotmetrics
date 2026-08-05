@@ -1,6 +1,6 @@
 export const AIRPORTS: Record<string, string> = {
   ICN: "RKSI", GMP: "RKSS",
-  DPS: "WADD", LAX: "KLAX", HNL: "PHNL",
+  DPS: "WADD", HNL: "PHNL",
   NRT: "RJAA", HND: "RJTT", OSA: "RJBB", FUK: "RJFF", NGO: "RJGG",
   SIN: "WSSS", BKK: "VTBS", MNL: "RPLL", HKG: "VHHH",
   KUL: "WMKK", SGN: "VVTS", HAN: "VVNB", DAD: "VVDN",
