@@ -312,7 +312,7 @@ body {
 }
 .ctx-header {
   background: linear-gradient(135deg, var(--navy-800) 0%, var(--navy-600) 100%);
-  padding: 20px 24px;
+  padding: 28px 24px 20px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
