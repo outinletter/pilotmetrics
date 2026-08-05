@@ -1,8 +1,6 @@
 export type Env = {
   DB: D1Database;
   AVIATIONSTACK_API_KEY: string;
-  TELEGRAM_BOT_TOKEN: string;
-  TELEGRAM_CHAT_ID: string;
   OPS_INTEL_AUTOSTART?: string;
   OPS_INTEL_INTERVAL_HOURS?: string;
 };

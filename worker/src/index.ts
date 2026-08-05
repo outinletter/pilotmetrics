@@ -10,7 +10,6 @@ import { buildThreats } from "./services/briefing_generator";
 import { collectOnce, refineOfficialItems } from "./services/ops_intel_collector";
 import { collectRecentOfficialEvents } from "./services/official_event_parsers";
 import { dailyBriefingMarkdown, reviewMarkdown } from "./services/report_generator";
-import { telegramMessage, sendTelegramMessage } from "./services/telegram";
 
 const app = new Hono<{ Bindings: Env }>();
 app.use("*", cors());
@@ -96,12 +95,6 @@ app.post("/api/ops-intel/reports/daily", async c => c.json({ markdown: await dai
 app.post("/api/ops-intel/reports/weekly", async c => c.json({ markdown: await reviewMarkdown(c.env.DB, "weekly") }));
 
 app.post("/api/ops-intel/reports/monthly", async c => c.json({ markdown: await reviewMarkdown(c.env.DB, "monthly") }));
-
-app.get("/api/ops-intel/telegram/message", async c => c.json({ message: await telegramMessage(c.env.DB) }));
-
-app.post("/api/ops-intel/telegram/send", async c =>
-  c.json(await sendTelegramMessage(c.env.DB, c.env.TELEGRAM_BOT_TOKEN, c.env.TELEGRAM_CHAT_ID))
-);
 
 // ─── Default: serve static assets ────────────────────────────────────────────
 // Cloudflare Workers Assets serve public/ automatically for non-API routes.
