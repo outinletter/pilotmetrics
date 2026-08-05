@@ -152,36 +152,60 @@ const NTSB_PHASE_MAP: Record<string, string> = {
   approach: "APPROACH", landing: "LANDING",
 };
 
+async function fetchCarolCases(start: string, end: string): Promise<Record<string, unknown>[]> {
+  const res = await fetch(NTSB_CAROL_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "*/*", "Origin": "https://data.ntsb.gov" },
+    body: JSON.stringify(carolPayload(start, end)),
+    signal: AbortSignal.timeout(60000),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const buf = await res.arrayBuffer();
+  const zip = unzipSync(new Uint8Array(buf));
+  const jsonFile = Object.keys(zip).find(f => f.endsWith(".json"));
+  if (!jsonFile) throw new Error("No JSON in ZIP");
+  return JSON.parse(new TextDecoder().decode(zip[jsonFile])) as Record<string, unknown>[];
+}
+
 async function parseNtsbCarol(db: D1Database, yearsBack: number): Promise<Record<string, unknown>> {
-  const end = new Date().toISOString().slice(0, 10);
-  const start = cutoffDate(yearsBack).toISOString().slice(0, 10);
-  let cases: Record<string, unknown>[];
-  try {
-    const res = await fetch(NTSB_CAROL_URL, {
-      method: "POST", headers: { "Content-Type": "application/json", "Accept": "*/*", "Origin": "https://data.ntsb.gov" },
-      body: JSON.stringify(carolPayload(start, end)), signal: AbortSignal.timeout(60000),
-    });
-    if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
-    const buf = await res.arrayBuffer();
-    const zip = unzipSync(new Uint8Array(buf));
-    const jsonFile = Object.keys(zip).find(f => f.endsWith(".json"));
-    if (!jsonFile) return { checked: 0, created: 0, error: "No JSON in ZIP" };
-    cases = JSON.parse(new TextDecoder().decode(zip[jsonFile])) as Record<string, unknown>[];
-  } catch (e) {
-    return { checked: 0, created: 0, error: String(e) };
+  // Split into 2-year chunks to exceed the 500-record-per-query limit.
+  const now = new Date();
+  const chunks: { start: string; end: string }[] = [];
+  for (let y = 0; y < yearsBack; y += 2) {
+    const chunkEnd = new Date(now);
+    chunkEnd.setFullYear(now.getFullYear() - y);
+    const chunkStart = new Date(now);
+    chunkStart.setFullYear(now.getFullYear() - Math.min(y + 2, yearsBack));
+    chunks.push({ start: chunkStart.toISOString().slice(0, 10), end: chunkEnd.toISOString().slice(0, 10) });
+  }
+
+  let allCases: Record<string, unknown>[] = [];
+  const errors: string[] = [];
+  for (const chunk of chunks) {
+    try {
+      const cases = await fetchCarolCases(chunk.start, chunk.end);
+      allCases = allCases.concat(cases);
+    } catch (e) {
+      errors.push(`${chunk.start}~${chunk.end}: ${e}`);
+    }
   }
 
   let created = 0;
   let part121Matched = 0;
   const seen = new Set<string>();
-  for (const c of cases) {
+  for (const c of allCases) {
     const ntsbNum = (c.cm_ntsbNum ?? c.cm_NtsbNo ?? "") as string;
     if (!ntsbNum || seen.has(ntsbNum)) continue;
     seen.add(ntsbNum);
     const vehicles = (c.cm_vehicles ?? []) as Record<string, unknown>[];
-    const farParts = vehicles.map(v => String(v.regulationFlightConductedUnder ?? "").trim());
-    if (!farParts.some(p => LARGE_JET_PARTS.has(p))) continue;
+    if (!vehicles.map(v => String(v.regulationFlightConductedUnder ?? "").trim()).some(p => LARGE_JET_PARTS.has(p))) continue;
     part121Matched++;
+    if (await upsertNtsbCase(db, ntsbNum, c, vehicles)) created++;
+  }
+  return { checked: allCases.length, chunks: chunks.length, part121_matched: part121Matched, created, errors };
+}
+
+async function upsertNtsbCase(db: D1Database, ntsbNum: string, c: Record<string, unknown>, vehicles: Record<string, unknown>[]): Promise<boolean> {
     const eventId = `NTSB-${ntsbNum}`.toUpperCase().replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, "");
     const existing = await db.prepare("SELECT id FROM events WHERE id = ?").bind(eventId).first<{ id: string }>();
     if (!existing) {
@@ -200,10 +224,9 @@ async function parseNtsbCarol(db: D1Database, yearsBack: number): Promise<Record
       for (const tag of ["NTSB","carol_case","official_report_candidate",...(fatal > 0 ? ["FATAL"] : [])]) {
         await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId,"risk",tag).run();
       }
-      created++;
+      return true;
     }
-  }
-  return { checked: cases.length, part121_matched: part121Matched, created };
+    return false;
 }
 
 async function parseAsrsReportSets(db: D1Database): Promise<Record<string, unknown>> {
@@ -233,6 +256,26 @@ async function parseAsrsReportSets(db: D1Database): Promise<Record<string, unkno
     })) created++;
   }
   return { checked, created };
+}
+
+export async function collectNtsbRange(db: D1Database, start: string, end: string): Promise<Record<string, unknown>> {
+  try {
+    const cases = await fetchCarolCases(start, end);
+    let created = 0, part121Matched = 0;
+    const seen = new Set<string>();
+    for (const c of cases) {
+      const ntsbNum = (c.cm_ntsbNum ?? c.cm_NtsbNo ?? "") as string;
+      if (!ntsbNum || seen.has(ntsbNum)) continue;
+      seen.add(ntsbNum);
+      const vehicles = (c.cm_vehicles ?? []) as Record<string, unknown>[];
+      if (!vehicles.map(v => String(v.regulationFlightConductedUnder ?? "").trim()).some(p => LARGE_JET_PARTS.has(p))) continue;
+      part121Matched++;
+      await upsertNtsbCase(db, ntsbNum, c, vehicles) && created++;
+    }
+    return { start, end, checked: cases.length, part121_matched: part121Matched, created };
+  } catch (e) {
+    return { start, end, checked: 0, created: 0, error: String(e) };
+  }
 }
 
 export async function collectRecentOfficialEvents(db: D1Database, yearsBack = 20): Promise<Record<string, unknown>> {

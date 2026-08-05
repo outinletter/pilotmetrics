@@ -10,12 +10,12 @@
     "db:migrate:remote": "wrangler d1 execute pilot-briefing --remote --file=./schema.sql"
   },
   "dependencies": {
-    "hono": "^4.4.0",
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "hono": "^4.4.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240924.0",
+    "@cloudflare/workers-types": "^5.20260804.1",
     "typescript": "^5.5.4",
-    "wrangler": "^3.78.0"
+    "wrangler": "^4.35.0"
   }
 }

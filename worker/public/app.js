@@ -1,122 +1,185 @@
-﻿const flightInput = document.querySelector("#flight");
-const searchButton = document.querySelector("#search");
-const statusEl = document.querySelector("#status");
-const contextEl = document.querySelector("#context");
-const threatsEl = document.querySelector("#threats");
+/* PilotMetrics — app.js */
 
-function esc(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const flightInput  = document.getElementById("flight");
+const searchBtn    = document.getElementById("search");
+const searchBtnTxt = document.getElementById("searchBtnText");
+const statusEl     = document.getElementById("status");
+const resultsWrap  = document.getElementById("resultsWrap");
+const heroSection  = document.getElementById("heroSection");
+const contextEl    = document.getElementById("context");
+const threatsEl    = document.getElementById("threats");
+const flightSticky = document.getElementById("flightSticky");
+const searchSticky = document.getElementById("searchSticky");
+const navUtc       = document.getElementById("navUtc");
+
+// UTC clock
+function updateUtc() {
+  const now = new Date();
+  const h = String(now.getUTCHours()).padStart(2, "0");
+  const m = String(now.getUTCMinutes()).padStart(2, "0");
+  const s = String(now.getUTCSeconds()).padStart(2, "0");
+  navUtc.textContent = `${h}:${m}:${s}Z`;
+}
+updateUtc();
+setInterval(updateUtc, 1000);
+
+function esc(v) {
+  return String(v ?? "").replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+  );
 }
 
-function eventSimilarity(event) {
-  const value = Number(event.similarity ?? event.similarity_score ?? 50);
-  if (!Number.isFinite(value)) return 50;
-  return Math.round(value > 1 ? value : value * 100);
+function simPct(event) {
+  const v = Number(event.similarity ?? event.similarity_score ?? 50);
+  return Math.round(Number.isFinite(v) ? (v > 1 ? v : v * 100) : 50);
 }
 
-function riskLabel(value) {
-  return String(value || "LOW").toUpperCase();
+function sevClass(sev) {
+  const s = String(sev || "").toLowerCase();
+  if (s === "critical" || Number(sev) >= 5) return "critical";
+  if (s === "high"     || Number(sev) >= 4) return "high";
+  if (s === "medium"   || Number(sev) >= 3) return "medium";
+  return "low";
+}
+
+function matchClass(pct) {
+  if (pct >= 75) return "match-high";
+  if (pct >= 50) return "match-med";
+  return "";
 }
 
 function renderContext(ctx) {
-  const searchLinks = (ctx.flight_search_links || []).map(link =>
-    `<a href="${esc(link.url)}" target="_blank" rel="noreferrer">${esc(link.label)}</a>`
+  const riskLow = (ctx.risk_level || "low").toLowerCase();
+  const msgs = (ctx.messages || []).map(m => `<p class="ctx-msg">${esc(m)}</p>`).join("");
+  const links = (ctx.flight_search_links || []).map(l =>
+    `<a class="ctx-link" href="${esc(l.url)}" target="_blank" rel="noreferrer">${esc(l.label)}</a>`
   ).join("");
-  contextEl.classList.remove("hidden");
+
   contextEl.innerHTML = `
-    <div class="contextTop">
+    <div class="ctx-header">
       <div>
-        <strong>${esc(ctx.flight_number)} ${esc(ctx.route)}</strong>
-        <span>${esc(ctx.departure_icao)} -> ${esc(ctx.arrival_icao)} - ${esc(ctx.aircraft)}</span>
+        <div class="ctx-flight">${esc(ctx.flight_number)}</div>
+        <div class="ctx-route">${esc(ctx.route)} &nbsp;·&nbsp; ${esc(ctx.departure_icao || "—")} → ${esc(ctx.arrival_icao || "—")}</div>
+        <div class="ctx-aircraft">${esc(ctx.aircraft)}</div>
       </div>
-      <b class="risk ${esc(ctx.risk_level).toLowerCase()}">${esc(ctx.risk_level)}</b>
+      <span class="risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
     </div>
-    <div class="chips">
-      <span>${esc(ctx.destination_runway || "RWY TBD")}</span>
-      <span>${esc(ctx.weather)}</span>
+    <div class="ctx-body">
+      <div class="ctx-chip-row">
+        <span class="chip">${esc(ctx.destination_runway || "RWY TBD")}</span>
+        <span class="chip">${esc(ctx.weather || "—")}</span>
+        ${ctx.arrival_weather_time ? `<span class="chip">${esc(ctx.arrival_weather_time)}</span>` : ""}
+      </div>
+      ${msgs}
+      ${links ? `<div class="ctx-links">${links}</div>` : ""}
+      ${ctx.arrival_taf ? `
+        <div class="ctx-block">
+          <div class="ctx-block-label">Arrival TAF</div>
+          <pre class="ctx-weather-text">${esc(ctx.arrival_taf)}</pre>
+        </div>` : ""}
+      ${ctx.metar ? `
+        <div class="ctx-block">
+          <div class="ctx-block-label">METAR</div>
+          <pre class="ctx-weather-text">${esc(ctx.metar)}</pre>
+        </div>` : ""}
     </div>
-    ${(ctx.messages || []).map(m => `<p class="msg">${esc(m)}</p>`).join("")}
-    ${searchLinks ? `<div class="flightSearch"><b>Google flight lookup</b>${searchLinks}</div>` : ""}
-    <div class="forecastBasis">
-      <b>Threat basis</b>
-      <span>${esc(ctx.arrival_weather_time || "Arrival time unavailable")}</span>
-      <pre class="weatherText">${esc(ctx.arrival_taf || "Arrival TAF segment unavailable")}</pre>
-    </div>
-    <pre class="weatherText">${esc(ctx.metar || "METAR unavailable")}</pre>
-    <pre class="weatherText">${esc(ctx.taf || "TAF unavailable")}</pre>
   `;
 }
 
 function renderThreats(threats) {
+  if (!threats || threats.length === 0) {
+    threatsEl.innerHTML = `<p style="color:var(--muted);font-size:14px">No threat data found for this route.</p>`;
+    return;
+  }
   threatsEl.innerHTML = `
-    <h2 class="threatsTitle">Today's Top Threats</h2>
-    ${threats.map((threat, index) => `
-    <section class="threat">
-      <h2><span class="desktopThreatPrefix">Threat ${index + 1}: </span><span class="threatRank">${index + 1}</span>${esc(threat.title)}</h2>
-      <p>${esc(threat.description)}</p>
-      <div class="events">
-        ${threat.events.map(event => `
-          <details>
-            <summary>
-              <span class="dropIcon">&gt;</span>
-              <span class="eventLine">${esc(event.one_line)}</span>
-              <span class="mobileEventMeta">Events 1 - Similar ${eventSimilarity(event)}%</span>
-              <b class="matchRisk ${esc(event.match_class || "")}">${esc(event.match_level || `${eventSimilarity(event)}% match`)}</b>
-              <b class="risk eventRisk ${esc(event.severity || "Low").toLowerCase()}">${esc(riskLabel(event.severity))}</b>
+    <div class="threats-header">
+      <h2 class="threats-title">Top Threats</h2>
+      <span class="threats-count">${threats.length} identified</span>
+    </div>
+    ${threats.map((t, i) => {
+      const events = (t.events || []);
+      return `
+      <div class="threat-card">
+        <div class="threat-card-header">
+          <div class="threat-num">${i + 1}</div>
+          <div class="threat-title-wrap">
+            <div class="threat-title">${esc(t.title)}</div>
+            ${t.description ? `<div class="threat-desc">${esc(t.description)}</div>` : ""}
+          </div>
+          <span class="threat-event-count">${events.length} event${events.length !== 1 ? "s" : ""}</span>
+        </div>
+        ${events.map(ev => {
+          const pct = simPct(ev);
+          const sc  = sevClass(ev.severity);
+          return `
+          <details class="event-item">
+            <summary class="event-summary">
+              <span class="event-chevron">›</span>
+              <span class="sev-dot ${sc}"></span>
+              <span class="event-one-line">${esc(ev.one_line)}</span>
+              <span class="event-match ${matchClass(pct)}">${pct}% match</span>
             </summary>
-            <div class="detail">
-              <h3>${esc(event.detail_title)}</h3>
-              <div class="eventMeta">
-                <span>${esc(event.date || "DATE TBD")}</span>
-                <span>${esc(event.operation_type || "Operation TBD")}</span>
-                <span>${esc(event.category || "Category TBD")}</span>
-                <span>${esc(event.severity || "Severity TBD")}</span>
+            <div class="event-detail">
+              <div class="event-detail-title">${esc(ev.detail_title)}</div>
+              <div class="event-meta-row">
+                ${ev.date ? `<span class="event-meta-chip">${esc(ev.date)}</span>` : ""}
+                ${ev.operation_type ? `<span class="event-meta-chip">${esc(ev.operation_type)}</span>` : ""}
+                ${ev.category ? `<span class="event-meta-chip">${esc(ev.category)}</span>` : ""}
+                <span class="event-meta-chip sev-${sc}">${esc(String(ev.severity || "").toUpperCase() || "N/A")}</span>
               </div>
-              <p>${esc(event.summary)}</p>
-              <b>Contributing factors</b>
-              <ul>${event.contributing_factors.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
-              <b>Operational lessons</b>
-              <ul>${event.operational_lessons.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
-              <b>A350 / B787 long-haul relevance</b>
-              <p>${esc(event.a350_b787_applicability || "")}</p>
-              <b>Recommended action</b>
-              <p>${esc(event.recommended_action || "")}</p>
-              <p class="brief">${esc(event.pilot_briefing_sentence)}</p>
+              <p class="event-summary-text">${esc(ev.summary)}</p>
+              ${ev.contributing_factors?.length ? `
+                <div class="event-section-label">Contributing Factors</div>
+                <ul class="event-list">${ev.contributing_factors.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+              ${ev.operational_lessons?.length ? `
+                <div class="event-section-label">Operational Lessons</div>
+                <ul class="event-list">${ev.operational_lessons.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+              ${ev.a350_b787_applicability ? `
+                <div class="event-section-label">A350 / B787 Applicability</div>
+                <p class="event-summary-text">${esc(ev.a350_b787_applicability)}</p>` : ""}
+              ${ev.pilot_briefing_sentence ? `
+                <div class="event-briefing">
+                  <div class="event-briefing-label">Pilot Briefing</div>
+                  <div class="event-briefing-text">${esc(ev.pilot_briefing_sentence)}</div>
+                </div>` : ""}
             </div>
-          </details>
-        `).join("")}
-      </div>
-    </section>
-  `).join("")}
+          </details>`;
+        }).join("")}
+      </div>`;
+    }).join("")}
   `;
 }
 
-async function loadBriefing() {
-  const flight = flightInput.value.trim();
-  if (!flight) {
-    statusEl.textContent = "Enter a flight number.";
-    flightInput.focus();
-    return;
-  }
-  statusEl.textContent = "Loading briefing...";
-  searchButton.disabled = true;
+async function loadBriefing(flightNum) {
+  const fn = (flightNum || flightInput.value.trim()).toUpperCase().replace(/\s+/g, "");
+  if (!fn) { statusEl.textContent = "Enter a flight number."; return; }
+
+  statusEl.textContent = "Analyzing…";
+  searchBtn.disabled = true;
+  searchBtnTxt.textContent = "…";
+
   try {
-    const response = await fetch(`/api/briefing/${encodeURIComponent(flight)}`);
-    if (!response.ok) throw new Error("Briefing unavailable");
-    const data = await response.json();
+    const res = await fetch(`/api/briefing/${encodeURIComponent(fn)}`);
+    if (!res.ok) throw new Error("Briefing unavailable");
+    const data = await res.json();
+
     renderContext(data.flight_context);
     renderThreats(data.top_threats || []);
-    document.body.classList.add("briefingLoaded");
+
+    heroSection.classList.add("hidden");
+    resultsWrap.classList.remove("hidden");
     statusEl.textContent = "";
-  } catch (error) {
-    document.body.classList.remove("briefingLoaded");
-    statusEl.textContent = "Unable to load briefing. Try again.";
+    flightSticky.value = fn;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch {
+    statusEl.textContent = "Unable to load briefing. Please try again.";
   } finally {
-    searchButton.disabled = false;
+    searchBtn.disabled = false;
+    searchBtnTxt.textContent = "Analyze";
   }
 }
 
-searchButton.addEventListener("click", loadBriefing);
-flightInput.addEventListener("keydown", event => {
-  if (event.key === "Enter") loadBriefing();
-});
+searchBtn.addEventListener("click", () => loadBriefing());
+flightInput.addEventListener("keydown", e => { if (e.key === "Enter") loadBriefing(); });
+searchSticky.addEventListener("click", () => loadBriefing(flightSticky.value));
+flightSticky.addEventListener("keydown", e => { if (e.key === "Enter") loadBriefing(flightSticky.value); });

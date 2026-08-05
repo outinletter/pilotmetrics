@@ -83,6 +83,16 @@ app.post("/api/ops-intel/collect-official-recent", async c => {
   return c.json(await collectRecentOfficialEvents(c.env.DB, body.years_back ?? 20));
 });
 
+// NTSB CAROL 연도 범위 지정 수집 (Workers CPU 제한 회피용)
+// 예: POST /api/ops-intel/collect-ntsb { "start": "2020-01-01", "end": "2022-12-31" }
+app.post("/api/ops-intel/collect-ntsb", async c => {
+  const body = await c.req.json<{ start?: string; end?: string }>().catch(() => ({ start: undefined, end: undefined }));
+  const end = body.end ?? new Date().toISOString().slice(0, 10);
+  const start = body.start ?? (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 2); return d.toISOString().slice(0, 10); })();
+  const { collectNtsbRange } = await import("./services/official_event_parsers");
+  return c.json(await collectNtsbRange(c.env.DB, start, end));
+});
+
 app.get("/api/ops-intel/items", async c => {
   const { results } = await c.env.DB.prepare("SELECT source_name,source_url,title,category,severity,summary,operational_lesson,a350_b787_applicability,recommended_action,tags,last_status,last_checked_at FROM ops_intel_items ORDER BY updated_at DESC LIMIT 50").all();
   return c.json(results);

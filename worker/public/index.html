@@ -1,29 +1,91 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pilot Threat Briefing</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <title>PilotMetrics — Threat Briefing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <main class="shell">
-    <header class="mobileHeader">
-      <strong>Pilot Threat Briefing</strong>
-      <span aria-hidden="true">&#9776;</span>
-    </header>
-    <section class="search">
-      <label for="flight">Pilot Threat Briefing</label>
-      <div class="row">
-        <input id="flight" autocomplete="off" placeholder="KE081">
-        <button id="search">Search</button>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="6" fill="#0f4c81"/>
+          <path d="M6 18L13 9l3 5 3-3 3 4" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="21" cy="9" r="2" fill="#f59e0b"/>
+        </svg>
+        <span class="nav-title">PilotMetrics</span>
+        <span class="nav-badge">THREAT INTEL</span>
       </div>
-      <p id="status"></p>
-    </section>
+      <div class="nav-right">
+        <span class="nav-utc" id="navUtc">-- UTC</span>
+        <span class="nav-dot"></span>
+        <span class="nav-status">LIVE</span>
+      </div>
+    </div>
+  </nav>
 
-    <section id="context" class="context hidden"></section>
-    <section id="threats" class="threats"></section>
-  </main>
-  <script src="/static/app.js"></script>
+  <section class="hero" id="heroSection">
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Operational Safety Intelligence</p>
+      <h1 class="hero-title">Flight Threat<br>Briefing</h1>
+      <p class="hero-sub">Enter your flight number to receive an AI-generated threat analysis based on historical incidents and real-time weather.</p>
+      <div class="search-box">
+        <div class="search-input-wrap">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 19h20L12 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+          <input id="flight" class="search-input" autocomplete="off" spellcheck="false" placeholder="KE081 / UA888 / SQ021" />
+        </div>
+        <button id="search" class="search-btn">
+          <span id="searchBtnText">Analyze</span>
+        </button>
+      </div>
+      <p id="status" class="status-msg"></p>
+      <div class="hero-tags">
+        <span>NTSB Database</span>
+        <span>METAR / TAF</span>
+        <span>ASRS Reports</span>
+        <span>FAA Incidents</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="results-wrap hidden" id="resultsWrap">
+    <div class="sticky-bar" id="stickyBar">
+      <div class="sticky-inner">
+        <div class="sticky-brand">
+          <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="6" fill="#0f4c81"/>
+            <path d="M6 18L13 9l3 5 3-3 3 4" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="21" cy="9" r="2" fill="#f59e0b"/>
+          </svg>
+          <span>PilotMetrics</span>
+        </div>
+        <div class="sticky-search">
+          <input id="flightSticky" class="sticky-input" autocomplete="off" spellcheck="false" placeholder="New flight…" />
+          <button id="searchSticky" class="sticky-btn">Search</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <section id="context" class="ctx-panel"></section>
+      <section id="threats" class="threats-section"></section>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>PilotMetrics &copy; 2026 &mdash; Operational Safety Intelligence</span>
+      <span>For crew use only &middot; Not for operational certification</span>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
 </body>
 </html>
