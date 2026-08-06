@@ -43,7 +43,7 @@ Respond with exactly this JSON structure (no markdown, no explanation):
 }`;
 
   try {
-    const response = await (ai as any).run("@cf/meta/llama-3.1-8b-instruct", {
+    const response = await (ai as any).run("@cf/meta/llama-3.1-8b-instruct-fp8", {
       messages: [
         { role: "system", content: "You are an aviation safety analyst. Always respond with valid JSON only." },
         { role: "user", content: prompt },
@@ -102,7 +102,7 @@ export async function enrichWithLLM(
       errors++;
       if (errorSamples.length < 3) {
         try {
-          const testRun = await (ai as any).run("@cf/meta/llama-3.1-8b-instruct", { prompt: "Say OK", max_tokens: 5 });
+          const testRun = await (ai as any).run("@cf/meta/llama-3.1-8b-instruct-fp8", { prompt: "Say OK", max_tokens: 5 });
           errorSamples.push(`model_ok:${JSON.stringify(testRun).slice(0,80)}`);
         } catch(te) { errorSamples.push(String(te).slice(0, 120)); }
       }

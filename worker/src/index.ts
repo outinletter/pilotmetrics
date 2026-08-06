@@ -135,7 +135,7 @@ app.post("/api/ops-intel/collect", async c => c.json(await collectOnce(c.env.DB,
 app.get("/api/ops-intel/ai-test", async c => {
   if (!c.env.AI) return c.json({ error: "AI binding not configured" }, 503);
   try {
-    const result = await (c.env.AI as any).run("@cf/meta/llama-3.1-8b-instruct", {
+    const result = await (c.env.AI as any).run("@cf/meta/llama-3.1-8b-instruct-fp8", {
       messages: [{ role: "user", content: "Reply with: OK" }],
       max_tokens: 10,
     });
