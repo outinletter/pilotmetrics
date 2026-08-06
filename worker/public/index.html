@@ -58,17 +58,14 @@
   <div class="results-wrap hidden" id="resultsWrap">
     <div class="sticky-bar" id="stickyBar">
       <div class="sticky-inner">
-        <div class="sticky-brand">
-          <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-            <rect width="28" height="28" rx="6" fill="#0f4c81"/>
-            <path d="M6 18L13 9l3 5 3-3 3 4" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="21" cy="9" r="2" fill="#f59e0b"/>
-          </svg>
-          <span>PilotMetrics</span>
+        <div class="sticky-flight-info" id="stickyFlightInfo">
+          <span class="sticky-fn" id="stickyFn"></span>
+          <span class="sticky-route" id="stickyRoute"></span>
+          <span class="sticky-ac" id="stickyAc"></span>
         </div>
-        <div class="sticky-search">
-          <input id="flightSticky" class="sticky-input" autocomplete="off" spellcheck="false" placeholder="KE 편명 입력…" />
-          <button id="searchSticky" class="sticky-btn">Search</button>
+        <div class="sticky-right">
+          <span class="sticky-risk-badge" id="stickyRisk"></span>
+          <button class="sticky-back-btn" id="stickyBackBtn">← New Search</button>
         </div>
       </div>
     </div>

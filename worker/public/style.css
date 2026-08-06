@@ -249,48 +249,66 @@ body {
   padding: 10px 24px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
 }
-.sticky-brand {
+.sticky-flight-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 14px;
+  min-width: 0;
+}
+.sticky-fn {
+  font-family: var(--font-mono);
+  font-size: 18px;
   font-weight: 700;
   color: #ffffff;
+  letter-spacing: 0.06em;
   flex: 0 0 auto;
 }
-.sticky-search {
-  flex: 1;
-  display: flex;
-  gap: 8px;
-}
-.sticky-input {
-  flex: 1;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px;
-  color: #ffffff;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  padding: 8px 14px;
-  outline: none;
-}
-.sticky-input::placeholder { color: rgba(255,255,255,0.25); font-weight: 400; }
-.sticky-btn {
-  background: var(--sky-400);
-  color: var(--navy-900);
-  border: none;
-  border-radius: 8px;
+.sticky-route {
   font-size: 13px;
-  font-weight: 700;
-  padding: 0 20px;
+  color: var(--sky-300);
+  letter-spacing: 0.04em;
+  flex: 0 0 auto;
+}
+.sticky-ac {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  flex: 0 0 auto;
+}
+.sticky-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+.sticky-risk-badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+.sticky-risk-badge.low    { background: var(--green-100); color: #15803d; }
+.sticky-risk-badge.medium { background: var(--amber-100); color: #92400e; }
+.sticky-risk-badge.high   { background: var(--orange-100); color: #9a3412; }
+.sticky-risk-badge.critical { background: var(--red-100); color: #991b1b; }
+.sticky-back-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
   cursor: pointer;
   transition: background 0.15s;
+  white-space: nowrap;
 }
-.sticky-btn:hover { background: var(--sky-300); }
+.sticky-back-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
 
 /* ── CONTAINER ────────────────────────────────────────────── */
 .container {
@@ -665,7 +683,8 @@ details summary::marker { content: ""; }
   .search-btn { width: 100%; height: 48px; border-radius: 10px; }
   .container { padding: 20px 16px 40px; }
   .ctx-body { grid-template-columns: 1fr; }
-  .sticky-brand { display: none; }
+  .sticky-ac { display: none; }
+  .sticky-route { font-size: 11px; }
   .threat-card-header { flex-wrap: wrap; }
   .event-summary { flex-wrap: wrap; }
   .event-one-line { font-size: 12px; }
