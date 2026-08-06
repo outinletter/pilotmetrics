@@ -8,31 +8,114 @@ const ASRS_KEYWORDS = ["far 121","air carrier","commuter","corporate","fatigue",
 const LARGE_JET_PARTS = new Set(["121","135","125","129"]);
 
 const US_CITY_AIRPORTS: Record<string, [string, string]> = {
-  "boston,massachusetts": ["BOS","KBOS"], "chicago,illinois": ["ORD","KORD"],
-  "honolulu,hawaii": ["HNL","PHNL"], "jamaica,new york": ["JFK","KJFK"],
-  "los angeles,california": ["LAX","KLAX"], "new york,new york": ["JFK","KJFK"],
-  "san francisco,california": ["SFO","KSFO"], "seattle,washington": ["SEA","KSEA"],
-  "washington,d.c.": ["DCA","KDCA"], "atlanta,georgia": ["ATL","KATL"],
-  "dallas,texas": ["DFW","KDFW"], "denver,colorado": ["DEN","KDEN"],
-  "houston,texas": ["IAH","KIAH"], "miami,florida": ["MIA","KMIA"],
-  "newark,new jersey": ["EWR","KEWR"], "anchorage,alaska": ["ANC","PANC"],
+  // 동부
+  "boston,massachusetts": ["BOS","KBOS"], "east boston,massachusetts": ["BOS","KBOS"],
+  "jamaica,new york": ["JFK","KJFK"], "new york,new york": ["JFK","KJFK"],
+  "flushing,new york": ["JFK","KJFK"], "queens,new york": ["JFK","KJFK"],
+  "newark,new jersey": ["EWR","KEWR"],
+  "washington,d.c.": ["DCA","KDCA"], "arlington,virginia": ["DCA","KDCA"],
+  "dulles,virginia": ["IAD","KIAD"],
+  "miami,florida": ["MIA","KMIA"], "doral,florida": ["MIA","KMIA"],
+  "fort lauderdale,florida": ["FLL","KFLL"],
+  "orlando,florida": ["MCO","KMCO"],
+  "tampa,florida": ["TPA","KTPA"],
+  "charlotte,north carolina": ["CLT","KCLT"],
+  "atlanta,georgia": ["ATL","KATL"], "college park,georgia": ["ATL","KATL"],
+  "philadelphia,pennsylvania": ["PHL","KPHL"],
+  "pittsburgh,pennsylvania": ["PIT","KPIT"],
+  "detroit,michigan": ["DTW","KDTW"], "romulus,michigan": ["DTW","KDTW"],
+  "minneapolis,minnesota": ["MSP","KMSP"],
+  "chicago,illinois": ["ORD","KORD"], "rosemont,illinois": ["ORD","KORD"],
+  "midway,illinois": ["MDW","KMDW"],
+  "st. louis,missouri": ["STL","KSTL"],
+  "memphis,tennessee": ["MEM","KMEM"],
+  "nashville,tennessee": ["BNA","KBNA"],
+  // 중부/남부
+  "dallas,texas": ["DFW","KDFW"], "fort worth,texas": ["DFW","KDFW"],
+  "houston,texas": ["IAH","KIAH"], "humble,texas": ["IAH","KIAH"],
+  "san antonio,texas": ["SAT","KSAT"],
+  "phoenix,arizona": ["PHX","KPHX"],
+  "las vegas,nevada": ["LAS","KLAS"],
+  "denver,colorado": ["DEN","KDEN"],
+  "salt lake city,utah": ["SLC","KSLC"],
+  // 서부
+  "los angeles,california": ["LAX","KLAX"], "inglewood,california": ["LAX","KLAX"],
+  "san francisco,california": ["SFO","KSFO"], "san jose,california": ["SJC","KSJC"],
+  "san diego,california": ["SAN","KSAN"],
+  "seattle,washington": ["SEA","KSEA"], "seatac,washington": ["SEA","KSEA"],
+  "portland,oregon": ["PDX","KPDX"],
+  // 알래스카/하와이
+  "anchorage,alaska": ["ANC","PANC"],
+  "honolulu,hawaii": ["HNL","PHNL"],
 };
 
 const INTL_CITY_AIRPORTS: Record<string, [string, string]> = {
+  // 한국
   "seoul,south korea": ["ICN","RKSI"], "seoul,korea": ["ICN","RKSI"],
+  "incheon,south korea": ["ICN","RKSI"],
+  "busan,south korea": ["PUS","RKPK"],
+  // 일본
   "tokyo,japan": ["HND","RJTT"], "narita,japan": ["NRT","RJAA"],
-  "hong kong,hong kong": ["HKG","VHHH"], "singapore,singapore": ["SIN","WSSS"],
-  "bangkok,thailand": ["BKK","VTBS"], "manila,philippines": ["MNL","RPLL"],
-  "london,united kingdom": ["LHR","EGLL"], "london,england": ["LHR","EGLL"],
-  "paris,france": ["CDG","LFPG"], "dubai,united arab emirates": ["DXB","OMDB"],
+  "osaka,japan": ["KIX","RJBB"], "kansai,japan": ["KIX","RJBB"],
+  "fukuoka,japan": ["FUK","RJFF"], "sapporo,japan": ["CTS","RJCC"],
+  // 중국
+  "beijing,china": ["PEK","ZBAA"], "shanghai,china": ["PVG","ZSPD"],
+  "guangzhou,china": ["CAN","ZGGG"], "shenzhen,china": ["SZX","ZGSZ"],
+  "chengdu,china": ["CTU","ZUUU"],
+  // 홍콩/싱가포르/동남아
+  "hong kong,hong kong": ["HKG","VHHH"],
+  "singapore,singapore": ["SIN","WSSS"],
+  "bangkok,thailand": ["BKK","VTBS"],
+  "manila,philippines": ["MNL","RPLL"],
+  "cebu,philippines": ["CEB","RPVM"],
   "denpasar,indonesia": ["DPS","WADD"], "bali,indonesia": ["DPS","WADD"],
+  "jakarta,indonesia": ["CGK","WIII"],
+  "kuala lumpur,malaysia": ["KUL","WMKK"],
+  "ho chi minh city,vietnam": ["SGN","VVTS"],
+  "hanoi,vietnam": ["HAN","VVNB"],
+  // 유럽
+  "london,united kingdom": ["LHR","EGLL"], "london,england": ["LHR","EGLL"],
+  "heathrow,united kingdom": ["LHR","EGLL"],
+  "paris,france": ["CDG","LFPG"],
+  "frankfurt,germany": ["FRA","EDDF"],
+  "amsterdam,netherlands": ["AMS","EHAM"],
+  "rome,italy": ["FCO","LIRF"],
+  "madrid,spain": ["MAD","LEMD"],
+  "zurich,switzerland": ["ZRH","LSZH"],
+  "vienna,austria": ["VIE","LOWW"],
+  "istanbul,turkey": ["IST","LTFM"],
+  // 중동/아프리카
+  "dubai,united arab emirates": ["DXB","OMDB"],
+  "abu dhabi,united arab emirates": ["AUH","OMAA"],
+  "riyadh,saudi arabia": ["RUH","OERK"],
+  "jeddah,saudi arabia": ["JED","OEJN"],
+  "nairobi,kenya": ["NBO","HKJK"],
+  // 호주/오세아니아
+  "sydney,australia": ["SYD","YSSY"],
+  "melbourne,australia": ["MEL","YMML"],
+  "auckland,new zealand": ["AKL","NZAA"],
+  // 캐나다
+  "vancouver,canada": ["YVR","CYVR"], "richmond,canada": ["YVR","CYVR"],
+  "toronto,canada": ["YYZ","CYYZ"],
 };
 
 function airportForLocation(city: string, state: string, country: string): [string, string] {
-  if (country.toLowerCase() === "united states") {
-    return US_CITY_AIRPORTS[`${city.toLowerCase()},${state.toLowerCase()}`] ?? ["",""];
+  const c = city.toLowerCase().trim();
+  const s = state.toLowerCase().trim();
+  const cn = country.toLowerCase().trim();
+  // 1순위: IATA 코드 직접 입력된 경우 (city가 3자 대문자)
+  if (/^[A-Z]{3}$/.test(city)) return [city, ""];
+  if (/^[A-Z]{4}$/.test(city)) return ["", city];
+  // 2순위: 미국 도시
+  if (!cn || cn === "united states" || cn === "us" || cn === "usa") {
+    const hit = US_CITY_AIRPORTS[`${c},${s}`];
+    if (hit) return hit;
+    // 주만으로 폴백 (state가 공항 코드인 경우)
   }
-  return INTL_CITY_AIRPORTS[`${city.toLowerCase()},${country.toLowerCase()}`] ?? ["",""];
+  // 3순위: 국제 도시
+  const intlHit = INTL_CITY_AIRPORTS[`${c},${cn}`] ?? INTL_CITY_AIRPORTS[`${c},${s}`];
+  if (intlHit) return intlHit;
+  return ["",""];
 }
 
 function cleanText(text: string): string {
@@ -212,15 +295,22 @@ async function upsertNtsbCase(db: D1Database, ntsbNum: string, c: Record<string,
       const eventDate = String(c.cm_eventDate ?? "").slice(0, 10);
       const city = String(c.cm_city ?? "");
       const state = String(c.cm_state ?? "");
+      const country = String(c.cm_country ?? "");
       const highestInjury = String(c.cm_highestInjury ?? "").toUpperCase();
       const fatal = Number(c.cm_fatalInjuryCount ?? 0);
       const makeModel = vehicles.map(v => `${v.cm_make ?? v.make ?? ""} ${v.cm_model ?? v.model ?? ""}`.trim()).find(Boolean) ?? "";
       const flightPhase = vehicles.flatMap(v => (v.cm_events as Record<string, unknown>[] ?? []).map(e => NTSB_PHASE_MAP[String(e.cicttPhaseSOEGroup ?? "").toLowerCase()] ?? "")).find(Boolean) ?? "";
       const operator = vehicles.map(v => String(v.operatorName ?? v.registeredOwner ?? "")).find(Boolean) ?? "";
       const severity = fatal > 0 ? 5 : highestInjury.includes("SERIOUS") ? 4 : highestInjury.includes("MINOR") ? 3 : 2;
+      // 공항코드: CAROL의 cm_apt 우선, 없으면 도시→공항 매핑
+      const aptRaw = String(c.cm_apt ?? c.cm_aptId ?? c.cm_airport ?? "").trim().toUpperCase();
+      let airportIata = "", airportIcao = "";
+      if (/^[A-Z]{4}$/.test(aptRaw)) { airportIcao = aptRaw; }
+      else if (/^[A-Z]{3}$/.test(aptRaw)) { airportIata = aptRaw; }
+      else { [airportIata, airportIcao] = airportForLocation(city, state, country); }
       const now = new Date().toISOString();
       await db.prepare("INSERT INTO events (id,source_name,source_url,event_date,operation_type,airport_iata,airport_icao,runway,approach_type,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
-        .bind(eventId,"NTSB CAROL",`https://data.ntsb.gov/carol-main-public/basic-search?NTSBNumber=${ntsbNum}`,eventDate,"Part 121 air transport (NTSB CAROL)","","","","",flightPhase,makeModel,"JET",operator,[city,state].filter(Boolean).join(", "),"NTSB CASE",severity,`NTSB ${ntsbNum}`,"NTSB Case",`NTSB case ${ntsbNum} near ${city || "unspecified"}${state ? `, ${state}` : ""}. Highest injury: ${highestInjury || "unknown"}.`,JSON.stringify([]),JSON.stringify([]),`Review NTSB case ${ntsbNum} in full — this record carries only CAROL summary fields.`,0.5,now,now).run();
+        .bind(eventId,"NTSB CAROL",`https://data.ntsb.gov/carol-main-public/basic-search?NTSBNumber=${ntsbNum}`,eventDate,"Part 121 air transport (NTSB CAROL)",airportIata,airportIcao,"","",flightPhase,makeModel,"JET",operator,[city,state,country].filter(Boolean).join(", "),"NTSB CASE",severity,`NTSB ${ntsbNum}`,"NTSB Case",`NTSB case ${ntsbNum} near ${city || "unspecified"}${state ? `, ${state}` : ""}. Highest injury: ${highestInjury || "unknown"}.`,JSON.stringify([]),JSON.stringify([]),`Review NTSB case ${ntsbNum} in full — this record carries only CAROL summary fields.`,0.5,now,now).run();
       for (const tag of ["NTSB","carol_case","official_report_candidate",...(fatal > 0 ? ["FATAL"] : [])]) {
         await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId,"risk",tag).run();
       }
@@ -276,6 +366,41 @@ export async function collectNtsbRange(db: D1Database, start: string, end: strin
   } catch (e) {
     return { start, end, checked: 0, created: 0, error: String(e) };
   }
+}
+
+// ── 기존 이벤트 공항코드 백필 ──────────────────────────────────────────────────
+// weather_summary(도시명) 컬럼을 파싱해서 airport_iata/airport_icao 업데이트
+export async function backfillAirportCodes(db: D1Database): Promise<Record<string, unknown>> {
+  const { results } = await db.prepare(
+    "SELECT id, weather_summary, airport_iata, airport_icao FROM events WHERE (airport_icao IS NULL OR airport_icao = '') AND weather_summary IS NOT NULL AND weather_summary != ''"
+  ).all<{ id: string; weather_summary: string; airport_iata: string; airport_icao: string }>();
+
+  let updated = 0;
+  const skipped: string[] = [];
+
+  for (const row of results) {
+    // weather_summary 형식: "City, State" or "City, Country" or "City, State, Country"
+    const parts = row.weather_summary.split(",").map(s => s.trim());
+    const city = parts[0] ?? "";
+    const state = parts[1] ?? "";
+    const country = parts[2] ?? parts[1] ?? "";
+
+    const [iata, icao] = airportForLocation(city, state, country);
+    if (!iata && !icao) {
+      skipped.push(`${row.id}: "${row.weather_summary}"`);
+      continue;
+    }
+    await db.prepare("UPDATE events SET airport_iata=?, airport_icao=?, updated_at=? WHERE id=?")
+      .bind(iata, icao, new Date().toISOString(), row.id).run();
+    updated++;
+  }
+
+  return {
+    total_checked: results.length,
+    updated,
+    skipped_count: skipped.length,
+    skipped_samples: skipped.slice(0, 10),
+  };
 }
 
 export async function collectRecentOfficialEvents(db: D1Database, yearsBack = 20): Promise<Record<string, unknown>> {

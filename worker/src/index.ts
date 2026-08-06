@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { Env } from "./types";
 import { iataToIcao, AIRPORTS } from "./data/airports";
+import { backfillAirportCodes } from "./services/official_event_parsers";
 import { getFlight, normalizeFlightNumber } from "./services/aviation_stack";
 import { getWeather } from "./services/noaa";
 import { parseWeatherTags, selectArrivalTafSegment } from "./services/metar_parser";
@@ -100,6 +101,12 @@ app.get("/api/stats", async c => {
     severity_breakdown: sev.results,
     last_updated: lastUpdated?.ts ?? null,
   });
+});
+
+// 기존 이벤트 공항코드 백필
+app.post("/api/ops-intel/backfill-airports", async c => {
+  const result = await backfillAirportCodes(c.env.DB);
+  return c.json(result);
 });
 
 app.get("/api/weather/:icao", async c => {
