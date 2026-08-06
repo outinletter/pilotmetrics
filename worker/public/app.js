@@ -1,42 +1,29 @@
 /* PilotMetrics — app.js */
 
-// ── iOS Safari pull-to-refresh: 5초 홀딩 필요 ─────────────
+// ── iOS Safari pull-to-refresh 방지 ───────────────────────
+// passive:false는 렌더링 지연을 일으키므로 최소한으로만 사용
 ;(function() {
-  let startY = 0;
-  let pullStartTime = 0;
-  let isPulling = false;
-  let holdTimer = null;
-  const HOLD_MS = 5000;
+  let startX = 0, startY = 0;
+  const EDGE_THRESHOLD = 30; // 왼쪽 엣지(뒤로가기 제스처) 보호 영역 px
 
   document.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
-    isPulling = false;
-    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
   }, { passive: true });
 
   document.addEventListener('touchmove', e => {
+    // 왼쪽 엣지 스와이프(iOS 뒤로가기)는 무조건 통과
+    if (startX < EDGE_THRESHOLD) return;
+
     const scrollTop = (document.scrollingElement || document.documentElement).scrollTop;
+    const dx = Math.abs(e.touches[0].clientX - startX);
     const dy = e.touches[0].clientY - startY;
 
-    if (scrollTop === 0 && dy > 0) {
-      e.preventDefault(); // 기본 새로고침 차단
-
-      if (!isPulling) {
-        isPulling = true;
-        pullStartTime = Date.now();
-        // 5초 후 실제 새로고침 허용
-        holdTimer = setTimeout(() => { window.location.reload(); }, HOLD_MS);
-      }
-    } else {
-      // 방향이 바뀌거나 스크롤이 생기면 타이머 취소
-      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; isPulling = false; }
+    // 세로 당김이 가로보다 2배 이상 크고, 최상단이고, 아래 방향일 때만 차단
+    if (scrollTop === 0 && dy > 10 && dy > dx * 2) {
+      e.preventDefault();
     }
   }, { passive: false });
-
-  document.addEventListener('touchend', () => {
-    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-    isPulling = false;
-  }, { passive: true });
 })();
 
 const flightInput  = document.getElementById("flight");
