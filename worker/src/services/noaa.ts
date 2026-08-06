@@ -18,6 +18,11 @@ async function fetchMetar(icao: string): Promise<[string, string | null]> {
       `https://metar.vatsim.net/metar.php?id=${icao}`,
       t => { const s = t.trim(); return (s.length > 10 && !s.startsWith("No ")) ? s : null; }
     ),
+    // IVAO (plain text, 별도 네트워크)
+    tryMetarSource(
+      `https://wx.ivao.aero/metar.php?station=${icao}`,
+      t => { const s = t.trim(); return (s.length > 10 && !s.startsWith("No ")) ? s : null; }
+    ),
     // aviationweather.gov JSON
     tryMetarSource(
       `https://aviationweather.gov/api/data/metar?format=json&ids=${icao}`,

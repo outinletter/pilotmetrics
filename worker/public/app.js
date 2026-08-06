@@ -1,5 +1,19 @@
 /* PilotMetrics — app.js */
 
+// ── iOS Safari pull-to-refresh 방지 ───────────────────────
+;(function() {
+  let startY = 0;
+  document.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    if (scrollTop === 0 && e.touches[0].clientY > startY) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+})();
+
 const flightInput  = document.getElementById("flight");
 const searchBtn    = document.getElementById("search");
 const searchBtnTxt = document.getElementById("searchBtnText");
