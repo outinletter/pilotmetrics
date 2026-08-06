@@ -1,7 +1,8 @@
 async function fetchWeatherKind(kind: "metar" | "taf", icao: string): Promise<[string, string | null]> {
-  const url = `https://aviationweather.gov/api/data/${kind}?ids=${icao}&format=json`;
+  // format=json 먼저, ids 나중 — aviationweather.gov 리다이렉트 방지
+  const url = `https://aviationweather.gov/api/data/${kind}?format=json&ids=${icao}`;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    const res = await fetch(url, { redirect: "follow", signal: AbortSignal.timeout(12000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json() as Record<string, string>[];
     if (data?.length) {
