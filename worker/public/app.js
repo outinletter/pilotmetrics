@@ -86,8 +86,6 @@ function renderContext(ctx) {
           <span class="ctx-route-inline">${esc(ctx.route)}</span>
           <span class="ctx-flight-sep">·</span>
           <span class="ctx-route-inline">${esc(ctx.departure_icao || "—")} → ${esc(ctx.arrival_icao || "—")}</span>
-          <span class="ctx-flight-sep">·</span>
-          <span class="ctx-aircraft-inline">${esc(ctx.aircraft)}</span>
         </div>
       </div>
       <span class="risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
