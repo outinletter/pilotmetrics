@@ -19,7 +19,31 @@ app.get("/api/health", c => c.json({ ok: true }));
 
 // ─── Briefing ─────────────────────────────────────────────────────────────────
 app.get("/api/briefing/:flightNumber", async c => {
-  const fn = normalizeFlightNumber(c.req.param("flightNumber"));
+  const raw = c.req.param("flightNumber").toUpperCase().trim();
+
+  // ── 공항코드 직접 검색 (IATA 3자 or ICAO 4자) ──────────────────────────────
+  if (/^[A-Z]{3}$/.test(raw) || /^[A-Z]{4}$/.test(raw)) {
+    const arrIcao = raw.length === 4 ? raw : iataToIcao(raw);
+    const arrIata = raw.length === 3 ? raw : raw.slice(1); // 근사값
+    const [weather, weatherMessages] = arrIcao ? await getWeather(arrIcao) : [{ metar: "", taf: "" }, []];
+    const tags = parseWeatherTags(weather.metar, weather.taf);
+    const context: Record<string, unknown> = {
+      flight_number: raw,
+      route: `— → ${raw}`,
+      aircraft: "Airport Search",
+      departure_icao: "", arrival_icao: arrIcao,
+      departure_iata: "", arrival_iata: arrIata,
+      destination_runway: null,
+      weather: tags.join("/") || "ROUTE ONLY",
+      risk_level: riskLevel(tags),
+      messages: weatherMessages.filter(Boolean),
+      arrival_weather_time: null,
+      metar: weather.metar, taf: weather.taf, arrival_taf: weather.taf,
+    };
+    return c.json({ flight_context: context, top_threats: await buildThreats(c.env.DB, context, tags) });
+  }
+
+  const fn = normalizeFlightNumber(raw);
   const [flight, flightMsg] = await getFlight(fn, c.env.AVIATIONSTACK_API_KEY);
   const depIcao = iataToIcao(flight.departure_iata as string);
   const arrIcao = iataToIcao(flight.arrival_iata as string);

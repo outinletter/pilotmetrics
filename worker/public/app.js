@@ -163,7 +163,7 @@ function renderThreats(threats) {
   `;
 }
 
-function normalizeKE(raw) {
+function normalizeInput(raw) {
   let fn = raw.trim().toUpperCase().replace(/\s+/g, "");
   // 숫자만 입력 시 KE 자동 추가
   if (/^\d+$/.test(fn)) fn = "KE" + fn;
@@ -172,11 +172,16 @@ function normalizeKE(raw) {
   return fn;
 }
 
+function isAirportCode(fn) {
+  return /^[A-Z]{3}$/.test(fn) || /^[A-Z]{4}$/.test(fn);
+}
+
 async function loadBriefing(flightNum) {
-  const fn = normalizeKE(flightNum || flightInput.value);
-  if (!fn) { statusEl.textContent = "편명을 입력하세요."; return; }
-  if (!fn.startsWith("KE") || !/^KE\d{1,4}$/.test(fn)) {
-    statusEl.textContent = "대한항공 편명(KE + 숫자)만 검색할 수 있습니다.";
+  const fn = normalizeInput(flightNum || flightInput.value);
+  if (!fn) { statusEl.textContent = "편명 또는 공항코드를 입력하세요."; return; }
+  const isAirport = isAirportCode(fn);
+  if (!isAirport && (!fn.startsWith("KE") || !/^KE\d{1,4}$/.test(fn))) {
+    statusEl.textContent = "대한항공 편명(KE + 숫자) 또는 공항코드(LAX, KLAX)를 입력하세요.";
     return;
   }
 
