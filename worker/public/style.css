@@ -459,23 +459,30 @@ body {
   gap: 8px;
 }
 .ctx-header-brand-name {
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 700;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255,255,255,0.95);
   letter-spacing: 0.01em;
 }
 .ctx-header-brand-badge {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--sky-400);
   background: rgba(56,189,248,0.12);
   border: 1px solid rgba(56,189,248,0.25);
   border-radius: 4px;
-  padding: 2px 7px;
+  padding: 3px 9px;
 }
 .ctx-header-center {
   text-align: center;
+}
+.ctx-flight-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .ctx-flight {
   font-family: var(--font-mono);
@@ -484,18 +491,22 @@ body {
   color: #ffffff;
   letter-spacing: 0.04em;
 }
-.ctx-route {
-  font-size: 13px;
-  color: rgba(255,255,255,0.6);
-  margin-top: 6px;
+.ctx-flight-sep {
+  font-size: 22px;
+  color: rgba(255,255,255,0.3);
+}
+.ctx-route-inline {
+  font-size: 18px;
+  color: rgba(255,255,255,0.7);
   letter-spacing: 0.04em;
 }
-.ctx-aircraft {
+.ctx-aircraft-inline {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 16px;
   color: var(--sky-300);
-  margin-top: 6px;
 }
+.ctx-route { display: none; }
+.ctx-aircraft { display: none; }
 .risk-badge {
   justify-self: end;
   align-self: center;

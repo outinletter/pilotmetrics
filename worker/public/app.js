@@ -80,9 +80,15 @@ function renderContext(ctx) {
         <span class="ctx-header-brand-badge">THREAT INTEL</span>
       </div>
       <div class="ctx-header-center">
-        <div class="ctx-flight">${esc(ctx.flight_number)}</div>
-        <div class="ctx-route">${esc(ctx.route)} &nbsp;·&nbsp; ${esc(ctx.departure_icao || "—")} → ${esc(ctx.arrival_icao || "—")}</div>
-        <div class="ctx-aircraft">${esc(ctx.aircraft)}</div>
+        <div class="ctx-flight-row">
+          <span class="ctx-flight">${esc(ctx.flight_number)}</span>
+          <span class="ctx-flight-sep">·</span>
+          <span class="ctx-route-inline">${esc(ctx.route)}</span>
+          <span class="ctx-flight-sep">·</span>
+          <span class="ctx-route-inline">${esc(ctx.departure_icao || "—")} → ${esc(ctx.arrival_icao || "—")}</span>
+          <span class="ctx-flight-sep">·</span>
+          <span class="ctx-aircraft-inline">${esc(ctx.aircraft)}</span>
+        </div>
       </div>
       <span class="risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
     </div>
