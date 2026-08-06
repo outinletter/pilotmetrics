@@ -14,10 +14,9 @@ async function fetchWeatherKind(kind: "metar" | "taf", icao: string): Promise<[s
 }
 
 export async function getWeather(icao: string): Promise<[{ metar: string; taf: string }, string[]]> {
-  const [[metar, metarMsg], [taf, tafMsg]] = await Promise.all([
-    fetchWeatherKind("metar", icao),
-    fetchWeatherKind("taf", icao),
-  ]);
+  // Sequential fetch (not parallel) — Cloudflare Workers concurrent outbound limit 방지
+  const [metar, metarMsg] = await fetchWeatherKind("metar", icao);
+  const [taf, tafMsg] = await fetchWeatherKind("taf", icao);
   const messages = [...new Set([metarMsg, tafMsg].filter(Boolean) as string[])];
 
   // Fallback test data for WADD (Bali)
