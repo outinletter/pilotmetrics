@@ -505,6 +505,12 @@ body {
   font-size: 16px;
   color: var(--sky-300);
 }
+.ctx-time-inline {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--sky-400);
+  letter-spacing: 0.04em;
+}
 .ctx-route { display: none; }
 .ctx-aircraft { display: none; }
 .risk-badge {

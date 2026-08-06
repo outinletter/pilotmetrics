@@ -35,6 +35,13 @@ function updateUtc() {
 updateUtc();
 setInterval(updateUtc, 1000);
 
+function toUtcHHMM(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d)) return null;
+  return d.toISOString().slice(11, 16).replace(":", "") + "Z";
+}
+
 function esc(v) {
   return String(v ?? "").replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
@@ -86,6 +93,9 @@ function renderContext(ctx) {
           <span class="ctx-route-inline">${esc(ctx.route)}</span>
           <span class="ctx-flight-sep">·</span>
           <span class="ctx-route-inline">${esc(ctx.departure_icao || "—")} → ${esc(ctx.arrival_icao || "—")}</span>
+          ${(toUtcHHMM(ctx.scheduled_departure) || toUtcHHMM(ctx.scheduled_arrival)) ? `
+          <span class="ctx-flight-sep">·</span>
+          <span class="ctx-time-inline">${toUtcHHMM(ctx.scheduled_departure) || "—"} → ${toUtcHHMM(ctx.scheduled_arrival) || "—"}</span>` : ""}
         </div>
       </div>
       <span class="risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>

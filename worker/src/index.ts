@@ -65,6 +65,8 @@ app.get("/api/briefing/:flightNumber", async c => {
     risk_level: riskLevel(tags),
     messages: [flightMsg, ...weatherMessages].filter(Boolean),
     arrival_weather_time: arrivalTime,
+    scheduled_departure: flight.scheduled_departure ?? null,
+    scheduled_arrival: flight.scheduled_arrival ?? null,
     metar: weather.metar, taf: weather.taf, arrival_taf: arrivalTaf,
   };
   if (flightMsg) {
