@@ -235,7 +235,11 @@ async function loadStats() {
     document.getElementById("statYears").textContent =
       d.year_min && d.year_max ? `${d.year_min} – ${d.year_max}` : "—";
     document.getElementById("statAirports").textContent = d.airports_covered ?? "—";
-    document.getElementById("statSources").textContent = d.sources ?? "—";
+    const sourcesEl = document.getElementById("statSources");
+    const sourceNames = Array.isArray(d.sources) ? d.sources : [];
+    sourcesEl.innerHTML = sourceNames.map(s =>
+      `<span class="db-source-tag">${esc(s)}</span>`
+    ).join("");
 
     if (d.last_updated) {
       const dt = new Date(d.last_updated);
