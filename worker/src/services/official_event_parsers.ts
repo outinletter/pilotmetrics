@@ -99,22 +99,43 @@ const INTL_CITY_AIRPORTS: Record<string, [string, string]> = {
   "toronto,canada": ["YYZ","CYYZ"],
 };
 
+const US_STATES = new Set([
+  "alabama","alaska","arizona","arkansas","california","colorado","connecticut","delaware",
+  "florida","georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky",
+  "louisiana","maine","maryland","massachusetts","michigan","minnesota","mississippi",
+  "missouri","montana","nebraska","nevada","new hampshire","new jersey","new mexico",
+  "new york","north carolina","north dakota","ohio","oklahoma","oregon","pennsylvania",
+  "rhode island","south carolina","south dakota","tennessee","texas","utah","vermont",
+  "virginia","washington","west virginia","wisconsin","wyoming","district of columbia",
+  // 약어
+  "al","ak","az","ar","ca","co","ct","de","fl","ga","hi","id","il","in","ia","ks","ky",
+  "la","me","md","ma","mi","mn","ms","mo","mt","ne","nv","nh","nj","nm","ny","nc","nd",
+  "oh","ok","or","pa","ri","sc","sd","tn","tx","ut","vt","va","wa","wv","wi","wy","dc",
+]);
+
 function airportForLocation(city: string, state: string, country: string): [string, string] {
   const c = city.toLowerCase().trim();
   const s = state.toLowerCase().trim();
   const cn = country.toLowerCase().trim();
-  // 1순위: IATA 코드 직접 입력된 경우 (city가 3자 대문자)
+
+  // IATA/ICAO 직접 코드 입력
   if (/^[A-Z]{3}$/.test(city)) return [city, ""];
   if (/^[A-Z]{4}$/.test(city)) return ["", city];
-  // 2순위: 미국 도시
-  if (!cn || cn === "united states" || cn === "us" || cn === "usa") {
-    const hit = US_CITY_AIRPORTS[`${c},${s}`];
+
+  // 미국 여부 판단: country가 미국이거나, state가 미국 주이거나, country 자체가 주 이름(2파트 포맷)
+  const isUS = !cn || cn === "united states" || cn === "us" || cn === "usa"
+    || US_STATES.has(s) || US_STATES.has(cn);
+
+  if (isUS) {
+    // city + state 조합으로 먼저 검색
+    const hit = US_CITY_AIRPORTS[`${c},${s}`] ?? US_CITY_AIRPORTS[`${c},${cn}`];
     if (hit) return hit;
-    // 주만으로 폴백 (state가 공항 코드인 경우)
   }
-  // 3순위: 국제 도시
+
+  // 국제 도시 검색 (country 또는 state 필드로 시도)
   const intlHit = INTL_CITY_AIRPORTS[`${c},${cn}`] ?? INTL_CITY_AIRPORTS[`${c},${s}`];
   if (intlHit) return intlHit;
+
   return ["",""];
 }
 
@@ -379,11 +400,11 @@ export async function backfillAirportCodes(db: D1Database): Promise<Record<strin
   const skipped: string[] = [];
 
   for (const row of results) {
-    // weather_summary 형식: "City, State" or "City, Country" or "City, State, Country"
-    const parts = row.weather_summary.split(",").map(s => s.trim());
-    const city = parts[0] ?? "";
-    const state = parts[1] ?? "";
-    const country = parts[2] ?? parts[1] ?? "";
+    // weather_summary 형식: "City, State" (FAA) or "City, State, Country" (NTSB)
+    const parts = row.weather_summary.split(",").map((s: string) => s.trim()).filter(Boolean);
+    const city    = parts[0] ?? "";
+    const state   = parts[1] ?? "";
+    const country = parts[2] ?? "";   // 없으면 빈 문자열 — airportForLocation이 US_STATES로 판단
 
     const [iata, icao] = airportForLocation(city, state, country);
     if (!iata && !icao) {
