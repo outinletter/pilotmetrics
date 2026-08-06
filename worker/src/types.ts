@@ -1,8 +1,11 @@
 export type Env = {
   DB: D1Database;
+  AI: Ai;
   AVIATIONSTACK_API_KEY: string;
   OPS_INTEL_AUTOSTART?: string;
   OPS_INTEL_INTERVAL_HOURS?: string;
+  MAX_DETAIL_FETCHES?: string;
+  PRIORITY_FULL_SCAN?: string;
 };
 
 export type FlightRow = {

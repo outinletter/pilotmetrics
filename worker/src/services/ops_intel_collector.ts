@@ -1,12 +1,13 @@
-import type { OpsIntelItemRow, Source } from "../types";
+import type { OpsIntelItemRow, Source, Env } from "../types";
 import { SOURCES } from "../data/sources";
 import { collectRecentOfficialEvents } from "./official_event_parsers";
+import { enrichWithLLM } from "./llm_classifier";
 
-const OFFICIAL_HOSTS = ["faa.gov", "ntsb.gov", "nasa.gov", "icao.int", "easa.europa.eu"];
-const EVENT_KEYWORDS = ["accident","incident","investigation","safety","recommendation","safo","advisory","airworthiness","directive","runway","engine","fire","smoke","gps","gnss","jamming","mel","training","part-121","part 135"];
+const OFFICIAL_HOSTS = ["faa.gov", "ntsb.gov", "nasa.gov", "icao.int", "easa.europa.eu", "skybrary.aero"];
+const EVENT_KEYWORDS = ["accident","incident","investigation","safety","recommendation","safo","advisory","airworthiness","directive","runway","engine","fire","smoke","gps","gnss","jamming","mel","training","part-121","part 135","approach","landing","departure","takeoff"];
 const REPORT_KEYWORDS = ["report","final","preliminary","investigation","recommendation","safo","advisory circular","airworthiness directive","safety alert","accident","incident","asrs","callback","lessons learned"];
 const SKIP_LABELS = ["skip to","main content","enable javascript","subscribe","login","sign in","privacy","contact"];
-const MAX_DETAIL_FETCHES = 4;
+const DEFAULT_MAX_DETAIL_FETCHES = 8;
 
 function htmlTitle(text: string): string {
   const m = text.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
@@ -85,12 +86,17 @@ async function upsertItem(db: D1Database, source: Source, url: string, title: st
   return false;
 }
 
-async function fetchSource(source: Source): Promise<{ source: Source; statusCode: number; title: string; links: { url: string; title: string; category: string; severity: string; detailStatus: number; detailText: string }[] }> {
+async function fetchSource(source: Source, maxDetailFetches: number, priorityHosts: Set<string>): Promise<{ source: Source; statusCode: number; title: string; links: { url: string; title: string; category: string; severity: string; detailStatus: number; detailText: string }[] }> {
   const res = await fetch(source.url, { headers: { "User-Agent": "OpsBriefing/0.1" }, signal: AbortSignal.timeout(12000), redirect: "follow" });
   const html = await res.text();
   const rawLinks = extractEventLinks(html, source);
+
+  // 우선 소스는 더 많은 링크 상세 탐색
+  const isPriority = priorityHosts.size > 0 && [...priorityHosts].some(h => source.url.includes(h));
+  const detailLimit = isPriority ? Math.max(maxDetailFetches, 12) : maxDetailFetches;
+
   const enriched = [];
-  for (const link of rawLinks.slice(0, MAX_DETAIL_FETCHES)) {
+  for (const link of rawLinks.slice(0, detailLimit)) {
     try {
       const dr = await fetch(link.url, { headers: { "User-Agent": "OpsBriefing/0.1" }, signal: AbortSignal.timeout(12000), redirect: "follow" });
       const dt = extractMainText(await dr.text());
@@ -100,19 +106,22 @@ async function fetchSource(source: Source): Promise<{ source: Source; statusCode
       enriched.push({ ...link, detailStatus: res.status, detailText: "" });
     }
   }
-  enriched.push(...rawLinks.slice(MAX_DETAIL_FETCHES).map(l => ({ ...l, detailStatus: res.status, detailText: "" })));
+  enriched.push(...rawLinks.slice(detailLimit).map(l => ({ ...l, detailStatus: res.status, detailText: "" })));
   return { source, statusCode: res.status, title: htmlTitle(html), links: enriched };
 }
 
-export async function collectOnce(db: D1Database): Promise<Record<string, unknown>> {
+export async function collectOnce(db: D1Database, env?: Env): Promise<Record<string, unknown>> {
   const runInsert = await db.prepare("INSERT INTO ops_intel_runs (started_at,status) VALUES (?,?) RETURNING id").bind(new Date().toISOString(), "running").first<{ id: number }>();
   const runId = runInsert!.id;
+
+  const maxDetailFetches = parseInt(env?.MAX_DETAIL_FETCHES ?? String(DEFAULT_MAX_DETAIL_FETCHES), 10);
+  const priorityHosts = new Set((env?.PRIORITY_FULL_SCAN ?? "faa.gov,ntsb.gov,easa.europa.eu,icao.int").split(",").map(s => s.trim()));
 
   let saved = 0;
   const seenUrls = new Set<string>();
 
   try {
-    const results = await Promise.allSettled(SOURCES.map(s => fetchSource(s)));
+    const results = await Promise.allSettled(SOURCES.map(s => fetchSource(s, maxDetailFetches, priorityHosts)));
     for (const result of results) {
       if (result.status === "rejected") continue;
       const { source, statusCode, title, links } = result.value;
@@ -134,10 +143,21 @@ export async function collectOnce(db: D1Database): Promise<Record<string, unknow
 
     const officialResult = await collectRecentOfficialEvents(db, 20);
     saved += (officialResult.items_saved as number) ?? 0;
+
+    // LLM enrichment: Workers AI가 있으면 신규 항목 일괄 분류
+    let llmResult: Record<string, unknown> = { skipped: "no AI binding" };
+    if (env?.AI) {
+      try {
+        llmResult = await enrichWithLLM(env.AI, db, 20);
+      } catch (e) {
+        llmResult = { error: String(e) };
+      }
+    }
+
     const now = new Date().toISOString();
     await db.prepare("UPDATE ops_intel_runs SET status=?,items_checked=?,items_saved=?,finished_at=? WHERE id=?")
       .bind("complete", SOURCES.length, saved, now, runId).run();
-    return { status: "complete", items_checked: SOURCES.length, items_saved: saved, official_recent: officialResult };
+    return { status: "complete", items_checked: SOURCES.length, items_saved: saved, official_recent: officialResult, llm_enrichment: llmResult };
   } catch (err) {
     const now = new Date().toISOString();
     await db.prepare("UPDATE ops_intel_runs SET status=?,error=?,finished_at=? WHERE id=?")

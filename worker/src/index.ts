@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import type { Env } from "./types";
 import { iataToIcao, AIRPORTS } from "./data/airports";
 import { backfillAirportCodes } from "./services/official_event_parsers";
+import { enrichWithLLM } from "./services/llm_classifier";
 import { getFlight, normalizeFlightNumber } from "./services/aviation_stack";
 import { getWeather } from "./services/noaa";
 import { parseWeatherTags, selectArrivalTafSegment } from "./services/metar_parser";
@@ -128,7 +129,14 @@ app.get("/api/ops-intel/status", async c => {
   return c.json({ items_in_database: count?.count ?? 0, last_run: lastRun ?? null });
 });
 
-app.post("/api/ops-intel/collect", async c => c.json(await collectOnce(c.env.DB)));
+app.post("/api/ops-intel/collect", async c => c.json(await collectOnce(c.env.DB, c.env)));
+
+// LLM enrichment 단독 실행
+app.post("/api/ops-intel/enrich-llm", async c => {
+  if (!c.env.AI) return c.json({ error: "AI binding not available" }, 503);
+  const body = await c.req.json<{ limit?: number }>().catch(() => ({}));
+  return c.json(await enrichWithLLM(c.env.AI, c.env.DB, body.limit ?? 20));
+});
 
 app.post("/api/ops-intel/collect-official-recent", async c => {
   const body = await c.req.json<{ years_back?: number }>().catch(() => ({ years_back: undefined }));

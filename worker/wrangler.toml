@@ -13,3 +13,8 @@ database_id = "09d394b0-213a-457c-8aa7-c23f5db3d20c"
 
 [vars]
 OPS_INTEL_INTERVAL_HOURS = "24"
+MAX_DETAIL_FETCHES = "8"
+PRIORITY_FULL_SCAN = "faa.gov,ntsb.gov,easa.europa.eu,icao.int"
+
+[ai]
+binding = "AI"

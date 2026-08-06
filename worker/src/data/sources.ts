@@ -8,7 +8,9 @@ export const SOURCES: Source[] = [
   { name: "Flight Safety Foundation", url: "https://flightsafety.org/", category: "Flight Operations", tags: ["Safety", "Operations", "Training"] },
   { name: "ICAO Safety", url: "https://www.icao.int/safety-reports", category: "Flight Operations", tags: ["ICAO", "Safety", "Global"] },
   { name: "EASA Safety Publications", url: "https://www.easa.europa.eu/en/domains/safety-management/safety-publications", category: "Regulation", tags: ["EASA", "Safety", "Regulation"] },
-  { name: "SKYbrary", url: "https://skybrary.aero/", category: "Training", tags: ["Operational Lessons", "Training", "Threat and Error Management"] },
+  { name: "EASA Accident Investigation", url: "https://www.easa.europa.eu/en/domains/accident-investigation", category: "Accident / Incident", tags: ["EASA", "Accident", "Investigation"] },
+  { name: "SKYbrary", url: "https://skybrary.aero/accidents-and-incidents", category: "Accident / Incident", tags: ["Operational Lessons", "Training", "Threat and Error Management"] },
+  { name: "SKYbrary Articles", url: "https://skybrary.aero/articles", category: "Training", tags: ["Operational Lessons", "Training", "Procedures"] },
   { name: "Aviation Week", url: "https://aviationweek.com/", category: "Industry Trends", tags: ["Industry", "Fleet", "Operations"] },
   { name: "The Air Current", url: "https://theaircurrent.com/", category: "Industry Trends", tags: ["Industry", "Operations", "Analysis"] },
 ];
