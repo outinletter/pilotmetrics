@@ -505,11 +505,13 @@ body {
   font-size: 16px;
   color: var(--sky-300);
 }
-.ctx-time-inline {
+.ctx-time-inline { display: none; }
+.ctx-time-paren {
   font-family: var(--font-mono);
-  font-size: 16px;
+  font-size: 14px;
   color: var(--sky-400);
-  letter-spacing: 0.04em;
+  margin-left: 3px;
+  opacity: 0.85;
 }
 .ctx-route { display: none; }
 .ctx-aircraft { display: none; }

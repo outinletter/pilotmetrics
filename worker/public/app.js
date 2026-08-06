@@ -92,10 +92,7 @@ function renderContext(ctx) {
           <span class="ctx-flight-sep">·</span>
           <span class="ctx-route-inline">${esc(ctx.route)}</span>
           <span class="ctx-flight-sep">·</span>
-          <span class="ctx-route-inline">${esc(ctx.departure_icao || "—")} → ${esc(ctx.arrival_icao || "—")}</span>
-          ${(toUtcHHMM(ctx.scheduled_departure) || toUtcHHMM(ctx.scheduled_arrival)) ? `
-          <span class="ctx-flight-sep">·</span>
-          <span class="ctx-time-inline">${toUtcHHMM(ctx.scheduled_departure) || "—"} → ${toUtcHHMM(ctx.scheduled_arrival) || "—"}</span>` : ""}
+          <span class="ctx-route-inline">${esc(ctx.departure_icao || "—")}${toUtcHHMM(ctx.scheduled_departure) ? `<span class="ctx-time-paren">(${toUtcHHMM(ctx.scheduled_departure)})</span>` : ""} → ${esc(ctx.arrival_icao || "—")}${toUtcHHMM(ctx.scheduled_arrival) ? `<span class="ctx-time-paren">(${toUtcHHMM(ctx.scheduled_arrival)})</span>` : ""}</span>
         </div>
       </div>
       <span class="risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
