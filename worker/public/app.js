@@ -149,7 +149,15 @@ function renderContext(ctx) {
 
 function renderThreats(threats) {
   if (!threats || threats.length === 0) {
-    threatsEl.innerHTML = `<p style="color:var(--muted);font-size:14px">No threat data found for this route.</p>`;
+    threatsEl.innerHTML = `
+      <div class="no-threat-wrap">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" stroke="rgba(56,189,248,0.2)" stroke-width="2"/>
+          <path d="M24 14v12M24 32v2" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <p class="no-threat-title">No threat data found</p>
+        <p class="no-threat-sub">No safety events in the database match this route. The route may have limited historical data.</p>
+      </div>`;
     return;
   }
   threatsEl.innerHTML = `
