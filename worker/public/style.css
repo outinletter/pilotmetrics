@@ -465,8 +465,8 @@ body {
   margin-top: 6px;
 }
 .risk-badge {
-  flex: 0 0 auto;
-  align-self: flex-start;
+  justify-self: end;
+  align-self: center;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.1em;
