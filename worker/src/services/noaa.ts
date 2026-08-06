@@ -1,22 +1,43 @@
-async function fetchWeatherKind(kind: "metar" | "taf", icao: string): Promise<[string, string | null]> {
-  // format=json 먼저, ids 나중 — aviationweather.gov 리다이렉트 방지
-  const url = `https://aviationweather.gov/api/data/${kind}?format=json&ids=${icao}`;
+async function fetchMetar(icao: string): Promise<[string, string | null]> {
+  // 1차: VATSIM (신뢰성 높음, plain text)
   try {
-    const res = await fetch(url, { redirect: "follow", signal: AbortSignal.timeout(12000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json() as Record<string, string>[];
-    if (data?.length) {
-      const raw = data[0].rawOb ?? data[0].rawTAF ?? data[0].raw_text ?? null;
-      if (raw) return [raw, null];
+    const res = await fetch(`https://metar.vatsim.net/metar.php?id=${icao}`, { signal: AbortSignal.timeout(8000) });
+    if (res.ok) {
+      const text = (await res.text()).trim();
+      if (text && !text.startsWith("No METAR")) return [text, null];
+    }
+  } catch { /* fall through */ }
+  // 2차: aviationweather.gov
+  try {
+    const res = await fetch(`https://aviationweather.gov/api/data/metar?format=json&ids=${icao}`, { signal: AbortSignal.timeout(10000) });
+    if (res.ok) {
+      const data = await res.json() as Record<string, string>[];
+      if (data?.length) {
+        const raw = data[0].rawOb ?? data[0].raw_text ?? null;
+        if (raw) return [raw, null];
+      }
+    }
+  } catch { /* fall through */ }
+  return ["", "Weather API unavailable; showing route-based risk briefing."];
+}
+
+async function fetchTaf(icao: string): Promise<[string, string | null]> {
+  try {
+    const res = await fetch(`https://aviationweather.gov/api/data/taf?format=json&ids=${icao}`, { signal: AbortSignal.timeout(10000) });
+    if (res.ok) {
+      const data = await res.json() as Record<string, string>[];
+      if (data?.length) {
+        const raw = data[0].rawTAF ?? data[0].raw_text ?? null;
+        if (raw) return [raw, null];
+      }
     }
   } catch { /* fall through */ }
   return ["", "Weather API unavailable; showing route-based risk briefing."];
 }
 
 export async function getWeather(icao: string): Promise<[{ metar: string; taf: string }, string[]]> {
-  // Sequential fetch (not parallel) — Cloudflare Workers concurrent outbound limit 방지
-  const [metar, metarMsg] = await fetchWeatherKind("metar", icao);
-  const [taf, tafMsg] = await fetchWeatherKind("taf", icao);
+  const [metar, metarMsg] = await fetchMetar(icao);
+  const [taf, tafMsg] = await fetchTaf(icao);
   const messages = [...new Set([metarMsg, tafMsg].filter(Boolean) as string[])];
 
   // Fallback test data for WADD (Bali)

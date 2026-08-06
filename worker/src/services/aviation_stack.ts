@@ -93,6 +93,7 @@ function flightFromItem(fn: string, item: Record<string, unknown>) {
 
 async function aviationstackLookup(fn: string, apiKey: string) {
   if (!apiKey) return null;
+  // 1차: 실시간 flights (현재 비행 중인 편)
   for (const q of candidates(fn)) {
     const url = `http://api.aviationstack.com/v1/flights?access_key=${apiKey}&flight_iata=${q}`;
     try {
@@ -100,6 +101,35 @@ async function aviationstackLookup(fn: string, apiKey: string) {
       if (!res.ok) continue;
       const data = (await res.json() as { data?: unknown[] }).data;
       if (data?.length) return flightFromItem(fn, data[0] as Record<string, unknown>);
+    } catch { /* continue */ }
+  }
+  // 2차: timetable (스케줄 데이터 — 비행 중이 아닐 때)
+  for (const q of candidates(fn)) {
+    const url = `http://api.aviationstack.com/v1/timetable?access_key=${apiKey}&iataCode=ICN&type=departure&flight_number=${q}`;
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) continue;
+      const json = await res.json() as { data?: unknown[] };
+      const data = json.data;
+      if (data?.length) {
+        const item = data[0] as Record<string, unknown>;
+        // timetable 응답 구조를 flightFromItem 형식으로 변환
+        const dep = item.departure as Record<string, string> | undefined;
+        const arr = item.arrival as Record<string, string> | undefined;
+        return {
+          flight_number: fn,
+          airline_iata: (item.airline as Record<string, string>)?.iata ?? "KE",
+          flight_iata: q,
+          departure_iata: dep?.iata ?? null,
+          arrival_iata: arr?.iata ?? null,
+          scheduled_departure: dep?.scheduledTime ?? dep?.scheduled ?? null,
+          scheduled_arrival: arr?.scheduledTime ?? arr?.scheduled ?? null,
+          estimated_departure: null,
+          estimated_arrival: null,
+          aircraft_type: (item.aircraft as Record<string, string>)?.iata ?? null,
+          raw: item,
+        };
+      }
     } catch { /* continue */ }
   }
   return null;
