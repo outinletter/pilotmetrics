@@ -211,3 +211,43 @@ async function loadBriefing(flightNum) {
 
 searchBtn.addEventListener("click", () => loadBriefing());
 flightInput.addEventListener("keydown", e => { if (e.key === "Enter") loadBriefing(); });
+
+// ── DB STATS SIDEBAR ──────────────────────────────────────────────────────────
+const SEV_LABELS = { 5: "Critical", 4: "High", 3: "Medium", 2: "Low", 1: "Info" };
+const SEV_COLORS = { 5: "#ef4444", 4: "#f97316", 3: "#f59e0b", 2: "#22c55e", 1: "#38bdf8" };
+
+async function loadStats() {
+  try {
+    const res = await fetch("/api/stats");
+    if (!res.ok) return;
+    const d = await res.json();
+
+    document.getElementById("statTotal").textContent = Number(d.total_events).toLocaleString();
+    document.getElementById("statYears").textContent =
+      d.year_min && d.year_max ? `${d.year_min} – ${d.year_max}` : "—";
+    document.getElementById("statAirports").textContent = d.airports_covered ?? "—";
+    document.getElementById("statSources").textContent = d.sources ?? "—";
+
+    if (d.last_updated) {
+      const dt = new Date(d.last_updated);
+      document.getElementById("statUpdated").textContent =
+        dt.toISOString().slice(0, 10);
+    }
+
+    const sevData = (d.severity_breakdown || []).sort((a, b) => b.severity - a.severity);
+    const maxN = Math.max(...sevData.map(s => s.n), 1);
+    const barsEl = document.getElementById("statSevBars");
+    barsEl.innerHTML = sevData.map(s => {
+      const pct = Math.round((s.n / maxN) * 100);
+      const label = SEV_LABELS[s.severity] || `Sev ${s.severity}`;
+      const color = SEV_COLORS[s.severity] || "#8fa3b8";
+      return `<div class="db-sev-row">
+        <span class="db-sev-name">${label}</span>
+        <div class="db-sev-bar-wrap"><div class="db-sev-bar" style="width:${pct}%;background:${color}"></div></div>
+        <span class="db-sev-count">${s.n}</span>
+      </div>`;
+    }).join("");
+  } catch { /* silent */ }
+}
+
+loadStats();

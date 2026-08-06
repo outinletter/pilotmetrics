@@ -81,6 +81,27 @@ app.get("/api/briefing/:flightNumber", async c => {
   return c.json({ flight_context: context, top_threats: await buildThreats(c.env.DB, context, tags) });
 });
 
+// ─── Stats ────────────────────────────────────────────────────────────────────
+app.get("/api/stats", async c => {
+  const [total, yearRange, airports, sources, sev, lastUpdated] = await Promise.all([
+    c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number }>(),
+    c.env.DB.prepare("SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events WHERE event_date IS NOT NULL").first<{ min_yr: string; max_yr: string }>(),
+    c.env.DB.prepare("SELECT COUNT(DISTINCT airport_icao) as n FROM events WHERE airport_icao IS NOT NULL AND airport_icao != ''").first<{ n: number }>(),
+    c.env.DB.prepare("SELECT COUNT(DISTINCT source_name) as n FROM events WHERE source_name IS NOT NULL").first<{ n: number }>(),
+    c.env.DB.prepare("SELECT severity, COUNT(*) as n FROM events GROUP BY severity ORDER BY severity DESC").all<{ severity: number; n: number }>(),
+    c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>(),
+  ]);
+  return c.json({
+    total_events: total?.n ?? 0,
+    year_min: yearRange?.min_yr ?? "—",
+    year_max: yearRange?.max_yr ?? "—",
+    airports_covered: airports?.n ?? 0,
+    sources: sources?.n ?? 0,
+    severity_breakdown: sev.results,
+    last_updated: lastUpdated?.ts ?? null,
+  });
+});
+
 app.get("/api/weather/:icao", async c => {
   const icao = c.req.param("icao").toUpperCase();
   const [weather, messages] = await getWeather(icao);
