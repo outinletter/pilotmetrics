@@ -833,25 +833,140 @@ details summary::marker { content: ""; }
 }
 
 /* ── RESPONSIVE ───────────────────────────────────────────── */
+
+/* ── 태블릿 (≤900px) ─────────────────────────────────────── */
 @media (max-width: 900px) {
   .page-layout { flex-direction: column; }
   .db-sidebar {
     flex: none; width: 100%; position: static; height: auto;
     border-left: none; border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 16px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
   }
+  .db-sidebar-title { width: 100%; margin-bottom: 0; }
+  .db-stat-card { flex: 1 1 140px; }
+  .db-sources-card { flex: 1 1 100%; }
+  .db-sev-section { flex: 1 1 100%; }
+  .db-sidebar-footer { flex: 1 1 100%; }
+  .ctx-header {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    padding: 20px 20px 18px;
+    margin-top: 12px;
+    gap: 10px;
+  }
+  .ctx-header-brand { grid-column: 1; grid-row: 1; }
+  .risk-badge { grid-column: 2; grid-row: 1; justify-self: end; }
+  .ctx-header-center { grid-column: 1 / -1; grid-row: 2; text-align: left; }
+  .ctx-flight-row { justify-content: flex-start; }
 }
+
+/* ── 모바일 (≤640px) ─────────────────────────────────────── */
 @media (max-width: 640px) {
+  /* Nav */
+  .nav-inner { padding: 0 14px; }
+  .nav-utc { display: none; }
   .nav-badge { display: none; }
-  .hero { padding: 80px 16px 50px; text-align: left; }
-  .hero-inner { text-align: left; align-items: flex-start; }
-  .hero-main { text-align: left; }
+  .nav-title { font-size: 13px; }
+
+  /* Hero */
+  .hero { padding: 72px 16px 40px; }
+  .hero-inner { text-align: left; }
+  .hero-title { font-size: clamp(28px, 8vw, 40px); }
+  .hero-sub { font-size: 14px; margin-bottom: 24px; text-align: left; }
+  .hero-eyebrow { margin-bottom: 12px; }
   .hero-tags { justify-content: flex-start; }
-  .search-box { flex-direction: column; gap: 6px; }
+
+  /* Search */
+  .search-box { flex-direction: column; gap: 6px; padding: 8px; }
+  .search-input-wrap { padding: 4px 10px; }
+  .search-input { font-size: 18px; }
   .search-btn { width: 100%; height: 48px; border-radius: 10px; }
-  .container { padding: 20px 16px 40px; }
-  .ctx-body { grid-template-columns: 1fr; }
-  .threat-card-header { flex-wrap: wrap; }
-  .event-summary { flex-wrap: wrap; }
-  .event-one-line { font-size: 12px; }
-  .footer-inner { flex-direction: column; align-items: flex-start; }
+
+  /* Container */
+  .container { padding: 12px 12px 40px; }
+
+  /* ctx-header: 2-row layout */
+  .ctx-header {
+    padding: 16px 14px 14px;
+    margin-top: 8px;
+    gap: 8px;
+  }
+  .ctx-header-brand-name { font-size: 15px; }
+  .ctx-header-brand-badge { font-size: 11px; padding: 2px 7px; }
+
+  /* Flight info row: wrap to 2 lines */
+  .ctx-flight { font-size: 26px; }
+  .ctx-flight-sep { font-size: 18px; }
+  .ctx-route-inline { font-size: 14px; }
+  .ctx-time-paren { font-size: 12px; }
+
+  /* Risk badge */
+  .risk-badge { font-size: 11px; padding: 4px 10px; }
+
+  /* ctx-body */
+  .ctx-body { padding: 14px; grid-template-columns: 1fr; gap: 10px; }
+  .ctx-block-label { font-size: 10px; }
+  .ctx-weather-text { font-size: 11px; }
+
+  /* DB Sidebar on mobile: compact horizontal scroll */
+  .db-sidebar { padding: 12px; gap: 8px; }
+  .db-stat-card { flex: 0 0 auto; min-width: 130px; }
+  .db-sidebar > .db-stat-card,
+  .db-sidebar > .db-sources-card,
+  .db-sidebar > .db-sev-section,
+  .db-sidebar > .db-sidebar-footer {
+    flex: 0 0 auto;
+  }
+  /* stat cards: horizontal scroll strip */
+  .db-sidebar {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .db-sidebar::-webkit-scrollbar { display: none; }
+  .db-sidebar-title { display: none; }
+  .db-sources-card { display: none; }
+  .db-sev-section { display: none; }
+  .db-sidebar-footer { display: none; }
+  .db-stat-value { font-size: 15px; }
+  .db-stat-label { font-size: 10px; }
+  .db-stat-icon svg { width: 16px; height: 16px; }
+
+  /* Threat cards */
+  .threats-section { margin-top: 0; }
+  .threats-title { font-size: 16px; }
+  .threat-card-header { padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
+  .threat-title { font-size: 14px; }
+  .threat-desc { font-size: 12px; }
+  .threat-num { width: 28px; height: 28px; font-size: 12px; }
+
+  /* Event rows */
+  .event-summary { padding: 12px 14px; }
+  .event-one-line { font-size: 11px; white-space: normal; }
+  .event-match { font-size: 10px; }
+
+  /* Event detail */
+  .event-detail { padding: 14px; }
+  .event-detail-title { font-size: 14px; }
+  .event-summary-text { font-size: 13px; }
+  .event-briefing { padding: 12px; }
+  .event-briefing-text { font-size: 13px; }
+
+  /* Footer */
+  .footer { padding: 14px 16px; }
+  .footer-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+/* ── 소형 폰 (≤380px) ────────────────────────────────────── */
+@media (max-width: 380px) {
+  .ctx-flight { font-size: 22px; }
+  .ctx-route-inline { font-size: 12px; }
+  .ctx-flight-sep { font-size: 14px; }
+  .nav-status { display: none; }
+  .nav-new-search { font-size: 11px; padding: 4px 10px; }
 }
