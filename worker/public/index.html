@@ -30,109 +30,114 @@
     </div>
   </nav>
 
-  <section class="hero" id="heroSection">
-    <div class="hero-inner">
-      <div class="hero-main">
-        <p class="hero-eyebrow">Korean Air · Operational Safety Intelligence</p>
-        <h1 class="hero-title">Korean Air<br>Threat Briefing</h1>
-        <p class="hero-sub">대한항공 편명을 입력하면 역대 항공 사고 데이터와 실시간 기상 정보를 기반으로 위협 요소를 분석합니다.</p>
-        <div class="search-box">
-          <div class="search-input-wrap">
-            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 19h20L12 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-            </svg>
-            <input id="flight" class="search-input" autocomplete="off" spellcheck="false" placeholder="KE081 / KE677 / LAX / KJFK" />
+  <!-- ── PAGE LAYOUT: left=content, right=sidebar ── -->
+  <div class="page-layout">
+
+    <div class="page-main">
+      <section class="hero" id="heroSection">
+        <div class="hero-inner">
+          <p class="hero-eyebrow">Korean Air · Operational Safety Intelligence</p>
+          <h1 class="hero-title">Korean Air<br>Threat Briefing</h1>
+          <p class="hero-sub">대한항공 편명을 입력하면 역대 항공 사고 데이터와 실시간 기상 정보를 기반으로 위협 요소를 분석합니다.</p>
+          <div class="search-box">
+            <div class="search-input-wrap">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 19h20L12 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+              <input id="flight" class="search-input" autocomplete="off" spellcheck="false" placeholder="KE081 / KE677 / LAX / KJFK" />
+            </div>
+            <button id="search" class="search-btn">
+              <span id="searchBtnText">Analyze</span>
+            </button>
           </div>
-          <button id="search" class="search-btn">
-            <span id="searchBtnText">Analyze</span>
-          </button>
+          <p id="status" class="status-msg"></p>
+          <div class="hero-tags">
+            <span>NTSB Database</span>
+            <span>METAR / TAF</span>
+            <span>ASRS Reports</span>
+            <span>FAA Incidents</span>
+          </div>
         </div>
-        <p id="status" class="status-msg"></p>
-        <div class="hero-tags">
-          <span>NTSB Database</span>
-          <span>METAR / TAF</span>
-          <span>ASRS Reports</span>
-          <span>FAA Incidents</span>
+      </section>
+
+      <div class="results-wrap hidden" id="resultsWrap">
+        <div class="container">
+          <section id="context" class="ctx-panel"></section>
+          <section id="threats" class="threats-section"></section>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DATABASE SIDEBAR ── -->
+    <aside class="db-sidebar" id="dbSidebar">
+      <div class="db-sidebar-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="6" rx="9" ry="3" stroke="currentColor" stroke-width="1.8"/><path d="M3 6v6c0 1.657 4.03 3 9 3s9-1.343 9-3V6" stroke="currentColor" stroke-width="1.8"/><path d="M3 12v6c0 1.657 4.03 3 9 3s9-1.343 9-3v-6" stroke="currentColor" stroke-width="1.8"/></svg>
+        Intelligence Database
+      </div>
+
+      <div class="db-stat-card">
+        <div class="db-stat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/></svg>
+        </div>
+        <div class="db-stat-info">
+          <div class="db-stat-value" id="statTotal">—</div>
+          <div class="db-stat-label">Total Threat Events</div>
         </div>
       </div>
 
-      <!-- ── DATABASE SIDEBAR ── -->
-      <aside class="db-sidebar" id="dbSidebar">
-        <div class="db-sidebar-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="6" rx="9" ry="3" stroke="currentColor" stroke-width="1.8"/><path d="M3 6v6c0 1.657 4.03 3 9 3s9-1.343 9-3V6" stroke="currentColor" stroke-width="1.8"/><path d="M3 12v6c0 1.657 4.03 3 9 3s9-1.343 9-3v-6" stroke="currentColor" stroke-width="1.8"/></svg>
-          Intelligence Database
+      <div class="db-stat-card">
+        <div class="db-stat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </div>
-
-        <div class="db-stat-card">
-          <div class="db-stat-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/></svg>
-          </div>
-          <div class="db-stat-info">
-            <div class="db-stat-value" id="statTotal">—</div>
-            <div class="db-stat-label">Total Threat Events</div>
-          </div>
+        <div class="db-stat-info">
+          <div class="db-stat-value" id="statYears">—</div>
+          <div class="db-stat-label">Data Coverage Period</div>
         </div>
+      </div>
 
-        <div class="db-stat-card">
-          <div class="db-stat-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </div>
-          <div class="db-stat-info">
-            <div class="db-stat-value" id="statYears">—</div>
-            <div class="db-stat-label">Data Coverage Period</div>
-          </div>
+      <div class="db-stat-card">
+        <div class="db-stat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </div>
-
-        <div class="db-stat-card">
-          <div class="db-stat-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </div>
-          <div class="db-stat-info">
-            <div class="db-stat-value" id="statUpdated">—</div>
-            <div class="db-stat-label">Last DB Update</div>
-          </div>
+        <div class="db-stat-info">
+          <div class="db-stat-value" id="statUpdated">—</div>
+          <div class="db-stat-label">Last DB Update</div>
         </div>
+      </div>
 
-        <div class="db-stat-card">
-          <div class="db-stat-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12l4-4 4 4 4-6 4 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="db-stat-info">
-            <div class="db-stat-value" id="statAirports">—</div>
-            <div class="db-stat-label">Airports Covered</div>
-          </div>
+      <div class="db-stat-card">
+        <div class="db-stat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12l4-4 4 4 4-6 4 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-
-        <div class="db-stat-card">
-          <div class="db-stat-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </div>
-          <div class="db-stat-info">
-            <div class="db-stat-value" id="statSources">—</div>
-            <div class="db-stat-label">Data Sources</div>
-          </div>
+        <div class="db-stat-info">
+          <div class="db-stat-value" id="statAirports">—</div>
+          <div class="db-stat-label">Airports Covered</div>
         </div>
+      </div>
 
-        <div class="db-sev-section">
-          <div class="db-sev-label">Severity Distribution</div>
-          <div class="db-sev-bars" id="statSevBars">
-            <div class="db-sev-skeleton"></div>
-          </div>
+      <div class="db-stat-card">
+        <div class="db-stat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </div>
-
-        <div class="db-sidebar-footer">
-          <span class="db-live-dot"></span> Live · Real-time queries
+        <div class="db-stat-info">
+          <div class="db-stat-value" id="statSources">—</div>
+          <div class="db-stat-label">Data Sources</div>
         </div>
-      </aside>
-    </div>
-  </section>
+      </div>
 
-  <div class="results-wrap hidden" id="resultsWrap">
-    <div class="container">
-      <section id="context" class="ctx-panel"></section>
-      <section id="threats" class="threats-section"></section>
-    </div>
-  </div>
+      <div class="db-sev-section">
+        <div class="db-sev-label">Severity Distribution</div>
+        <div class="db-sev-bars" id="statSevBars">
+          <div class="db-sev-skeleton"></div>
+        </div>
+      </div>
+
+      <div class="db-sidebar-footer">
+        <span class="db-live-dot"></span> Live · Real-time queries
+      </div>
+    </aside>
+
+  </div><!-- /.page-layout -->
 
   <footer class="footer">
     <div class="footer-inner">

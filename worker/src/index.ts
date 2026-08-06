@@ -86,7 +86,7 @@ app.get("/api/stats", async c => {
   const [total, yearRange, airports, sources, sev, lastUpdated] = await Promise.all([
     c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number }>(),
     c.env.DB.prepare("SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events WHERE event_date IS NOT NULL").first<{ min_yr: string; max_yr: string }>(),
-    c.env.DB.prepare("SELECT COUNT(DISTINCT airport_icao) as n FROM events WHERE airport_icao IS NOT NULL AND airport_icao != ''").first<{ n: number }>(),
+    c.env.DB.prepare("SELECT COUNT(DISTINCT airport_icao) as n FROM events WHERE airport_icao IS NOT NULL AND length(airport_icao) = 4 AND airport_icao GLOB '[A-Z][A-Z][A-Z][A-Z]'").first<{ n: number }>(),
     c.env.DB.prepare("SELECT COUNT(DISTINCT source_name) as n FROM events WHERE source_name IS NOT NULL").first<{ n: number }>(),
     c.env.DB.prepare("SELECT severity, COUNT(*) as n FROM events GROUP BY severity ORDER BY severity DESC").all<{ severity: number; n: number }>(),
     c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>(),
