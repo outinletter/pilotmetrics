@@ -8,24 +8,21 @@ const resultsWrap  = document.getElementById("resultsWrap");
 const heroSection  = document.getElementById("heroSection");
 const contextEl    = document.getElementById("context");
 const threatsEl    = document.getElementById("threats");
-const stickyFn     = document.getElementById("stickyFn");
-const stickyRoute  = document.getElementById("stickyRoute");
-const stickyAc     = document.getElementById("stickyAc");
-const stickyRisk   = document.getElementById("stickyRisk");
-const stickyBackBtn= document.getElementById("stickyBackBtn");
+const navNewSearch = document.getElementById("navNewSearch");
 const navUtc       = document.getElementById("navUtc");
 
-// 로고 클릭 / Back 버튼 → 홈으로
+// 로고 클릭 / New Search 버튼 → 홈으로
 function goHome() {
   resultsWrap.classList.add("hidden");
   heroSection.classList.remove("hidden");
+  navNewSearch.classList.add("hidden");
   flightInput.value = "";
   statusEl.textContent = "";
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 document.querySelector(".nav-brand").style.cursor = "pointer";
 document.querySelector(".nav-brand").addEventListener("click", goHome);
-stickyBackBtn.addEventListener("click", goHome);
+navNewSearch.addEventListener("click", goHome);
 
 // UTC clock
 function updateUtc() {
@@ -63,18 +60,9 @@ function matchClass(pct) {
   return "";
 }
 
-function updateStickyBar(ctx) {
-  const riskLow = (ctx.risk_level || "low").toLowerCase();
-  stickyFn.textContent = ctx.flight_number || "";
-  stickyRoute.textContent = `${ctx.route || ""} · ${ctx.departure_icao || "—"} → ${ctx.arrival_icao || "—"}`;
-  stickyAc.textContent = ctx.aircraft || "";
-  stickyRisk.textContent = ctx.risk_level || "LOW";
-  stickyRisk.className = `sticky-risk-badge ${riskLow}`;
-}
-
 function renderContext(ctx) {
   const riskLow = (ctx.risk_level || "low").toLowerCase();
-  updateStickyBar(ctx);
+  navNewSearch.classList.remove("hidden");
   const msgs = (ctx.messages || []).map(m => `<p class="ctx-msg">${esc(m)}</p>`).join("");
   const links = (ctx.flight_search_links || []).map(l =>
     `<a class="ctx-link" href="${esc(l.url)}" target="_blank" rel="noreferrer">${esc(l.label)}</a>`
