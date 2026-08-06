@@ -131,6 +131,20 @@ app.get("/api/ops-intel/status", async c => {
 
 app.post("/api/ops-intel/collect", async c => c.json(await collectOnce(c.env.DB, c.env)));
 
+// Workers AI 연결 테스트
+app.get("/api/ops-intel/ai-test", async c => {
+  if (!c.env.AI) return c.json({ error: "AI binding not configured" }, 503);
+  try {
+    const result = await (c.env.AI as any).run("@cf/meta/llama-3.1-8b-instruct", {
+      messages: [{ role: "user", content: "Reply with: OK" }],
+      max_tokens: 10,
+    });
+    return c.json({ ok: true, result });
+  } catch (e) {
+    return c.json({ ok: false, error: String(e) });
+  }
+});
+
 // LLM enrichment 단독 실행
 app.post("/api/ops-intel/enrich-llm", async c => {
   if (!c.env.AI) return c.json({ error: "AI binding not available" }, 503);

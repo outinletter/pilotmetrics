@@ -44,22 +44,57 @@ const US_CITY_AIRPORTS: Record<string, [string, string]> = {
   "san diego,california": ["SAN","KSAN"],
   "seattle,washington": ["SEA","KSEA"], "seatac,washington": ["SEA","KSEA"],
   "portland,oregon": ["PDX","KPDX"],
-  // 알래스카/하와이
+  // 알래스카
   "anchorage,alaska": ["ANC","PANC"], "fairbanks,alaska": ["FAI","PAFA"],
   "palmer,alaska": ["PAQ","PAAQ"], "juneau,alaska": ["JNU","PAJN"],
-  "honolulu,hawaii": ["HNL","PHNL"],
-  // 추가 주요 도시
+  "bettles,alaska": ["BTT","PABT"], "king salmon,alaska": ["AKN","PAKN"],
+  "skwentna,alaska": ["SKW","PASW"], "kenai,alaska": ["ENA","PAEN"],
+  "bethel,alaska": ["BET","PABE"], "kodiak,alaska": ["ADQ","PADQ"],
+  "nome,alaska": ["OME","PAOM"], "kotzebue,alaska": ["OTZ","PAOT"],
+  // 하와이
+  "honolulu,hawaii": ["HNL","PHNL"], "kahului,hawaii": ["OGG","PHOG"],
+  "hilo,hawaii": ["ITO","PHTO"],
+  // 추가 미국 도시
   "kansas city,missouri": ["MCI","KMCI"], "st. louis,missouri": ["STL","KSTL"],
   "cleveland,ohio": ["CLE","KCLE"], "columbus,ohio": ["CMH","KCMH"],
   "indianapolis,indiana": ["IND","KIND"],
   "louisville,kentucky": ["SDF","KSDF"],
   "new orleans,louisiana": ["MSY","KMSY"],
   "albuquerque,new mexico": ["ABQ","KABQ"],
-  "tucson,arizona": ["TUS","KTUS"],
-  "reno,nevada": ["RNO","KRNO"],
+  "phoenix,arizona": ["PHX","KPHX"], "tucson,arizona": ["TUS","KTUS"],
+  "salt lake city,utah": ["SLC","KSLC"],
+  "reno,nevada": ["RNO","KRNO"], "boulder city,nevada": ["BLD","KBVU"],
   "spokane,washington": ["GEG","KGEG"],
+  "dulles,virginia": ["IAD","KIAD"],
+  "long island,new york": ["JFK","KJFK"],
+  "cerritos,california": ["LAX","KLAX"],
+  // 국가 없이 도시만 있는 경우
   "mexico city": ["MEX","MMMX"],
-  "mexico city,mexico": ["MEX","MMMX"],
+  "toronto": ["YYZ","CYYZ"],
+  "london": ["LHR","EGLL"],
+  "paris": ["CDG","LFPG"],
+  "tokyo": ["HND","RJTT"],
+  "narita": ["NRT","RJAA"],
+  "dubai": ["DXB","OMDB"],
+  "istanbul": ["IST","LTFM"],
+  "singapore": ["SIN","WSSS"],
+  "dublin": ["DUB","EIDW"],
+  "amsterdam": ["AMS","EHAM"],
+  "frankfurt": ["FRA","EDDF"],
+  "zurich": ["ZRH","LSZH"],
+  "vienna": ["VIE","LOWW"],
+  "rome": ["FCO","LIRF"],
+  "madrid": ["MAD","LEMD"],
+  "seoul": ["ICN","RKSI"],
+  "beijing": ["PEK","ZBAA"],
+  "shanghai": ["PVG","ZSPD"],
+  "hong kong": ["HKG","VHHH"],
+  "bangkok": ["BKK","VTBS"],
+  "kuala lumpur": ["KUL","WMKK"],
+  "jakarta": ["CGK","WIII"],
+  "bali": ["DPS","WADD"],
+  "sydney": ["SYD","YSSY"],
+  "auckland": ["AKL","NZAA"],
 };
 
 const INTL_CITY_AIRPORTS: Record<string, [string, string]> = {
@@ -149,12 +184,17 @@ function airportForLocation(city: string, state: string, country: string): [stri
   if (/^[A-Z]{3}$/.test(city)) return [city, ""];
   if (/^[A-Z]{4}$/.test(city)) return ["", city];
 
+  // "OF" = NTSB Other Foreign (해외) → 미국이 아님
+  const isOtherForeign = sRaw === "of" || sRaw === "ao" || sRaw === "gm";
+
   // 주 약어 → 전체 이름 변환 (TX→texas, FL→florida 등)
   const s = US_STATE_ABBREV[sRaw] ?? sRaw;
 
   // 미국 여부 판단
-  const isUS = !cn || cn === "united states" || cn === "us" || cn === "usa"
-    || US_STATES.has(s) || US_STATES.has(sRaw) || US_STATES.has(cn);
+  const isUS = !isOtherForeign && (
+    !cn || cn === "united states" || cn === "us" || cn === "usa"
+    || US_STATES.has(s) || US_STATES.has(sRaw) || US_STATES.has(cn)
+  );
 
   if (isUS) {
     const hit = US_CITY_AIRPORTS[`${c},${s}`]
@@ -163,8 +203,11 @@ function airportForLocation(city: string, state: string, country: string): [stri
     if (hit) return hit;
   }
 
-  // 국제 도시
-  const intlHit = INTL_CITY_AIRPORTS[`${c},${cn}`] ?? INTL_CITY_AIRPORTS[`${c},${s}`];
+  // 국제 도시 (국가 포함 또는 도시명만)
+  const intlHit = INTL_CITY_AIRPORTS[`${c},${cn}`]
+    ?? INTL_CITY_AIRPORTS[`${c},${s}`]
+    ?? US_CITY_AIRPORTS[c]          // 국가 없이 도시명만 있는 경우 (tokyo, dubai 등)
+    ?? INTL_CITY_AIRPORTS[c];
   if (intlHit) return intlHit;
 
   return ["",""];
