@@ -64,7 +64,9 @@ Respond with exactly this JSON structure (no markdown, no explanation):
       airport_hint: String(parsed.airport_iata ?? "").toUpperCase().slice(0, 4),
       confidence: Math.max(0, Math.min(1, Number(parsed.confidence ?? 0.5))),
     };
-  } catch {
+  } catch (e) {
+    // 오류를 null 대신 로그로 반환 (디버깅용)
+    console.error("[llmClassify error]", String(e));
     return null;
   }
 }
@@ -92,10 +94,20 @@ export async function enrichWithLLM(
   }>();
 
   let updated = 0, errors = 0;
+  const errorSamples: string[] = [];
 
   for (const item of results) {
     const result = await llmClassify(ai, item.title ?? "", item.summary ?? "");
-    if (!result) { errors++; continue; }
+    if (!result) {
+      errors++;
+      if (errorSamples.length < 3) {
+        try {
+          const testRun = await (ai as any).run("@cf/meta/llama-3.1-8b-instruct", { prompt: "Say OK", max_tokens: 5 });
+          errorSamples.push(`model_ok:${JSON.stringify(testRun).slice(0,80)}`);
+        } catch(te) { errorSamples.push(String(te).slice(0, 120)); }
+      }
+      continue;
+    }
 
     const now = new Date().toISOString();
     await db.prepare(
@@ -117,5 +129,5 @@ export async function enrichWithLLM(
     await new Promise(r => setTimeout(r, 50));
   }
 
-  return { processed: results.length, updated, errors };
+  return { processed: results.length, updated, errors, error_samples: errorSamples };
 }

@@ -45,8 +45,21 @@ const US_CITY_AIRPORTS: Record<string, [string, string]> = {
   "seattle,washington": ["SEA","KSEA"], "seatac,washington": ["SEA","KSEA"],
   "portland,oregon": ["PDX","KPDX"],
   // 알래스카/하와이
-  "anchorage,alaska": ["ANC","PANC"],
+  "anchorage,alaska": ["ANC","PANC"], "fairbanks,alaska": ["FAI","PAFA"],
+  "palmer,alaska": ["PAQ","PAAQ"], "juneau,alaska": ["JNU","PAJN"],
   "honolulu,hawaii": ["HNL","PHNL"],
+  // 추가 주요 도시
+  "kansas city,missouri": ["MCI","KMCI"], "st. louis,missouri": ["STL","KSTL"],
+  "cleveland,ohio": ["CLE","KCLE"], "columbus,ohio": ["CMH","KCMH"],
+  "indianapolis,indiana": ["IND","KIND"],
+  "louisville,kentucky": ["SDF","KSDF"],
+  "new orleans,louisiana": ["MSY","KMSY"],
+  "albuquerque,new mexico": ["ABQ","KABQ"],
+  "tucson,arizona": ["TUS","KTUS"],
+  "reno,nevada": ["RNO","KRNO"],
+  "spokane,washington": ["GEG","KGEG"],
+  "mexico city": ["MEX","MMMX"],
+  "mexico city,mexico": ["MEX","MMMX"],
 };
 
 const INTL_CITY_AIRPORTS: Record<string, [string, string]> = {
@@ -99,6 +112,20 @@ const INTL_CITY_AIRPORTS: Record<string, [string, string]> = {
   "toronto,canada": ["YYZ","CYYZ"],
 };
 
+const US_STATE_ABBREV: Record<string, string> = {
+  al:"alabama", ak:"alaska", az:"arizona", ar:"arkansas", ca:"california",
+  co:"colorado", ct:"connecticut", de:"delaware", fl:"florida", ga:"georgia",
+  hi:"hawaii", id:"idaho", il:"illinois", in:"indiana", ia:"iowa", ks:"kansas",
+  ky:"kentucky", la:"louisiana", me:"maine", md:"maryland", ma:"massachusetts",
+  mi:"michigan", mn:"minnesota", ms:"mississippi", mo:"missouri", mt:"montana",
+  ne:"nebraska", nv:"nevada", nh:"new hampshire", nj:"new jersey", nm:"new mexico",
+  ny:"new york", nc:"north carolina", nd:"north dakota", oh:"ohio", ok:"oklahoma",
+  or:"oregon", pa:"pennsylvania", ri:"rhode island", sc:"south carolina",
+  sd:"south dakota", tn:"tennessee", tx:"texas", ut:"utah", vt:"vermont",
+  va:"virginia", wa:"washington", wv:"west virginia", wi:"wisconsin", wy:"wyoming",
+  dc:"district of columbia",
+};
+
 const US_STATES = new Set([
   "alabama","alaska","arizona","arkansas","california","colorado","connecticut","delaware",
   "florida","georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky",
@@ -115,24 +142,28 @@ const US_STATES = new Set([
 
 function airportForLocation(city: string, state: string, country: string): [string, string] {
   const c = city.toLowerCase().trim();
-  const s = state.toLowerCase().trim();
+  const sRaw = state.toLowerCase().trim();
   const cn = country.toLowerCase().trim();
 
-  // IATA/ICAO 직접 코드 입력
+  // IATA/ICAO 직접 코드
   if (/^[A-Z]{3}$/.test(city)) return [city, ""];
   if (/^[A-Z]{4}$/.test(city)) return ["", city];
 
-  // 미국 여부 판단: country가 미국이거나, state가 미국 주이거나, country 자체가 주 이름(2파트 포맷)
+  // 주 약어 → 전체 이름 변환 (TX→texas, FL→florida 등)
+  const s = US_STATE_ABBREV[sRaw] ?? sRaw;
+
+  // 미국 여부 판단
   const isUS = !cn || cn === "united states" || cn === "us" || cn === "usa"
-    || US_STATES.has(s) || US_STATES.has(cn);
+    || US_STATES.has(s) || US_STATES.has(sRaw) || US_STATES.has(cn);
 
   if (isUS) {
-    // city + state 조합으로 먼저 검색
-    const hit = US_CITY_AIRPORTS[`${c},${s}`] ?? US_CITY_AIRPORTS[`${c},${cn}`];
+    const hit = US_CITY_AIRPORTS[`${c},${s}`]
+      ?? US_CITY_AIRPORTS[`${c},${sRaw}`]
+      ?? US_CITY_AIRPORTS[`${c},${cn}`];
     if (hit) return hit;
   }
 
-  // 국제 도시 검색 (country 또는 state 필드로 시도)
+  // 국제 도시
   const intlHit = INTL_CITY_AIRPORTS[`${c},${cn}`] ?? INTL_CITY_AIRPORTS[`${c},${s}`];
   if (intlHit) return intlHit;
 
