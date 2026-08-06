@@ -31,12 +31,12 @@
   --orange-100: #ffedd5;
 
   /* Neutrals */
-  --bg: #f0f4f8;
-  --surface: #ffffff;
-  --border: #dde4ed;
-  --text: #0f1f2e;
-  --muted: #5c7189;
-  --subtle: #8fa3b8;
+  --bg: #0a1628;
+  --surface: #111f35;
+  --border: rgba(255,255,255,0.09);
+  --text: #e8f0f9;
+  --muted: #7da4c4;
+  --subtle: #4d7a9e;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -609,7 +609,7 @@ body {
   padding: 6px 12px;
   transition: background 0.15s;
 }
-.ctx-link:hover { background: #e5edf5; }
+.ctx-link:hover { background: rgba(255,255,255,0.08); }
 
 /* ── THREATS SECTION ──────────────────────────────────────── */
 .threats-section {}
@@ -706,7 +706,7 @@ body {
   user-select: none;
   transition: background 0.12s;
 }
-.event-summary:hover { background: #f7fafc; }
+.event-summary:hover { background: rgba(255,255,255,0.04); }
 .event-chevron {
   flex: 0 0 16px;
   color: var(--subtle);
@@ -750,13 +750,13 @@ details summary::marker { content: ""; }
 /* ── EVENT DETAIL ─────────────────────────────────────────── */
 .event-detail {
   border-top: 1px solid var(--border);
-  background: #f8fafc;
+  background: rgba(255,255,255,0.03);
   padding: 20px;
 }
 .event-detail-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text);
+  color: #e8f0f9;
   margin-bottom: 12px;
   line-height: 1.35;
 }
@@ -776,7 +776,7 @@ details summary::marker { content: ""; }
 }
 .event-summary-text {
   font-size: 14px;
-  color: #2c3e50;
+  color: rgba(232,240,249,0.8);
   line-height: 1.65;
   margin-bottom: 16px;
 }
@@ -794,7 +794,7 @@ details summary::marker { content: ""; }
 }
 .event-list li {
   font-size: 13px;
-  color: #394b54;
+  color: rgba(232,240,249,0.75);
   line-height: 1.55;
   margin-bottom: 3px;
 }
