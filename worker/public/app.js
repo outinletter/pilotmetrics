@@ -91,14 +91,17 @@ function renderContext(ctx) {
 
   contextEl.innerHTML = `
     <div class="ctx-header">
-      <div class="ctx-header-brand">
-        <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
-          <rect width="28" height="28" rx="6" fill="rgba(255,255,255,0.12)"/>
-          <path d="M6 18L13 9l3 5 3-3 3 4" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="21" cy="9" r="2" fill="#f59e0b"/>
-        </svg>
-        <span class="ctx-header-brand-name">PilotMetrics</span>
-        <span class="ctx-header-brand-badge">THREAT INTEL</span>
+      <div class="ctx-header-row1">
+        <div class="ctx-header-brand">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="6" fill="rgba(255,255,255,0.12)"/>
+            <path d="M6 18L13 9l3 5 3-3 3 4" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="21" cy="9" r="2" fill="#f59e0b"/>
+          </svg>
+          <span class="ctx-header-brand-name">PilotMetrics</span>
+          <span class="ctx-header-brand-badge">THREAT INTEL</span>
+        </div>
+        <span class="risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
       </div>
       <div class="ctx-header-center">
         <div class="ctx-flight-row">
@@ -109,7 +112,6 @@ function renderContext(ctx) {
           <span class="ctx-route-inline">${esc(ctx.departure_icao || "—")}${toUtcHHMM(ctx.scheduled_departure) ? `<span class="ctx-time-paren">(${toUtcHHMM(ctx.scheduled_departure)})</span>` : ""} → ${esc(ctx.arrival_icao || "—")}${toUtcHHMM(ctx.scheduled_arrival) ? `<span class="ctx-time-paren">(${toUtcHHMM(ctx.scheduled_arrival)})</span>` : ""}</span>
         </div>
       </div>
-      <span class="risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
     </div>
     <div class="ctx-body">
       <div class="ctx-chip-row">
