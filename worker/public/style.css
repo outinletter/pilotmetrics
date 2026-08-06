@@ -410,21 +410,44 @@ body {
 }
 .ctx-header {
   background: linear-gradient(135deg, var(--navy-800) 0%, var(--navy-600) 100%);
-  padding: 20px 24px 20px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  padding: 32px 28px 28px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   gap: 16px;
-  flex-wrap: wrap;
   position: sticky;
   top: 56px;
   z-index: 80;
   border-radius: 16px 16px 0 0;
   margin-top: 16px;
 }
+.ctx-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ctx-header-brand-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.01em;
+}
+.ctx-header-brand-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--sky-400);
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+.ctx-header-center {
+  text-align: center;
+}
 .ctx-flight {
   font-family: var(--font-mono);
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.04em;
@@ -432,7 +455,7 @@ body {
 .ctx-route {
   font-size: 13px;
   color: rgba(255,255,255,0.6);
-  margin-top: 4px;
+  margin-top: 6px;
   letter-spacing: 0.04em;
 }
 .ctx-aircraft {

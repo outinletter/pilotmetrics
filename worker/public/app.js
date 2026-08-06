@@ -70,7 +70,16 @@ function renderContext(ctx) {
 
   contextEl.innerHTML = `
     <div class="ctx-header">
-      <div>
+      <div class="ctx-header-brand">
+        <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="6" fill="rgba(255,255,255,0.12)"/>
+          <path d="M6 18L13 9l3 5 3-3 3 4" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="21" cy="9" r="2" fill="#f59e0b"/>
+        </svg>
+        <span class="ctx-header-brand-name">PilotMetrics</span>
+        <span class="ctx-header-brand-badge">THREAT INTEL</span>
+      </div>
+      <div class="ctx-header-center">
         <div class="ctx-flight">${esc(ctx.flight_number)}</div>
         <div class="ctx-route">${esc(ctx.route)} &nbsp;·&nbsp; ${esc(ctx.departure_icao || "—")} → ${esc(ctx.arrival_icao || "—")}</div>
         <div class="ctx-aircraft">${esc(ctx.aircraft)}</div>
