@@ -1,38 +1,79 @@
+const UA = "PilotMetrics/1.0 (aviation-safety-briefing)";
+
+/** 단일 소스에서 METAR 문자열 추출 — 실패 시 reject */
+async function tryMetarSource(url: string, parse: (body: string) => string | null): Promise<string> {
+  const res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(9000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const body = await res.text();
+  const metar = parse(body);
+  if (!metar) throw new Error("no data");
+  return metar;
+}
+
 async function fetchMetar(icao: string): Promise<[string, string | null]> {
-  // 1차: VATSIM (신뢰성 높음, plain text)
-  try {
-    const res = await fetch(`https://metar.vatsim.net/metar.php?id=${icao}`, { signal: AbortSignal.timeout(8000) });
-    if (res.ok) {
-      const text = (await res.text()).trim();
-      if (text && !text.startsWith("No METAR")) return [text, null];
-    }
-  } catch { /* fall through */ }
-  // 2차: aviationweather.gov
-  try {
-    const res = await fetch(`https://aviationweather.gov/api/data/metar?format=json&ids=${icao}`, { signal: AbortSignal.timeout(10000) });
-    if (res.ok) {
-      const data = await res.json() as Record<string, string>[];
-      if (data?.length) {
-        const raw = data[0].rawOb ?? data[0].raw_text ?? null;
-        if (raw) return [raw, null];
+  // 3개 소스를 동시에 요청 — 가장 먼저 성공한 결과 사용
+  const sources: Promise<string>[] = [
+    // VATSIM (plain text)
+    tryMetarSource(
+      `https://metar.vatsim.net/metar.php?id=${icao}`,
+      t => { const s = t.trim(); return (s.length > 10 && !s.startsWith("No ")) ? s : null; }
+    ),
+    // aviationweather.gov JSON
+    tryMetarSource(
+      `https://aviationweather.gov/api/data/metar?format=json&ids=${icao}`,
+      t => {
+        try {
+          const d = JSON.parse(t) as Record<string, string>[];
+          return d?.[0]?.rawOb ?? d?.[0]?.raw_text ?? null;
+        } catch { return null; }
       }
-    }
-  } catch { /* fall through */ }
-  return ["", "Weather API unavailable; showing route-based risk briefing."];
+    ),
+    // NOAA ADDS legacy CSV
+    tryMetarSource(
+      `https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=csv&stationString=${icao}&hoursBeforeNow=2&mostRecent=true`,
+      t => {
+        const line = t.split("\n").find(l => l.trimStart().startsWith(icao));
+        if (!line) return null;
+        const raw = line.split(",")[0].trim();
+        return raw.startsWith(icao) ? raw : null;
+      }
+    ),
+  ];
+
+  try {
+    const metar = await Promise.any(sources);
+    return [metar, null];
+  } catch {
+    return ["", "Weather API unavailable; showing route-based risk briefing."];
+  }
 }
 
 async function fetchTaf(icao: string): Promise<[string, string | null]> {
-  try {
-    const res = await fetch(`https://aviationweather.gov/api/data/taf?format=json&ids=${icao}`, { signal: AbortSignal.timeout(10000) });
-    if (res.ok) {
-      const data = await res.json() as Record<string, string>[];
-      if (data?.length) {
-        const raw = data[0].rawTAF ?? data[0].raw_text ?? null;
-        if (raw) return [raw, null];
+  const sources: Promise<string>[] = [
+    tryMetarSource(
+      `https://aviationweather.gov/api/data/taf?format=json&ids=${icao}`,
+      t => {
+        try {
+          const d = JSON.parse(t) as Record<string, string>[];
+          return d?.[0]?.rawTAF ?? d?.[0]?.raw_text ?? null;
+        } catch { return null; }
       }
-    }
-  } catch { /* fall through */ }
-  return ["", "Weather API unavailable; showing route-based risk briefing."];
+    ),
+    tryMetarSource(
+      `https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=tafs&requestType=retrieve&format=csv&stationString=${icao}&hoursBeforeNow=6&mostRecent=true`,
+      t => {
+        const line = t.split("\n").find(l => l.trimStart().startsWith("TAF") || l.trimStart().startsWith(icao));
+        if (!line) return null;
+        const raw = line.split(",")[0].trim();
+        return raw.length > 10 ? raw : null;
+      }
+    ),
+  ];
+  try {
+    return [await Promise.any(sources), null];
+  } catch {
+    return ["", "Weather API unavailable; showing route-based risk briefing."];
+  }
 }
 
 export async function getWeather(icao: string): Promise<[{ metar: string; taf: string }, string[]]> {
