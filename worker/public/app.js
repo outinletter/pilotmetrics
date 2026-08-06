@@ -1,17 +1,42 @@
 /* PilotMetrics — app.js */
 
-// ── iOS Safari pull-to-refresh 방지 ───────────────────────
+// ── iOS Safari pull-to-refresh: 5초 홀딩 필요 ─────────────
 ;(function() {
   let startY = 0;
+  let pullStartTime = 0;
+  let isPulling = false;
+  let holdTimer = null;
+  const HOLD_MS = 5000;
+
   document.addEventListener('touchstart', e => {
     startY = e.touches[0].clientY;
+    isPulling = false;
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
   }, { passive: true });
+
   document.addEventListener('touchmove', e => {
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    if (scrollTop === 0 && e.touches[0].clientY > startY) {
-      e.preventDefault();
+    const scrollTop = (document.scrollingElement || document.documentElement).scrollTop;
+    const dy = e.touches[0].clientY - startY;
+
+    if (scrollTop === 0 && dy > 0) {
+      e.preventDefault(); // 기본 새로고침 차단
+
+      if (!isPulling) {
+        isPulling = true;
+        pullStartTime = Date.now();
+        // 5초 후 실제 새로고침 허용
+        holdTimer = setTimeout(() => { window.location.reload(); }, HOLD_MS);
+      }
+    } else {
+      // 방향이 바뀌거나 스크롤이 생기면 타이머 취소
+      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; isPulling = false; }
     }
   }, { passive: false });
+
+  document.addEventListener('touchend', () => {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+    isPulling = false;
+  }, { passive: true });
 })();
 
 const flightInput  = document.getElementById("flight");
