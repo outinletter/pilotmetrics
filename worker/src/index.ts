@@ -68,6 +68,8 @@ app.get("/api/briefing/:flightNumber", async c => {
     scheduled_departure: flight.scheduled_departure ?? null,
     scheduled_arrival: flight.scheduled_arrival ?? null,
     metar: weather.metar, taf: weather.taf, arrival_taf: arrivalTaf,
+    arrival_tags: parseWeatherTags("", arrivalTaf),   // 도착 시간대 전용 태그
+    metar_tags: parseWeatherTags(weather.metar, ""),  // 현재 METAR 전용 태그
   };
   if (flightMsg) {
     const enc = (q: string) => encodeURIComponent(q);
