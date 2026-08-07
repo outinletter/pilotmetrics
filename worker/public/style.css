@@ -545,6 +545,34 @@ body {
   margin-left: 3px;
   opacity: 0.85;
 }
+.ctx-icao-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.05em;
+}
+.ctx-icao-seg { white-space: nowrap; }
+.ctx-icao-arrow {
+  color: var(--sky-400);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.ctx-wx-brief {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--sky-300);
+  background: rgba(56,189,248,0.08);
+  border: 1px solid rgba(56,189,248,0.18);
+  border-radius: 6px;
+  padding: 6px 12px;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
 .ctx-route { display: none; }
 .ctx-aircraft { display: none; }
 .risk-badge {

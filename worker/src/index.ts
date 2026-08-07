@@ -6,7 +6,7 @@ import { backfillAirportCodes } from "./services/official_event_parsers";
 import { enrichWithLLM } from "./services/llm_classifier";
 import { getFlight, normalizeFlightNumber } from "./services/aviation_stack";
 import { getWeather } from "./services/noaa";
-import { parseWeatherTags, selectArrivalTafSegment, isNightArrival } from "./services/metar_parser";
+import { parseWeatherTags, selectArrivalTafSegment, isNightArrival, arrivalWeatherBrief } from "./services/metar_parser";
 import { riskLevel, riskScore, riskSummary, riskBreakdown } from "./services/risk_tagger";
 import { airportFixedRisks, airportUtcOffset } from "./data/airport_hazards";
 import { buildThreats } from "./services/briefing_generator";
@@ -52,6 +52,7 @@ app.get("/api/briefing/:flightNumber", async c => {
       risk_level: level,
       risk_summary: riskSummary(score, level, tags),
       risk_breakdown: riskBreakdown(tags, airportEventCount),
+      arrival_weather_brief: arrivalWeatherBrief(weather.taf, weather.metar, null, 0),
       airport_event_count: airportEventCount,
       messages: weatherMessages.filter(Boolean),
       arrival_weather_time: null,
@@ -108,6 +109,7 @@ app.get("/api/briefing/:flightNumber", async c => {
     risk_level: level,
     risk_summary: riskSummary(score, level, activeTags, nightArr),
     risk_breakdown: riskBreakdown(activeTags, airportEventCount, nightArr),
+    arrival_weather_brief: arrivalWeatherBrief(arrivalTaf, weather.metar, arrivalTime, utcOffset),
     night_arrival: nightArr,
     airport_event_count: airportEventCount,
     messages: [flightMsg, ...weatherMessages].filter(Boolean),

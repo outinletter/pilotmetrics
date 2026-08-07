@@ -214,3 +214,92 @@ export function isNightArrival(arrivalTimeUtc: string | null | undefined, utcOff
   const localHour = ((d.getUTCHours() + utcOffset) % 24 + 24) % 24;
   return localHour >= 22 || localHour < 5;
 }
+
+// ─── 기상현상 한국어 약어 ─────────────────────────────────────────────────────
+const WX_KO: Record<string, string> = {
+  TSRA: "뇌우+강우", CB: "적란운", THUNDERSTORM: "뇌우", HEAVY_RAIN: "폭우",
+  WINDSHEAR: "윈드시어", FOG: "안개", MIST: "박무", ICING: "착빙",
+  SNOW: "강설", FZRAIN: "결빙강수", BLOWING_SNOW: "날리는 눈",
+  DUST: "먼지/모래", SQUALL: "스콜", VOLCANIC_ASH: "화산재",
+  LOW_CLOUD: "저운고도", CROSSWIND: "측풍", TAILWIND: "배풍",
+};
+
+function cloudCeilingKo(text: string): string | null {
+  // BKN/OVC + 3자리 높이 (100ft 단위)
+  const m = text.match(/\b(BKN|OVC)(\d{3})\b/);
+  if (!m) return null;
+  const ft = parseInt(m[2]) * 100;
+  return `운고 ${ft.toLocaleString()}ft`;
+}
+
+/**
+ * 도착 예정 시각 기준 날씨 한 줄 브리핑 (한국어)
+ * @param arrivalTaf     selectArrivalTafSegment 가 반환한 도착 시간대 TAF 문자열
+ * @param metar          현재 METAR 원문
+ * @param arrivalTimeUtc 도착 예정 ISO UTC 시각
+ * @param utcOffset      도착 공항 UTC 오프셋
+ */
+export function arrivalWeatherBrief(
+  arrivalTaf: string,
+  metar: string,
+  arrivalTimeUtc: string | null | undefined,
+  utcOffset: number,
+): string {
+  const src = (arrivalTaf || metar).toUpperCase();
+
+  // 도착 현지 시각
+  const d = parseIsoUtc(arrivalTimeUtc);
+  const timeStr = d
+    ? (() => {
+        const localH = ((d.getUTCHours() + utcOffset) % 24 + 24) % 24;
+        const localM = d.getUTCMinutes();
+        return `${String(localH).padStart(2, "0")}:${String(localM).padStart(2, "0")} 현지`;
+      })()
+    : null;
+
+  const parts: string[] = [];
+
+  // 풍향/풍속
+  const wind = parseWind(src);
+  if (wind) {
+    const dirStr = wind.dir !== null ? `${wind.dir}°` : "가변";
+    const gustStr = wind.gust > wind.speed ? `/G${wind.gust}` : "";
+    parts.push(`바람 ${dirStr} ${wind.speed}${gustStr}kt`);
+  }
+
+  // 가시거리
+  const vis = (() => {
+    const tokens = src.split(/\s+/);
+    for (const t of tokens) {
+      if (/^\d{4}$/.test(t)) { const v = parseInt(t); if (v <= 9999) return v; }
+    }
+    return null;
+  })();
+  if (vis !== null) {
+    parts.push(vis >= 9999 ? "시정 10km+" : `시정 ${vis}m`);
+  }
+
+  // RVR
+  const { rvr_m, cat } = parseRvr(src);
+  if (rvr_m !== null) parts.push(`RVR ${rvr_m}m(${cat})`);
+
+  // 기상현상 (중복 없이 최대 3개)
+  const wxHits: string[] = [];
+  for (const [tag, re] of Object.entries(WEATHER_CHECKS)) {
+    if (re.test(src) && WX_KO[tag] && !wxHits.includes(WX_KO[tag])) {
+      wxHits.push(WX_KO[tag]);
+      if (wxHits.length >= 3) break;
+    }
+  }
+  if (wxHits.length) parts.push(wxHits.join("·"));
+
+  // 운고
+  const ceiling = cloudCeilingKo(src);
+  if (ceiling) parts.push(ceiling);
+
+  if (parts.length === 0) parts.push("기상 양호(CAVOK)");
+
+  const prefix = timeStr ? `도착 ${timeStr}` : "도착 예정";
+  const source = arrivalTaf ? "TAF" : "METAR";
+  return `${prefix} 기상(${source}): ${parts.join(", ")}`;
+}

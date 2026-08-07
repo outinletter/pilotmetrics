@@ -68,6 +68,10 @@ function toUtcHHMM(iso) {
   return d.toISOString().slice(11, 16).replace(":", "") + "Z";
 }
 
+function fmtTime(iso) {
+  return toUtcHHMM(iso) ?? "——z";
+}
+
 function esc(v) {
   return String(v ?? "").replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
@@ -120,9 +124,13 @@ function renderContext(ctx) {
           <span class="ctx-flight">${esc(ctx.flight_number)}</span>
           <span class="ctx-flight-sep">·</span>
           <span class="ctx-route-inline">${esc(ctx.route)}</span>
-          <span class="ctx-flight-sep">·</span>
-          <span class="ctx-route-inline">${esc(ctx.departure_icao || "—")}${toUtcHHMM(ctx.scheduled_departure) ? `<span class="ctx-time-paren">(${toUtcHHMM(ctx.scheduled_departure)})</span>` : ""} → ${esc(ctx.arrival_icao || "—")}${toUtcHHMM(ctx.scheduled_arrival) ? `<span class="ctx-time-paren">(${toUtcHHMM(ctx.scheduled_arrival)})</span>` : ""}</span>
         </div>
+        <div class="ctx-icao-row">
+          <span class="ctx-icao-seg">${esc(ctx.departure_icao || "—")}<span class="ctx-time-paren">(${fmtTime(ctx.estimated_departure ?? ctx.scheduled_departure)})</span></span>
+          <span class="ctx-icao-arrow">→</span>
+          <span class="ctx-icao-seg">${esc(ctx.arrival_icao || "—")}<span class="ctx-time-paren">(${fmtTime(ctx.estimated_arrival ?? ctx.scheduled_arrival)})</span></span>
+        </div>
+        ${ctx.arrival_weather_brief ? `<div class="ctx-wx-brief">${esc(ctx.arrival_weather_brief)}</div>` : ""}
       </div>
     </div>
     <div class="ctx-body">
