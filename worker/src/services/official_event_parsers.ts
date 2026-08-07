@@ -387,27 +387,102 @@ async function upsertNtsbCase(db: D1Database, ntsbNum: string, c: Record<string,
     const eventId = `NTSB-${ntsbNum}`.toUpperCase().replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, "");
     const existing = await db.prepare("SELECT id FROM events WHERE id = ?").bind(eventId).first<{ id: string }>();
     if (!existing) {
-      const eventDate = String(c.cm_eventDate ?? "").slice(0, 10);
+      const eventDateRaw = String(c.cm_eventDate ?? "");
+      const eventDate = eventDateRaw.slice(0, 10);
+      // 시각 추출 (cm_eventDate: "2024-03-15T14:30:00Z")
+      const eventTimeUtc = eventDateRaw.length >= 16 ? eventDateRaw.slice(11, 16) : "";
+
       const city = String(c.cm_city ?? "");
       const state = String(c.cm_state ?? "");
       const country = String(c.cm_country ?? "");
       const highestInjury = String(c.cm_highestInjury ?? "").toUpperCase();
       const fatal = Number(c.cm_fatalInjuryCount ?? 0);
+
       const makeModel = vehicles.map(v => `${v.cm_make ?? v.make ?? ""} ${v.cm_model ?? v.model ?? ""}`.trim()).find(Boolean) ?? "";
-      const flightPhase = vehicles.flatMap(v => (v.cm_events as Record<string, unknown>[] ?? []).map(e => NTSB_PHASE_MAP[String(e.cicttPhaseSOEGroup ?? "").toLowerCase()] ?? "")).find(Boolean) ?? "";
       const operator = vehicles.map(v => String(v.operatorName ?? v.registeredOwner ?? "")).find(Boolean) ?? "";
+
+      // 비행단계 + SOE 이벤트 분류
+      const flightPhase = vehicles.flatMap(v =>
+        (v.cm_events as Record<string, unknown>[] ?? []).map(e => NTSB_PHASE_MAP[String(e.cicttPhaseSOEGroup ?? "").toLowerCase()] ?? "")
+      ).find(Boolean) ?? "";
+      const soeGroups = vehicles.flatMap(v =>
+        (v.cm_events as Record<string, unknown>[] ?? []).flatMap(e => [
+          String(e.cm_tier1Name ?? ""), String(e.cm_tier2Name ?? ""), String(e.cicttEventSOEGroup ?? "")
+        ])
+      ).filter(Boolean);
+
+      // 피해 규모 (vehicles[].DamageLevel)
+      const damageLevel = vehicles.map(v => String(v.DamageLevel ?? v.damageLevel ?? "")).find(s => s && s !== "None") ?? "";
+
+      // 운항 정보
+      const flightOperationType = vehicles.map(v => String(v.flightOperationType ?? "")).find(Boolean) ?? "";
+      const flightScheduledType = vehicles.map(v => String(v.flightScheduledType ?? "")).find(Boolean) ?? "";
+      const secondPilotPresent = vehicles.some(v => v.secondPilotPresent === true || v.secondPilotPresent === "true" || v.secondPilotPresent === 1);
+
+      // 기상 조건 (VMC/IMC)
+      const siteCondition = String(c.accidentSiteCondition ?? "");
+
+      // 풍부한 서술 텍스트 우선 사용
+      const narrative = String(c.prelimNarrative ?? c.cm_probableCause ?? "").trim();
+
+      // 위치 기반 요약
+      const locationStr = [city, state, country].filter(Boolean).join(", ");
+
+      // 자동 요약 생성
+      const autoSummary = narrative ||
+        `NTSB case ${ntsbNum} near ${city || "unspecified"}${state ? `, ${state}` : ""}. Highest injury: ${highestInjury || "unknown"}.${damageLevel ? ` Aircraft damage: ${damageLevel}.` : ""}${siteCondition ? ` Conditions: ${siteCondition}.` : ""}${eventTimeUtc ? ` Event time: ${eventTimeUtc}Z.` : ""}`;
+
       const severity = fatal > 0 ? 5 : highestInjury.includes("SERIOUS") ? 4 : highestInjury.includes("MINOR") ? 3 : 2;
-      // 공항코드: CAROL의 cm_apt 우선, 없으면 도시→공항 매핑
-      const aptRaw = String(c.cm_apt ?? c.cm_aptId ?? c.cm_airport ?? "").trim().toUpperCase();
+
+      // 공항코드: CAROL의 airportId/cm_apt 우선, 없으면 도시→공항 매핑
+      const aptRaw = String(c.airportId ?? c.cm_apt ?? c.cm_aptId ?? c.cm_airport ?? "").trim().toUpperCase();
       let airportIata = "", airportIcao = "";
       if (/^[A-Z]{4}$/.test(aptRaw)) { airportIcao = aptRaw; }
       else if (/^[A-Z]{3}$/.test(aptRaw)) { airportIata = aptRaw; }
       else { [airportIata, airportIcao] = airportForLocation(city, state, country); }
+
+      // 이벤트 유형: SOE > 기본값
+      const eventType = soeGroups.filter(s => s.length > 2).slice(0, 3).join(" / ") || "NTSB CASE";
+
+      // 운항 유형 레이블
+      const operationType = [
+        "Part 121 air transport (NTSB CAROL)",
+        flightScheduledType === "SCHD" ? "scheduled" : flightScheduledType === "NSCH" ? "non-scheduled" : "",
+        flightOperationType,
+      ].filter(Boolean).join(" · ");
+
       const now = new Date().toISOString();
       await db.prepare("INSERT INTO events (id,source_name,source_url,event_date,operation_type,airport_iata,airport_icao,runway,approach_type,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
-        .bind(eventId,"NTSB CAROL",`https://data.ntsb.gov/carol-main-public/basic-search?NTSBNumber=${ntsbNum}`,eventDate,"Part 121 air transport (NTSB CAROL)",airportIata,airportIcao,"","",flightPhase,makeModel,"JET",operator,[city,state,country].filter(Boolean).join(", "),"NTSB CASE",severity,`NTSB ${ntsbNum}`,"NTSB Case",`NTSB case ${ntsbNum} near ${city || "unspecified"}${state ? `, ${state}` : ""}. Highest injury: ${highestInjury || "unknown"}.`,JSON.stringify([]),JSON.stringify([]),`Review NTSB case ${ntsbNum} in full — this record carries only CAROL summary fields.`,0.5,now,now).run();
-      for (const tag of ["NTSB","carol_case","official_report_candidate",...(fatal > 0 ? ["FATAL"] : [])]) {
-        await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId,"risk",tag).run();
+        .bind(
+          eventId, "NTSB CAROL",
+          `https://data.ntsb.gov/carol-main-public/basic-search?NTSBNumber=${ntsbNum}`,
+          eventDate, operationType,
+          airportIata, airportIcao,
+          "",
+          siteCondition,   // approach_type 필드에 VMC/IMC 저장
+          flightPhase, makeModel, "JET", operator,
+          locationStr,     // weather_summary 필드에 위치 저장
+          eventType,
+          severity,
+          `NTSB ${ntsbNum}`,
+          "NTSB Case",
+          autoSummary,
+          JSON.stringify([]),
+          JSON.stringify([]),
+          `Review NTSB case ${ntsbNum} — ${eventType}. ${siteCondition ? `Conditions: ${siteCondition}.` : "CAROL summary only."}`,
+          0.5, now, now
+        ).run();
+
+      // 태그: 기본 + 상세 분류 + 조건
+      const extraTags: string[] = [
+        ...(fatal > 0 ? ["FATAL"] : []),
+        ...(damageLevel === "Destroyed" ? ["AIRCRAFT_DESTROYED"] : damageLevel === "Substantial" ? ["SUBSTANTIAL_DAMAGE"] : []),
+        ...(siteCondition === "IMC" ? ["IMC"] : siteCondition === "VMC" ? ["VMC"] : []),
+        ...(secondPilotPresent ? [] : ["SINGLE_PILOT"]),
+        ...(eventTimeUtc ? [parseInt(eventTimeUtc.slice(0,2)) >= 22 || parseInt(eventTimeUtc.slice(0,2)) < 6 ? "NIGHT_EVENT" : "DAY_EVENT"] : []),
+      ];
+      for (const tag of ["NTSB", "carol_case", "official_report_candidate", ...extraTags]) {
+        await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId, "risk", tag).run();
       }
       return true;
     }
