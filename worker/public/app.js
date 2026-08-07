@@ -322,3 +322,5 @@ async function loadStats() {
 }
 
 loadStats();
+// DB 수집 후 홈 화면 자동 반영 — 5분마다 갱신
+setInterval(loadStats, 5 * 60 * 1000);
