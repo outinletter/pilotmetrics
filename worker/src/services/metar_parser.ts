@@ -167,8 +167,6 @@ export function selectArrivalTafSegment(taf: string, arrivalTime: string | null 
   let tempoBuffer: string[] = [];
   let inTempo = false;
 
-  // TAF 헤더의 유효 윈도우 (DDHH/DDHH) — 기준 날짜 계산용
-  const headerWindow = taf.match(/\b(\d{2})(\d{2})\/(\d{2})(\d{2})\b/);
   // 월 내 일(day)을 분(min) 단위로: 단순히 day*24*60+hour*60 사용
   function fmToMin(day: number, hour: number, min = 0) { return day * 1440 + hour * 60 + min; }
   const arrMin = fmToMin(arrival.getUTCDate(), arrival.getUTCHours(), arrival.getUTCMinutes());
@@ -193,9 +191,10 @@ export function selectArrivalTafSegment(taf: string, arrivalTime: string | null 
     // 시간 윈도우 DDHH/DDHH
     if (/^\d{4}\/\d{4}$/.test(token)) {
       if (inTempo) {
-        tempoBuffer.push(token);
-        if (!tafWindowMatches(token, arrival)) {
-          tempoSegments.push(tempoBuffer.join(" ")); tempoBuffer = []; inTempo = false;
+        if (tafWindowMatches(token, arrival)) {
+          tempoBuffer.push(token); // 도착 시각과 겹치는 TEMPO만 수집
+        } else {
+          tempoBuffer = []; inTempo = false; // 겹치지 않으면 버림
         }
       } else if (currentFm) {
         currentFm.tokens.push(token);

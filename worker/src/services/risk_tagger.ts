@@ -105,22 +105,20 @@ const TAG_LABELS: Record<string, string> = {
  * @param nightArrival 야간 도착 여부
  */
 // FAMILY 내 이미 점수를 부여한 태그 집합을 계산
-function familyDedupedScore(tags: Set<string>): { score: number; suppressed: Set<string> } {
+function familyDedupedScore(tags: Set<string>): Set<string> {
   const suppressed = new Set<string>();
-  let bonus = 0;
   for (const family of SCORE_FAMILIES) {
     const hits = family.filter(t => tags.has(t) && TAG_SCORES[t] > 0);
     if (hits.length <= 1) continue;
-    // 최고점 태그만 유지, 나머지 억제
     hits.sort((a, b) => TAG_SCORES[b] - TAG_SCORES[a]);
     for (const dup of hits.slice(1)) suppressed.add(dup);
   }
-  return { score: bonus, suppressed };
+  return suppressed;
 }
 
 export function riskScore(tags: string[], airportCnt = 0, nightArrival = false): number {
   const t = new Set(tags);
-  const { suppressed } = familyDedupedScore(t);
+  const suppressed = familyDedupedScore(t);
   let score = 0;
 
   for (const [tag, pts] of Object.entries(TAG_SCORES)) {
@@ -165,7 +163,7 @@ export function riskLevel(tags: string[], airportCnt = 0, nightArrival = false):
  */
 export function riskBreakdown(tags: string[], airportCnt = 0, nightArrival = false): RiskBreakdown[] {
   const t = new Set(tags);
-  const { suppressed } = familyDedupedScore(t);
+  const suppressed = familyDedupedScore(t);
   const items: RiskBreakdown[] = [];
 
   for (const [tag, pts] of Object.entries(TAG_SCORES)) {

@@ -143,10 +143,12 @@ export function airportUtcOffset(icao: string | null | undefined, at?: Date): nu
     return base;
   }
 
-  // 호주: DST = 10월 첫 일요일 ~ 다음해 4월 첫 일요일 (NSW/VIC/TAS 기준)
+  // 호주: DST = 10월 첫 일요일 ~ 같은 해 4월 첫 일요일 (NSW/VIC/TAS 기준, 남반구)
+  // 4월~10월은 겨울(표준시), 10월~4월은 여름(DST)
   if (icaoUpper.startsWith("Y") && base === 10) {
-    const dstStart = nthWeekdayOfMonth(y, 9, 0, 1);      // 10월 첫 일요일
-    const dstEnd   = nthWeekdayOfMonth(y + 1, 3, 0, 1);  // 다음해 4월 첫 일요일
+    const dstStart = nthWeekdayOfMonth(y, 9, 0, 1); // 이 해 10월 첫 일요일
+    const dstEnd   = nthWeekdayOfMonth(y, 3, 0, 1); // 이 해 4월 첫 일요일
+    // DST 활성: 10월 이후 OR 4월 이전 (연도 내 기준)
     if (at >= dstStart || at < dstEnd) return base + 1;
     return base;
   }
