@@ -6,8 +6,9 @@ import { backfillAirportCodes } from "./services/official_event_parsers";
 import { enrichWithLLM } from "./services/llm_classifier";
 import { getFlight, normalizeFlightNumber } from "./services/aviation_stack";
 import { getWeather } from "./services/noaa";
-import { parseWeatherTags, selectArrivalTafSegment } from "./services/metar_parser";
-import { riskLevel, riskScore, riskSummary } from "./services/risk_tagger";
+import { parseWeatherTags, selectArrivalTafSegment, isNightArrival } from "./services/metar_parser";
+import { riskLevel, riskScore, riskSummary, riskBreakdown } from "./services/risk_tagger";
+import { airportFixedRisks, airportUtcOffset } from "./data/airport_hazards";
 import { buildThreats } from "./services/briefing_generator";
 import { collectOnce, refineOfficialItems } from "./services/ops_intel_collector";
 import { collectRecentOfficialEvents } from "./services/official_event_parsers";
@@ -28,7 +29,8 @@ app.get("/api/briefing/:flightNumber", async c => {
     const arrIcao = raw.length === 4 ? raw : iataToIcao(raw);
     const arrIata = raw.length === 3 ? raw : raw.slice(1);
     const [weather, weatherMessages] = arrIcao ? await getWeather(arrIcao) : [{ metar: "", taf: "" }, []];
-    const tags = parseWeatherTags(weather.metar, weather.taf);
+    const fixedRisks = airportFixedRisks(arrIcao);
+    const tags = [...new Set([...parseWeatherTags(weather.metar, weather.taf, arrIcao), ...fixedRisks])];
 
     const airportEventCount = arrIcao
       ? ((await c.env.DB
@@ -49,6 +51,7 @@ app.get("/api/briefing/:flightNumber", async c => {
       risk_score: score,
       risk_level: level,
       risk_summary: riskSummary(score, level, tags),
+      risk_breakdown: riskBreakdown(tags, airportEventCount),
       airport_event_count: airportEventCount,
       messages: weatherMessages.filter(Boolean),
       arrival_weather_time: null,
@@ -70,9 +73,16 @@ app.get("/api/briefing/:flightNumber", async c => {
   const [weather, weatherMessages] = arrIcao ? await getWeather(arrIcao) : [{ metar: "", taf: "" }, []];
   const arrivalTime = (flight.estimated_arrival ?? flight.scheduled_arrival) as string | null;
   const arrivalTaf  = selectArrivalTafSegment(weather.taf, arrivalTime);
-  const arrivalTags = parseWeatherTags("", arrivalTaf);
-  const metarTags   = parseWeatherTags(weather.metar, "");
-  const tags        = parseWeatherTags(weather.metar, arrivalTaf);
+
+  // 공항 고정 위험 태그 (지형·접근 특성)
+  const fixedRisks  = airportFixedRisks(arrIcao);
+  const utcOffset   = airportUtcOffset(arrIcao);
+  const nightArr    = isNightArrival(arrivalTime, utcOffset);
+
+  // 태그 합산: METAR + 도착 TAF + 공항 고정 위험
+  const arrivalTags = [...new Set([...parseWeatherTags("", arrivalTaf, arrIcao), ...fixedRisks])];
+  const metarTags   = parseWeatherTags(weather.metar, "", arrIcao);
+  const tags        = [...new Set([...parseWeatherTags(weather.metar, arrivalTaf, arrIcao), ...fixedRisks])];
 
   // 도착 공항 과거 사고 이력 조회
   const airportEventCount = arrIcao
@@ -81,10 +91,10 @@ app.get("/api/briefing/:flightNumber", async c => {
         .bind(arrIcao, arrIata).first<{ n: number }>())?.n ?? 0)
     : 0;
 
-  // 수치 위험도: 도착 시간대 태그 + 공항 이력 반영
-  const activeTags = arrivalTags.length > 0 ? arrivalTags : tags;
-  const score = riskScore(activeTags, airportEventCount);
-  const level = riskLevel(activeTags, airportEventCount);
+  // 수치 위험도: 도착 시간대 태그 + 공항 이력 + 야간 여부 반영
+  const activeTags = arrivalTags.length > fixedRisks.length ? arrivalTags : tags;
+  const score = riskScore(activeTags, airportEventCount, nightArr);
+  const level = riskLevel(activeTags, airportEventCount, nightArr);
 
   const context: Record<string, unknown> = {
     flight_number: fn,
@@ -96,7 +106,9 @@ app.get("/api/briefing/:flightNumber", async c => {
     weather: tags.join("/") || "CLEAR",
     risk_score: score,
     risk_level: level,
-    risk_summary: riskSummary(score, level, activeTags),
+    risk_summary: riskSummary(score, level, activeTags, nightArr),
+    risk_breakdown: riskBreakdown(activeTags, airportEventCount, nightArr),
+    night_arrival: nightArr,
     airport_event_count: airportEventCount,
     messages: [flightMsg, ...weatherMessages].filter(Boolean),
     arrival_weather_time: arrivalTime,
