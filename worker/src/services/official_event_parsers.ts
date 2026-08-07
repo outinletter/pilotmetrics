@@ -1,4 +1,5 @@
 import { unzipSync } from "fflate";
+import { airportUtcOffset } from "../data/airport_hazards";
 
 const NTSB_CAROL_URL = "https://data.ntsb.gov/carol-main-public/api/Query/FileExport";
 const FAA_TRANSPORT_URL = "https://www.faa.gov/lessonslearned/transportairplane/accidents/transport-airplane-lessons-learned-library";
@@ -479,7 +480,13 @@ async function upsertNtsbCase(db: D1Database, ntsbNum: string, c: Record<string,
         ...(damageLevel === "Destroyed" ? ["AIRCRAFT_DESTROYED"] : damageLevel === "Substantial" ? ["SUBSTANTIAL_DAMAGE"] : []),
         ...(siteCondition === "IMC" ? ["IMC"] : siteCondition === "VMC" ? ["VMC"] : []),
         ...(secondPilotPresent ? [] : ["SINGLE_PILOT"]),
-        ...(eventTimeUtc ? [parseInt(eventTimeUtc.slice(0,2)) >= 22 || parseInt(eventTimeUtc.slice(0,2)) < 6 ? "NIGHT_EVENT" : "DAY_EVENT"] : []),
+        ...(eventTimeUtc ? (() => {
+          const utcHour = parseInt(eventTimeUtc.slice(0, 2));
+          // 공항 ICAO로 로컬 시간 계산, 없으면 UTC 그대로
+          const offset = airportIcao ? airportUtcOffset(airportIcao) : airportIata ? airportUtcOffset(airportIata) : 0;
+          const localHour = ((utcHour + offset) % 24 + 24) % 24;
+          return [localHour >= 22 || localHour < 6 ? "NIGHT_EVENT" : "DAY_EVENT"];
+        })() : []),
       ];
       for (const tag of ["NTSB", "carol_case", "official_report_candidate", ...extraTags]) {
         await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId, "risk", tag).run();
