@@ -224,6 +224,15 @@ app.post("/api/ops-intel/collect-ntsb", async c => {
   return c.json(await collectNtsbRange(c.env.DB, start, end));
 });
 
+// TSB Canada CSV 데이터 수집 (로컬 스크립트가 파싱 후 전송)
+// POST /api/ops-intel/ingest-tsb  Body: { records: TsbRecord[] }
+app.post("/api/ops-intel/ingest-tsb", async c => {
+  const body = await c.req.json<{ records?: unknown[] }>().catch(() => ({ records: [] }));
+  if (!Array.isArray(body.records) || body.records.length === 0) return c.json({ error: "records array required" }, 400);
+  const { ingestTsbBatch } = await import("./services/official_event_parsers");
+  return c.json(await ingestTsbBatch(c.env.DB, body.records as Parameters<typeof ingestTsbBatch>[1]));
+});
+
 app.get("/api/ops-intel/items", async c => {
   const { results } = await c.env.DB.prepare("SELECT source_name,source_url,title,category,severity,summary,operational_lesson,a350_b787_applicability,recommended_action,tags,last_status,last_checked_at FROM ops_intel_items ORDER BY updated_at DESC LIMIT 50").all();
   return c.json(results);

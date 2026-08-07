@@ -756,3 +756,108 @@ export async function collectRecentOfficialEvents(db: D1Database, yearsBack = 20
     items_saved:   totals.reduce((s, v) => s + ((v.created as number) ?? 0), 0),
   };
 }
+
+// ── TSB Canada CSV 수집 (로컬 스크립트 → Worker ingest) ───────────────────────
+
+export interface TsbRecord {
+  occNo: string;
+  occDate: string;       // "2026-06-29"
+  occTime?: string;
+  icao?: string;         // occurrence airport ICAO
+  occType: string;       // "ACCIDENT" | "INCIDENT"
+  occClass?: string;
+  country?: string;
+  province?: string;
+  summary?: string;
+  commonName?: string;
+  fatalCount?: number;
+  seriousCount?: number;
+  minorCount?: number;
+  lightCond?: string;
+  operator?: string;
+  aircraftType?: string;
+  carsSubpart?: string;  // e.g. "705 - AIRLINER"
+  operationType?: string;
+  flightNo?: string;
+  depIcao?: string;
+  destIcao?: string;
+  flightPhase?: string;
+  damageLevel?: string;
+}
+
+async function upsertTsbEvent(db: D1Database, rec: TsbRecord): Promise<boolean> {
+  const eventId = `TSB-${rec.occNo}`.toUpperCase().replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, "");
+  const existing = await db.prepare("SELECT id FROM events WHERE id = ?").bind(eventId).first<{ id: string }>();
+  if (existing) return false;
+
+  const fatal = rec.fatalCount ?? 0;
+  const serious = rec.seriousCount ?? 0;
+  const occUpper = (rec.occType ?? "").toUpperCase();
+  const severity = fatal > 0 ? 5 : occUpper.includes("ACCIDENT") ? (serious > 0 ? 4 : 3) : 2;
+
+  const rawIcao = (rec.icao ?? "").trim().toUpperCase();
+  let airportIcao = "", airportIata = "";
+  if (/^[A-Z]{4}$/.test(rawIcao)) {
+    airportIcao = rawIcao;
+  } else if (/^[A-Z]{3}$/.test(rawIcao)) {
+    airportIata = rawIcao;
+    const [, icao] = airportForLocation("", "", "");
+    airportIcao = icao;
+  }
+  if (!airportIcao && !airportIata && rec.province && rec.country) {
+    [airportIata, airportIcao] = airportForLocation("", rec.province, rec.country);
+  }
+
+  const year = rec.occDate.slice(0, 4);
+  const sourceUrl = `https://www.tsb.gc.ca/eng/rapports-reports/aviation/${year}/index.html`;
+  const summary = (rec.summary ?? rec.commonName ?? `TSB Canada occurrence ${rec.occNo}`).trim();
+
+  const tags: string[] = ["TSB_CANADA", "PART_121_135_RELEVANT"];
+  if (fatal > 0) tags.push("FATAL");
+  const dmgUpper = (rec.damageLevel ?? "").toUpperCase();
+  if (dmgUpper.includes("DESTRO")) tags.push("AIRCRAFT_DESTROYED");
+  else if (dmgUpper.includes("SUBSTANTIAL")) tags.push("SUBSTANTIAL_DAMAGE");
+  const lightUpper = (rec.lightCond ?? "").toUpperCase();
+  if (lightUpper.includes("NIGHT") || lightUpper.includes("DARK")) tags.push("NIGHT_EVENT");
+  else if (lightUpper.includes("DAY") || lightUpper.includes("DAWN") || lightUpper.includes("DUSK")) tags.push("DAY_EVENT");
+  if (occUpper.includes("ACCIDENT")) tags.push("ACCIDENT"); else tags.push("INCIDENT");
+
+  const now = new Date().toISOString();
+  await db.prepare(`INSERT INTO events (id,source_name,source_url,event_date,operation_type,airport_iata,airport_icao,runway,approach_type,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .bind(
+      eventId, "TSB Canada", sourceUrl,
+      rec.occDate.slice(0, 10),
+      rec.carsSubpart || rec.operationType || "Commercial aviation",
+      airportIata, airportIcao,
+      "", "",
+      rec.flightPhase ?? "",
+      rec.aircraftType ?? "",
+      "JET",
+      rec.operator ?? "",
+      [rec.province, rec.country].filter(Boolean).join(", "),
+      `${rec.occType}${rec.occClass ? ` - ${rec.occClass}` : ""}`,
+      severity,
+      `TSB ${rec.occNo}`,
+      "TSB Canada Occurrence",
+      summary,
+      JSON.stringify([]), JSON.stringify([]),
+      `Review TSB Canada occurrence ${rec.occNo} — ${rec.occType}.${rec.flightNo ? ` Flight: ${rec.flightNo}.` : ""}`,
+      0.6, now, now
+    ).run();
+
+  for (const tag of tags) {
+    await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId, "risk", tag).run();
+  }
+  return true;
+}
+
+export async function ingestTsbBatch(db: D1Database, records: TsbRecord[]): Promise<{ checked: number; created: number }> {
+  let created = 0;
+  for (const rec of records) {
+    try {
+      if (await upsertTsbEvent(db, rec)) created++;
+    } catch { /* skip invalid record */ }
+  }
+  return { checked: records.length, created };
+}
