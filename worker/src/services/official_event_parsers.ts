@@ -483,7 +483,9 @@ async function upsertNtsbCase(db: D1Database, ntsbNum: string, c: Record<string,
         ...(eventTimeUtc ? (() => {
           const utcHour = parseInt(eventTimeUtc.slice(0, 2));
           // 공항 ICAO로 로컬 시간 계산, 없으면 UTC 그대로
-          const offset = airportIcao ? airportUtcOffset(airportIcao) : airportIata ? airportUtcOffset(airportIata) : 0;
+          // AIRPORT_HAZARDS는 ICAO 키만 지원 — IATA fallback은 항상 0 반환하므로 제거
+          const eventAt = eventDateRaw ? new Date(eventDateRaw) : undefined;
+          const offset = airportIcao ? airportUtcOffset(airportIcao, eventAt) : 0;
           const localHour = ((utcHour + offset) % 24 + 24) % 24;
           return [localHour >= 22 || localHour < 6 ? "NIGHT_EVENT" : "DAY_EVENT"];
         })() : []),

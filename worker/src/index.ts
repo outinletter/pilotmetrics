@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { Env } from "./types";
-import { iataToIcao, AIRPORTS } from "./data/airports";
+import { iataToIcao, icaoToIata, AIRPORTS } from "./data/airports";
 import { backfillAirportCodes } from "./services/official_event_parsers";
 import { enrichWithLLM } from "./services/llm_classifier";
 import { getFlight, normalizeFlightNumber } from "./services/aviation_stack";
@@ -27,7 +27,7 @@ app.get("/api/briefing/:flightNumber", async c => {
   // ── 공항코드 직접 검색 (IATA 3자 or ICAO 4자) ──────────────────────────────
   if (/^[A-Z]{3}$/.test(raw) || /^[A-Z]{4}$/.test(raw)) {
     const arrIcao = raw.length === 4 ? raw : iataToIcao(raw);
-    const arrIata = raw.length === 3 ? raw : raw.slice(1);
+    const arrIata = raw.length === 3 ? raw : icaoToIata(raw);
     const [weather, weatherMessages] = arrIcao ? await getWeather(arrIcao) : [{ metar: "", taf: "" }, []];
     const fixedRisks = airportFixedRisks(arrIcao);
     const tags = [...new Set([...parseWeatherTags(weather.metar, weather.taf, arrIcao), ...fixedRisks])];
@@ -77,7 +77,8 @@ app.get("/api/briefing/:flightNumber", async c => {
 
   // 공항 고정 위험 태그 (지형·접근 특성)
   const fixedRisks  = airportFixedRisks(arrIcao);
-  const utcOffset   = airportUtcOffset(arrIcao);
+  const arrivalDate = arrivalTime ? new Date(arrivalTime) : new Date();
+  const utcOffset   = airportUtcOffset(arrIcao, arrivalDate);
   const nightArr    = isNightArrival(arrivalTime, utcOffset);
 
   // 태그 합산: METAR + 도착 TAF + 공항 고정 위험
@@ -128,13 +129,13 @@ app.get("/api/briefing/:flightNumber", async c => {
     ];
   }
 
-  // Persist query to D1
-  await c.env.DB.prepare(
+  // Persist query to D1 (fire-and-forget — 실패해도 응답에 영향 없음)
+  c.env.DB.prepare(
     "INSERT INTO flight_queries (flight_number,airline_iata,flight_iata,departure_iata,arrival_iata,departure_icao,arrival_icao,scheduled_departure,scheduled_arrival,estimated_departure,estimated_arrival,aircraft_type,raw_response_json) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
   ).bind(fn, flight.airline_iata ?? null, flight.flight_iata ?? null, depIata, arrIata, depIcao, arrIcao,
     flight.scheduled_departure ?? null, flight.scheduled_arrival ?? null,
     flight.estimated_departure ?? null, flight.estimated_arrival ?? null,
-    flight.aircraft_type ?? null, JSON.stringify(flight.raw ?? {})).run();
+    flight.aircraft_type ?? null, JSON.stringify(flight.raw ?? {})).run().catch(() => {});
 
   return c.json({ flight_context: context, top_threats: await buildThreats(c.env.DB, context, tags) });
 });

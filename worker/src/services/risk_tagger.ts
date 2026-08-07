@@ -1,42 +1,44 @@
 // ─── 위험도 태그별 가중치 ──────────────────────────────────────────────────────
+// 설계 원칙: 파생 태그(CONVECTIVE_WEATHER, WET_RWY 등)는 점수 0 — 기원 태그에만 점수 부여
+// 이중 집계 방지: TSRA(35) + CB(35)이 함께 발생하면 실질 최대 35점 처리 (MAX_FAMILY 그룹으로 제어)
 const TAG_SCORES: Record<string, number> = {
-  // ── 최고위험 기상 (단독으로 치명적) ──────────────────────────────────────────
+  // ── 최고위험 기상 (각 기상 현상 중 하나만 실점수 반영) ──────────────────────
   WINDSHEAR:          40,
-  TSRA:               35,
+  TSRA:               35,   // CB와 동시 발생 시 MAX(35,35) = 35 (아래 FAMILY 처리)
   CB:                 35,
+  FZRAIN:             30,
+  VOLCANIC_ASH:       30,
   CAT_III_C:          38,
   CAT_III_B:          35,
   CAT_III_A:          30,
   CAT_II:             25,
-  LOW_VISIBILITY:     28,
-  CAT_II_VIS:         25,
-  CAT_I_VIS:          18,
-  RVR_RESTRICTED:     22,
-  FZRAIN:             28,
+  LOW_VISIBILITY:     28,   // 가시거리 단독 저하 (RVR 없는 경우)
+  CAT_II_VIS:          0,   // LOW_VISIBILITY에 이미 포함 — 파생
+  CAT_I_VIS:           0,   // 동일
+  RVR_RESTRICTED:      0,   // CAT_III/II가 이미 반영 — 파생
   BLOWING_SNOW:       22,
   // ── 고위험 기상 ───────────────────────────────────────────────────────────────
   FOG:                22,
   ICING:              20,
   SNOW:               18,
-  HEAVY_RAIN:         18,
+  HEAVY_RAIN:         15,   // TSRA 동반 시 FAMILY로 중복 방지
   SQUALL:             18,
   STRONG_WIND:        16,
-  CAT_APPROACH_RISK:  15,
-  CONTAMINATED_SURFACE: 15,
+  CONTAMINATED_SURFACE: 0, // BLOWING_SNOW/FZRAIN/ICING이 이미 반영 — 파생
+  CAT_APPROACH_RISK:   0,  // FOG+LOW_VISIBILITY 조합 — 파생
   // ── 중위험 기상 ───────────────────────────────────────────────────────────────
   GUST:               14,
   CROSSWIND:          13,
   TAILWIND:           12,
-  CONVECTIVE_WEATHER: 10,
-  UNSTABLE_APPROACH_RISK: 10,
-  WET_RWY:             9,
-  WIND_HAZARD:         8,
+  CONVECTIVE_WEATHER:  0,  // TSRA/CB에서 유도 — 파생
+  UNSTABLE_APPROACH_RISK: 0, // 복합 유도 — 파생
+  WET_RWY:             0,  // HEAVY_RAIN/SNOW에서 유도 — 파생
+  WIND_HAZARD:         0,  // GUST/CROSSWIND에서 유도 — 파생
   MIST:                6,
   REDUCED_VISIBILITY:  8,
   MARGINAL_VISIBILITY: 4,
   LOW_CLOUD:           8,
   DUST:               12,
-  VOLCANIC_ASH:       30,
   HIGH_TEMP_PERF:      8,
   SEVERE_COLD:        10,
   // ── 공항 지형/접근 고정 위험 ─────────────────────────────────────────────────
@@ -57,7 +59,16 @@ const TAG_SCORES: Record<string, number> = {
   ETOPS:               5,
 };
 
-// 복수 고위험 태그 동시 발생 시 가산
+// 같은 현상에서 파생된 태그 그룹 — 그룹 내 최고점 하나만 계산
+// 예: TSRA(35) + CB(35) → 35점만 (중복 제거)
+const SCORE_FAMILIES: string[][] = [
+  ["TSRA", "CB", "HEAVY_RAIN"],         // 뇌우 패밀리 — 최대 35점
+  ["CAT_III_C", "CAT_III_B", "CAT_III_A", "CAT_II", "LOW_VISIBILITY"], // 시정/CAT — 최대 38점
+  ["FZRAIN", "BLOWING_SNOW", "SNOW"],   // 결빙/강설 — 최대 30점
+  ["STRONG_WIND", "GUST"],              // 바람 강도 — 최대 16점
+];
+
+// 복수 독립 고위험 태그 동시 발생 시 가산 (파생 태그 제외)
 const HIGH_TAGS = new Set([
   "WINDSHEAR", "TSRA", "CB", "LOW_VISIBILITY", "HEAVY_RAIN",
   "ICING", "FZRAIN", "SNOW", "SQUALL", "STRONG_WIND", "CAT_III_A", "CAT_III_B", "CAT_III_C",
@@ -93,18 +104,33 @@ const TAG_LABELS: Record<string, string> = {
  * @param airportCnt   도착 공항 과거 사고 건수
  * @param nightArrival 야간 도착 여부
  */
+// FAMILY 내 이미 점수를 부여한 태그 집합을 계산
+function familyDedupedScore(tags: Set<string>): { score: number; suppressed: Set<string> } {
+  const suppressed = new Set<string>();
+  let bonus = 0;
+  for (const family of SCORE_FAMILIES) {
+    const hits = family.filter(t => tags.has(t) && TAG_SCORES[t] > 0);
+    if (hits.length <= 1) continue;
+    // 최고점 태그만 유지, 나머지 억제
+    hits.sort((a, b) => TAG_SCORES[b] - TAG_SCORES[a]);
+    for (const dup of hits.slice(1)) suppressed.add(dup);
+  }
+  return { score: bonus, suppressed };
+}
+
 export function riskScore(tags: string[], airportCnt = 0, nightArrival = false): number {
   const t = new Set(tags);
+  const { suppressed } = familyDedupedScore(t);
   let score = 0;
 
   for (const [tag, pts] of Object.entries(TAG_SCORES)) {
-    if (t.has(tag)) score += pts;
+    if (t.has(tag) && !suppressed.has(tag)) score += pts;
   }
 
-  // 고위험 태그 복합 발생 가산
-  const highHits = [...HIGH_TAGS].filter(x => t.has(x)).length;
-  if (highHits >= 3)      score += 20;
-  else if (highHits >= 2) score += 10;
+  // 독립 고위험 태그 복합 발생 가산 (FAMILY 억제 태그 제외)
+  const highHits = [...HIGH_TAGS].filter(x => t.has(x) && !suppressed.has(x)).length;
+  if (highHits >= 3)      score += 15;
+  else if (highHits >= 2) score += 7;
 
   // 공항 사고 이력 가산
   if (airportCnt >= 50)      score += 15;
@@ -139,17 +165,18 @@ export function riskLevel(tags: string[], airportCnt = 0, nightArrival = false):
  */
 export function riskBreakdown(tags: string[], airportCnt = 0, nightArrival = false): RiskBreakdown[] {
   const t = new Set(tags);
+  const { suppressed } = familyDedupedScore(t);
   const items: RiskBreakdown[] = [];
 
   for (const [tag, pts] of Object.entries(TAG_SCORES)) {
-    if (t.has(tag)) {
+    if (t.has(tag) && !suppressed.has(tag) && pts > 0) {
       items.push({ tag, score: pts, label: TAG_LABELS[tag] ?? tag });
     }
   }
 
-  const highHits = [...HIGH_TAGS].filter(x => t.has(x)).length;
-  if (highHits >= 3)      items.push({ tag: "COMPOUND_HIGH", score: 20, label: "복합고위험가산" });
-  else if (highHits >= 2) items.push({ tag: "COMPOUND_HIGH", score: 10, label: "복합고위험가산" });
+  const highHits = [...HIGH_TAGS].filter(x => t.has(x) && !suppressed.has(x)).length;
+  if (highHits >= 3)      items.push({ tag: "COMPOUND_HIGH", score: 15, label: "복합고위험가산" });
+  else if (highHits >= 2) items.push({ tag: "COMPOUND_HIGH", score:  7, label: "복합고위험가산" });
 
   if (airportCnt >= 50)      items.push({ tag: "AIRPORT_HISTORY", score: 15, label: "공항사고이력(다발)" });
   else if (airportCnt >= 20) items.push({ tag: "AIRPORT_HISTORY", score: 10, label: "공항사고이력(고)" });

@@ -57,3 +57,12 @@ export function iataToIcao(iata: string | null | undefined): string {
   if (!iata) return "";
   return AIRPORTS[iata.toUpperCase()] ?? iata.toUpperCase();
 }
+
+// ICAO → IATA 역방향 조회 (없으면 빈 문자열)
+const ICAO_TO_IATA: Record<string, string> = Object.fromEntries(
+  Object.entries(AIRPORTS).map(([iata, icao]) => [icao, iata])
+);
+export function icaoToIata(icao: string | null | undefined): string {
+  if (!icao) return "";
+  return ICAO_TO_IATA[icao.toUpperCase()] ?? "";
+}

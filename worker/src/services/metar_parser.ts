@@ -157,49 +157,76 @@ export function selectArrivalTafSegment(taf: string, arrivalTime: string | null 
   const arrival = parseIsoUtc(arrivalTime);
   if (!taf || !arrival) return taf;
 
-  const tokens = taf.split(/\s+/);
-  const mainSegment: string[] = [];
+  // FM 구간을 순서대로 수집한 뒤 도착 시각에 해당하는 구간을 선택
+  // FM DDHHSS → 해당 일시부터 다음 FM 일시까지 유효
+  interface FmSegment { startMin: number; tokens: string[] }
+  const fmSegments: FmSegment[] = [];
+  let currentFm: FmSegment | null = null;
+  const baseTokens: string[] = [];
   const tempoSegments: string[] = [];
-
-  let mode: "main" | "tempo" | "skip" = "skip";
-  let tempoActive = false;
   let tempoBuffer: string[] = [];
+  let inTempo = false;
 
-  for (const token of tokens) {
-    // FM DDHHSS — 메인 구간 전환
+  // TAF 헤더의 유효 윈도우 (DDHH/DDHH) — 기준 날짜 계산용
+  const headerWindow = taf.match(/\b(\d{2})(\d{2})\/(\d{2})(\d{2})\b/);
+  // 월 내 일(day)을 분(min) 단위로: 단순히 day*24*60+hour*60 사용
+  function fmToMin(day: number, hour: number, min = 0) { return day * 1440 + hour * 60 + min; }
+  const arrMin = fmToMin(arrival.getUTCDate(), arrival.getUTCHours(), arrival.getUTCMinutes());
+
+  for (const token of taf.split(/\s+/)) {
+    // FM DDHHSS
     if (/^FM\d{6}$/.test(token)) {
-      if (tempoBuffer.length) { tempoSegments.push(tempoBuffer.join(" ")); tempoBuffer = []; }
-      const day = parseInt(token.slice(2, 4)), hour = parseInt(token.slice(4, 6));
-      mode = (day === arrival.getUTCDate() && hour <= arrival.getUTCHours()) ? "main" : "skip";
-      if (mode === "main") { mainSegment.length = 0; mainSegment.push(token); }
-      tempoActive = false;
+      if (inTempo && tempoBuffer.length) { tempoSegments.push(tempoBuffer.join(" ")); tempoBuffer = []; inTempo = false; }
+      const day = parseInt(token.slice(2, 4));
+      const hour = parseInt(token.slice(4, 6));
+      currentFm = { startMin: fmToMin(day, hour), tokens: [token] };
+      fmSegments.push(currentFm);
       continue;
     }
-    // TEMPO / BECMG / PROB 구간 — 도착 시간과 겹치면 수집
+    // TEMPO / BECMG / PROB — 도착 시간대 겹침 여부는 다음 토큰(윈도우)에서 판별
     if (["TEMPO", "BECMG", "PROB30", "PROB40"].includes(token)) {
-      if (tempoBuffer.length) { tempoSegments.push(tempoBuffer.join(" ")); tempoBuffer = []; }
-      tempoActive = true;
-      tempoBuffer.push(token);
+      if (inTempo && tempoBuffer.length) { tempoSegments.push(tempoBuffer.join(" ")); tempoBuffer = []; }
+      inTempo = true;
+      tempoBuffer = [token];
       continue;
     }
-    // 시간 윈도우 토큰 DDDD/DDDD
+    // 시간 윈도우 DDHH/DDHH
     if (/^\d{4}\/\d{4}$/.test(token)) {
-      const inWindow = tafWindowMatches(token, arrival);
-      if (tempoActive) {
+      if (inTempo) {
         tempoBuffer.push(token);
-        if (!inWindow) { tempoSegments.push(tempoBuffer.join(" ")); tempoBuffer = []; tempoActive = false; }
+        if (!tafWindowMatches(token, arrival)) {
+          tempoSegments.push(tempoBuffer.join(" ")); tempoBuffer = []; inTempo = false;
+        }
+      } else if (currentFm) {
+        currentFm.tokens.push(token);
       } else {
-        mode = inWindow ? "main" : "skip";
-        if (mode === "main") { mainSegment.length = 0; mainSegment.push(token); }
+        baseTokens.push(token);
       }
       continue;
     }
-    if (tempoActive) { tempoBuffer.push(token); continue; }
-    if (mode === "main") mainSegment.push(token);
+    if (inTempo) { tempoBuffer.push(token); continue; }
+    if (currentFm) { currentFm.tokens.push(token); continue; }
+    baseTokens.push(token);
   }
-  if (tempoBuffer.length) tempoSegments.push(tempoBuffer.join(" "));
+  if (inTempo && tempoBuffer.length) tempoSegments.push(tempoBuffer.join(" "));
 
-  const base = mainSegment.length ? mainSegment.join(" ") : taf;
+  // 도착 시각이 속하는 FM 구간 선택:
+  // 각 FM의 유효 범위 = [FM.startMin, 다음FM.startMin)
+  let bestFm: FmSegment | null = null;
+  for (let i = 0; i < fmSegments.length; i++) {
+    const seg = fmSegments[i];
+    const nextStart = fmSegments[i + 1]?.startMin ?? Infinity;
+    // 월말 경계 처리: 다음 FM의 day가 작으면 다음 달로 넘어간 것
+    const effectiveNext = fmSegments[i + 1] && fmSegments[i + 1].startMin < seg.startMin
+      ? fmSegments[i + 1].startMin + 31 * 1440
+      : nextStart;
+    const effectiveArr = arrMin < seg.startMin ? arrMin + 31 * 1440 : arrMin;
+    if (effectiveArr >= seg.startMin && effectiveArr < effectiveNext) {
+      bestFm = seg;
+    }
+  }
+
+  const base = bestFm ? bestFm.tokens.join(" ") : (baseTokens.length ? baseTokens.join(" ") : taf);
   return tempoSegments.length ? `${base} ${tempoSegments.join(" ")}` : base;
 }
 
