@@ -498,18 +498,177 @@ export async function backfillAirportCodes(db: D1Database): Promise<Record<strin
   };
 }
 
+// ─── RSS 공통 파서 ──────────────────────────────────────────────────────────────
+function rssField(item: string, tag: string): string {
+  const m = item.match(new RegExp(`<${tag}[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?<\\/${tag}>`, "i"));
+  return m ? cleanText(m[1]) : "";
+}
+
+interface RssSource {
+  name: string;
+  url: string;
+  tags: string[];
+  /** 항공 관련 항목만 필터 — 생략 시 전체 수집 */
+  aviationFilter?: RegExp;
+}
+
+async function parseRssFeed(db: D1Database, src: RssSource, cutoff: Date): Promise<Record<string, unknown>> {
+  let checked = 0, created = 0;
+  try {
+    const res = await fetch(src.url, {
+      headers: { "User-Agent": "PilotMetrics/1.0 (aviation-safety-research)", "Accept": "application/rss+xml, application/xml, text/xml" },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
+    const xml = await res.text();
+
+    for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)) {
+      const item = m[1];
+      const title   = rssField(item, "title");
+      const link    = rssField(item, "link") || rssField(item, "guid");
+      const desc    = rssField(item, "description") || rssField(item, "summary");
+      const pubDate = rssField(item, "pubDate") || rssField(item, "dc:date") || rssField(item, "updated");
+
+      if (!link || !title) continue;
+      if (src.aviationFilter && !src.aviationFilter.test(`${title} ${desc}`)) continue;
+
+      const d = pubDate ? new Date(pubDate) : null;
+      if (d && !isNaN(d.getTime()) && d < cutoff) continue;
+
+      checked++;
+      const fullUrl = link.startsWith("http") ? link : `https://${new URL(src.url).host}${link}`;
+      const isNew = await upsertOfficialItem(db, {
+        sourceName: src.name, sourceUrl: fullUrl, title,
+        category: "Accident / Incident", severity: "Medium",
+        summary: desc || title,
+        tags: [...src.tags, "official_report_candidate", "official_source"],
+      });
+      if (isNew) created++;
+    }
+  } catch (e) { return { checked, created, error: String(e) }; }
+  return { checked, created };
+}
+
+// ─── AAIB (UK) — GOV.UK JSON API ──────────────────────────────────────────────
+async function parseAaib(db: D1Database, cutoff: Date): Promise<Record<string, unknown>> {
+  let checked = 0, created = 0;
+  // GOV.UK 공식 Search API — 인증 불필요, JSON 반환
+  const url = "https://www.gov.uk/search/all?content_store_document_type=aaib_report&order=updated-newest&count=100";
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "PilotMetrics/1.0", "Accept": "application/json" },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
+    const data = await res.json() as { results?: Record<string, unknown>[] };
+    for (const item of (data.results ?? [])) {
+      const title   = String(item.title ?? "");
+      const link    = String(item.link ?? "");
+      const desc    = String(item.description ?? "");
+      const ts      = String(item.public_timestamp ?? "");
+      if (!link || !title) continue;
+      const d = ts ? new Date(ts) : null;
+      if (d && !isNaN(d.getTime()) && d < cutoff) continue;
+      checked++;
+      const fullUrl = link.startsWith("http") ? link : `https://www.gov.uk${link}`;
+      if (await upsertOfficialItem(db, {
+        sourceName: "AAIB Reports (UK)", sourceUrl: fullUrl, title,
+        category: "Accident / Incident", severity: "Medium",
+        summary: desc || title,
+        tags: ["AAIB", "UK", "official_report_candidate", "official_source"],
+      })) created++;
+    }
+  } catch (e) { return { checked, created, error: String(e) }; }
+  return { checked, created };
+}
+
+// ─── SKYbrary — Drupal JSON:API ────────────────────────────────────────────────
+async function parseSkybrary(db: D1Database, cutoff: Date): Promise<Record<string, unknown>> {
+  let checked = 0, created = 0;
+  // SKYbrary는 Drupal JSON:API 제공
+  const url = "https://skybrary.aero/jsonapi/node/accident_and_incident?sort=-field_event_date&page[limit]=100&fields[node--accident_and_incident]=title,field_event_date,path,body";
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "PilotMetrics/1.0", "Accept": "application/vnd.api+json" },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
+    const data = await res.json() as { data?: Record<string, unknown>[] };
+    for (const item of (data.data ?? [])) {
+      const attrs = item.attributes as Record<string, unknown> ?? {};
+      const title    = String(attrs.title ?? "");
+      const dateStr  = String(attrs.field_event_date ?? "");
+      const pathObj  = attrs.path as Record<string, string> ?? {};
+      const alias    = pathObj.alias ?? "";
+      const bodyObj  = attrs.body as Record<string, string> ?? {};
+      const summary  = cleanText(bodyObj.summary ?? bodyObj.value ?? "").slice(0, 500);
+      if (!alias || !title) continue;
+      const d = dateStr ? new Date(dateStr) : null;
+      if (d && !isNaN(d.getTime()) && d < cutoff) continue;
+      checked++;
+      const fullUrl = `https://skybrary.aero${alias}`;
+      if (await upsertOfficialItem(db, {
+        sourceName: "SKYbrary Accidents & Incidents", sourceUrl: fullUrl, title,
+        category: "Accident / Incident", severity: "Medium",
+        summary: summary || title,
+        tags: ["SKYbrary", "official_source", "official_report_candidate"],
+      })) created++;
+    }
+  } catch (e) { return { checked, created, error: String(e) }; }
+  return { checked, created };
+}
+
 export async function collectRecentOfficialEvents(db: D1Database, yearsBack = 20): Promise<Record<string, unknown>> {
-  const [ntsb, faa, asrs] = await Promise.allSettled([
+  const cutoff = cutoffDate(yearsBack);
+
+  const RSS_SOURCES: RssSource[] = [
+    {
+      name: "ATSB Aviation (Australia)",
+      url: "https://www.atsb.gov.au/feed/aviation/",
+      tags: ["ATSB", "Australia"],
+    },
+    {
+      name: "TSB Canada Aviation",
+      url: "https://www.tsb.gc.ca/eng/rss/aviation.xml",
+      tags: ["TSB", "Canada"],
+    },
+    {
+      name: "BEA France Investigations",
+      url: "https://bea.aero/en/feed/",
+      tags: ["BEA", "France"],
+      aviationFilter: /aircraft|aviation|flight|crash|accident|approach|runway|takeoff|landing/i,
+    },
+    {
+      name: "EASA Safety Publications",
+      url: "https://www.easa.europa.eu/en/newsroom-and-events/safety-publications/feed",
+      tags: ["EASA", "Europe"],
+      aviationFilter: /accident|incident|airworthiness|safety/i,
+    },
+  ];
+
+  const [ntsb, faa, asrs, aaib, skybrary, ...rssResults] = await Promise.allSettled([
     parseNtsbCarol(db, yearsBack),
     parseFaaTransportLibrary(db, yearsBack),
     parseAsrsReportSets(db),
+    parseAaib(db, cutoff),
+    parseSkybrary(db, cutoff),
+    ...RSS_SOURCES.map(src => parseRssFeed(db, src, cutoff)),
   ]);
-  const r = (p: PromiseSettledResult<Record<string, unknown>>) => p.status === "fulfilled" ? p.value : { checked: 0, created: 0, error: String((p as PromiseRejectedResult).reason) };
-  const ntsbR = r(ntsb), faaR = r(faa), asrsR = r(asrs);
+
+  const r = (p: PromiseSettledResult<Record<string, unknown>>) =>
+    p.status === "fulfilled" ? p.value : { checked: 0, created: 0, error: String((p as PromiseRejectedResult).reason) };
+
+  const srcResults: Record<string, unknown> = {
+    ntsb: r(ntsb), faa: r(faa), asrs: r(asrs),
+    aaib: r(aaib), skybrary: r(skybrary),
+  };
+  RSS_SOURCES.forEach((src, i) => { srcResults[src.tags[0].toLowerCase()] = r(rssResults[i]); });
+
+  const totals = Object.values(srcResults) as Record<string, number>[];
   return {
     status: "complete", years_back: yearsBack,
-    sources: { ntsb: ntsbR, faa: faaR, asrs: asrsR },
-    items_checked: ((ntsbR.checked ?? 0) as number) + ((faaR.checked ?? 0) as number) + ((asrsR.checked ?? 0) as number),
-    items_saved: ((ntsbR.created ?? 0) as number) + ((faaR.created ?? 0) as number) + ((asrsR.created ?? 0) as number),
+    sources: srcResults,
+    items_checked: totals.reduce((s, v) => s + ((v.checked as number) ?? 0), 0),
+    items_saved:   totals.reduce((s, v) => s + ((v.created as number) ?? 0), 0),
   };
 }
