@@ -283,11 +283,17 @@ flightInput.addEventListener("keydown", e => { if (e.key === "Enter") loadBriefi
 const SEV_LABELS = { 5: "Critical", 4: "High", 3: "Medium", 2: "Low", 1: "Info" };
 const SEV_COLORS = { 5: "#ef4444", 4: "#f97316", 3: "#f59e0b", 2: "#22c55e", 1: "#38bdf8" };
 
-async function loadStats() {
+let _lastStatsTs = null;
+
+async function loadStats({ force = false } = {}) {
   try {
     const res = await fetch("/api/stats");
     if (!res.ok) return;
     const d = await res.json();
+
+    // last_updated가 바뀌었을 때만 렌더링 (force=true이면 무조건 렌더)
+    if (!force && d.last_updated === _lastStatsTs) return;
+    _lastStatsTs = d.last_updated ?? null;
 
     document.getElementById("statTotal").textContent = Number(d.total_events).toLocaleString();
     document.getElementById("statYears").textContent =
@@ -321,6 +327,7 @@ async function loadStats() {
   } catch { /* silent */ }
 }
 
-loadStats();
-// DB 수집 후 홈 화면 자동 반영 — 5분마다 갱신
-setInterval(loadStats, 5 * 60 * 1000);
+// 최초 로드
+loadStats({ force: true });
+// 30초마다 last_updated 확인 — 변경됐을 때만 UI 갱신
+setInterval(loadStats, 30 * 1000);
