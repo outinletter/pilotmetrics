@@ -69,7 +69,7 @@ function toUtcHHMM(iso) {
 }
 
 function fmtTime(iso) {
-  return toUtcHHMM(iso) ?? "——z";
+  return toUtcHHMM(iso) ?? null;
 }
 
 function esc(v) {
@@ -126,9 +126,21 @@ function renderContext(ctx) {
           <span class="ctx-route-inline">${esc(ctx.route)}</span>
         </div>
         <div class="ctx-icao-row">
-          <span class="ctx-icao-seg">${esc(ctx.departure_icao || "—")}<span class="ctx-time-paren">(${fmtTime(ctx.estimated_departure ?? ctx.scheduled_departure)})</span></span>
-          <span class="ctx-icao-arrow">→</span>
-          <span class="ctx-icao-seg">${esc(ctx.arrival_icao || "—")}<span class="ctx-time-paren">(${fmtTime(ctx.estimated_arrival ?? ctx.scheduled_arrival)})</span></span>
+          ${(() => {
+            const dep   = esc(ctx.departure_icao || "—");
+            const arr   = esc(ctx.arrival_icao   || "—");
+            const depT  = fmtTime(ctx.estimated_departure ?? ctx.scheduled_departure);
+            const arrT  = fmtTime(ctx.estimated_arrival  ?? ctx.scheduled_arrival);
+            const fn    = esc(ctx.flight_number ?? "");
+            const gLink = t => `https://www.google.com/search?q=${encodeURIComponent(t)}`;
+            const depSeg = depT
+              ? `<span class="ctx-icao-seg">${dep}<span class="ctx-time-paren">(${depT})</span></span>`
+              : `<a class="ctx-icao-seg ctx-icao-search" href="${gLink(fn + ' departure time')}" target="_blank" rel="noreferrer">${dep}<span class="ctx-time-paren ctx-search-icon">🔍</span></a>`;
+            const arrSeg = arrT
+              ? `<span class="ctx-icao-seg">${arr}<span class="ctx-time-paren">(${arrT})</span></span>`
+              : `<a class="ctx-icao-seg ctx-icao-search" href="${gLink(fn + ' arrival time')}" target="_blank" rel="noreferrer">${arr}<span class="ctx-time-paren ctx-search-icon">🔍</span></a>`;
+            return `${depSeg}<span class="ctx-icao-arrow">→</span>${arrSeg}`;
+          })()}
         </div>
         ${ctx.arrival_weather_brief ? `<div class="ctx-wx-brief">${esc(ctx.arrival_weather_brief)}</div>` : ""}
       </div>
