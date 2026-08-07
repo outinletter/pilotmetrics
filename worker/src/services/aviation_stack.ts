@@ -91,6 +91,51 @@ function flightFromItem(fn: string, item: Record<string, unknown>) {
   };
 }
 
+// ─── Flightradar24 공개 API — 스케줄 시각 조회 ────────────────────────────────
+const FR24_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
+
+interface Fr24Times {
+  scheduled_departure: string | null;
+  scheduled_arrival:   string | null;
+  estimated_departure: string | null;
+  estimated_arrival:   string | null;
+}
+
+async function fr24Times(fn: string): Promise<Fr24Times | null> {
+  // FR24 flight-list endpoint (공개, 인증 불필요)
+  const url = `https://api.flightradar24.com/common/v1/flight/list.json?query=${encodeURIComponent(fn)}&fetchBy=flight&page=1&limit=10&format=json`;
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": FR24_UA, "Accept": "application/json", "Accept-Language": "en-US,en;q=0.9" },
+      signal: AbortSignal.timeout(7000),
+    });
+    if (!res.ok) return null;
+    const json = await res.json() as Record<string, unknown>;
+
+    // 응답 구조: { result: { response: { data: { item: { rows: [...] } } } } }
+    const rows = (json as any)?.result?.response?.data?.item?.rows as Record<string, unknown>[] | undefined;
+    if (!rows?.length) return null;
+
+    // 가장 최근 항편 (배열 첫 번째)
+    const row = rows[0] as Record<string, unknown>;
+
+    function toIso(epoch: unknown): string | null {
+      if (!epoch) return null;
+      const t = typeof epoch === "string" ? parseInt(epoch) : Number(epoch);
+      if (!isFinite(t) || t <= 0) return null;
+      return new Date(t * 1000).toISOString();
+    }
+
+    const times = row.time as Record<string, Record<string, unknown>> | undefined;
+    return {
+      scheduled_departure: toIso(times?.scheduled?.departure),
+      scheduled_arrival:   toIso(times?.scheduled?.arrival),
+      estimated_departure: toIso(times?.estimated?.departure ?? times?.real?.departure),
+      estimated_arrival:   toIso(times?.estimated?.arrival   ?? times?.real?.arrival),
+    };
+  } catch { return null; }
+}
+
 async function aviationstackLookup(fn: string, apiKey: string) {
   if (!apiKey) return null;
   // 1차: 실시간 flights (현재 비행 중인 편)
@@ -135,14 +180,47 @@ async function aviationstackLookup(fn: string, apiKey: string) {
   return null;
 }
 
+/** 시각이 모두 null인지 확인 */
+function hasNoTimes(f: Record<string, unknown>): boolean {
+  return !f.scheduled_departure && !f.scheduled_arrival && !f.estimated_departure && !f.estimated_arrival;
+}
+
+/** FR24에서 가져온 시각으로 결과 보완 */
+async function enrichTimesFromFr24(result: Record<string, unknown>, fn: string): Promise<void> {
+  if (!hasNoTimes(result)) return;
+  try {
+    const t = await fr24Times(fn);
+    if (!t) return;
+    if (t.scheduled_departure)  result.scheduled_departure  = t.scheduled_departure;
+    if (t.scheduled_arrival)    result.scheduled_arrival    = t.scheduled_arrival;
+    if (t.estimated_departure)  result.estimated_departure  = t.estimated_departure;
+    if (t.estimated_arrival)    result.estimated_arrival    = t.estimated_arrival;
+    if (t.scheduled_departure || t.scheduled_arrival) result.time_source = "flightradar24";
+  } catch { /* silent */ }
+}
+
 export async function getFlight(fn: string, apiKey: string): Promise<[Record<string, unknown>, string | null]> {
   fn = normalizeFlightNumber(fn);
   const local = localRoute(fn);
   let apiFlight: ReturnType<typeof flightFromItem> | null = null;
 
-  try { apiFlight = await aviationstackLookup(fn, apiKey); } catch { /* ignore */ }
+  // AviationStack + FR24 병렬 조회
+  const [, fr24] = await Promise.allSettled([
+    (async () => { try { apiFlight = await aviationstackLookup(fn, apiKey); } catch { /* ignore */ } })(),
+    fr24Times(fn),
+  ]);
+  const fr24Result = fr24.status === "fulfilled" ? fr24.value : null;
 
-  // 1순위: LOCAL_ROUTES (정확한 편명 매핑)
+  function applyFr24(target: Record<string, unknown>) {
+    if (!fr24Result || !hasNoTimes(target)) return;
+    if (fr24Result.scheduled_departure)  target.scheduled_departure  = fr24Result.scheduled_departure;
+    if (fr24Result.scheduled_arrival)    target.scheduled_arrival    = fr24Result.scheduled_arrival;
+    if (fr24Result.estimated_departure)  target.estimated_departure  = fr24Result.estimated_departure;
+    if (fr24Result.estimated_arrival)    target.estimated_arrival    = fr24Result.estimated_arrival;
+    if (fr24Result.scheduled_departure || fr24Result.scheduled_arrival) target.time_source = "flightradar24";
+  }
+
+  // 1순위: LOCAL_ROUTES
   if (local) {
     if (apiFlight) {
       local.aircraft_type = apiFlight.aircraft_type ?? local.aircraft_type;
@@ -150,22 +228,25 @@ export async function getFlight(fn: string, apiKey: string): Promise<[Record<str
         (local as Record<string, unknown>)[k] = (apiFlight as Record<string, unknown>)[k];
       }
     }
-    return [{ ...local, flight_number: fn, airline_iata: "KE", flight_iata: apiFlight?.flight_iata ?? fn, raw: apiFlight?.raw ?? { source: "local_routes" } }, null];
+    const result: Record<string, unknown> = { ...local, flight_number: fn, airline_iata: "KE", flight_iata: apiFlight?.flight_iata ?? fn, raw: apiFlight?.raw ?? { source: "local_routes" } };
+    applyFr24(result);
+    return [result, null];
   }
 
   // 2순위: AviationStack API 실시간 데이터
   if (apiFlight) {
-    // API 결과에서 ROUTE_PAIRS로 기종 보완
     const dep = (apiFlight.departure_iata as string) ?? "";
     const arr = (apiFlight.arrival_iata as string) ?? "";
     const pair = ROUTE_PAIRS[`${dep}-${arr}`];
     if (!apiFlight.aircraft_type && pair) {
       (apiFlight as Record<string, unknown>).aircraft_type = pair.aircraft_type;
     }
-    return [apiFlight as unknown as Record<string, unknown>, null];
+    const result = apiFlight as unknown as Record<string, unknown>;
+    applyFr24(result);
+    return [result, null];
   }
 
-  // 3순위: ROUTE_PAIRS 기반 추론 (OpenFlights 데이터)
+  // 3순위: ROUTE_PAIRS 기반 추론
   const keGuess = guessKeRoute(fn);
   const hasRoute = keGuess && keGuess.arrival_iata !== "UNKNOWN" && keGuess.departure_iata !== "UNKNOWN";
   const fallback: Record<string, unknown> = {
@@ -177,6 +258,7 @@ export async function getFlight(fn: string, apiKey: string): Promise<[Record<str
     aircraft_type: hasRoute ? keGuess!.aircraft_type : null,
     raw: { source: "openflights_route_pairs", ...keGuess },
   };
+  applyFr24(fallback);
   const msg = hasRoute
     ? `Route estimated from OpenFlights data (${keGuess!.departure_iata}→${keGuess!.arrival_iata}). Live data unavailable.`
     : "Flight route not found. Showing general Korean Air threat analysis.";
