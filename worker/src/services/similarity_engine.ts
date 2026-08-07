@@ -5,13 +5,11 @@ export function jsonList(value: string | null | undefined): string[] {
   try { return JSON.parse(value) as string[]; } catch { return []; }
 }
 
-// 개별 이벤트 태그 조회 (briefing_generator 내부용)
 export async function eventTags(db: D1Database, eventId: string): Promise<Set<string>> {
   const { results } = await db.prepare("SELECT tag_value FROM event_tags WHERE event_id = ?").bind(eventId).all<{ tag_value: string }>();
   return new Set(results.map(r => r.tag_value));
 }
 
-// 전체 태그를 한 번에 로드 → Map<eventId, Set<tagValue>>
 async function loadAllTags(db: D1Database): Promise<Map<string, Set<string>>> {
   const { results } = await db.prepare("SELECT event_id, tag_value FROM event_tags").all<{ event_id: string; tag_value: string }>();
   const map = new Map<string, Set<string>>();
@@ -24,12 +22,10 @@ async function loadAllTags(db: D1Database): Promise<Map<string, Set<string>>> {
 
 const KE_AIRCRAFT = new Set(["B737","B738","B739","B773","B777","B787","B788","B789","B78X","A333","A330","A350","A359","A380","A388"]);
 
-// 고위험 기상 태그 (도착 시간대 발생 시 위협도 높음)
 const HIGH_IMPACT_TAGS = new Set([
   "TSRA","CB","THUNDERSTORM","CONVECTIVE_WEATHER",
   "WINDSHEAR","FOG","LOW_VISIBILITY",
 ]);
-// 중간 위험 태그
 const MED_IMPACT_TAGS = new Set([
   "GUST","HEAVY_RAIN","UNSTABLE_APPROACH_RISK","WET_RWY",
 ]);
@@ -37,8 +33,9 @@ const MED_IMPACT_TAGS = new Set([
 function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: string[], eTags: Set<string>): number {
   let score = 0;
 
-  // 1. 도착 공항 일치 (최고 우선순위)
+  // 1. 도착 공항 일치 (최고 우선순위) — 매칭되면 높은 점수 부여
   if (event.airport_icao && event.airport_icao === context.arrival_icao) score += 25;
+  else if (event.airport_iata && event.airport_iata === context.arrival_iata)  score += 20;
   if (event.runway && event.runway === context.destination_runway) score += 10;
 
   // 2. 도착 시간대 TAF 날씨 태그 (가중치 적용)
@@ -47,13 +44,12 @@ function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: str
     let wx = 0;
     for (const t of arrivalTags) {
       if (!eTags.has(t)) continue;
-      if (HIGH_IMPACT_TAGS.has(t)) wx += 8;       // 고위험 기상 일치: 8점
-      else if (MED_IMPACT_TAGS.has(t)) wx += 4;   // 중위험 일치: 4점
-      else wx += 2;                                 // 기타 일치: 2점
+      if (HIGH_IMPACT_TAGS.has(t)) wx += 8;
+      else if (MED_IMPACT_TAGS.has(t)) wx += 4;
+      else wx += 2;
     }
-    score += Math.min(35, wx); // 최대 35점 (도착 날씨가 가장 중요)
+    score += Math.min(35, wx);
   } else {
-    // arrival_tags 없을 때 기존 전체 태그 방식 유지 (폴백)
     const tagSet = new Set(tags);
     if (tagSet.size && eTags.size) {
       const common = [...tagSet].filter(t => eTags.has(t)).length;
@@ -81,46 +77,38 @@ function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: str
   return Math.min(score, 100);
 }
 
+// ─── 핵심 수정: 공항 ICAO 하드필터 제거 ────────────────────────────────────────
+// 기존: hasArrival이면 airport_icao가 일치하는 이벤트만 포함 → 69% 미매핑 이벤트 전부 누락
+// 변경: 항상 점수 임계값(15점) 기준으로 필터링
+//       - 공항 매칭 시 +20~25점이므로 공항 일치 이벤트는 자동으로 상위 랭크
+//       - 날씨 태그 고위험 2개 이상 일치 시에도 포함 (wx >= 16점 → 임계값 통과)
 export async function rankedEvents(db: D1Database, context: Record<string, unknown>, tags: string[]): Promise<[EventRow, number][]> {
-  // events + 전체 tags를 각 1회 쿼리로 처리 (N+1 → 2회)
   const [{ results }, allTags] = await Promise.all([
     db.prepare("SELECT * FROM events").all<EventRow>(),
     loadAllTags(db),
   ]);
 
-  const arrIcao = (context.arrival_icao as string) || "";
-  const hasArrival = !!arrIcao;
   const scored: [EventRow, number][] = [];
-
   for (const event of results) {
     const eTags = allTags.get(event.id) ?? new Set<string>();
     const score = scoreEvent(event, context, tags, eTags);
-    // 도착 공항 있으면 해당 공항 이벤트만, 없으면 임계값 이상
-    if (hasArrival ? event.airport_icao === arrIcao : score >= 20) {
-      scored.push([event, score]);
-    }
+    if (score >= 15) scored.push([event, score]);
   }
 
   return scored.sort(([, a], [, b]) => b - a);
 }
 
-// 태그 포함 버전: briefing_generator에서 재쿼리 없이 사용
 export async function rankedEventsWithTags(db: D1Database, context: Record<string, unknown>, tags: string[]): Promise<[EventRow, number, Set<string>][]> {
   const [{ results }, allTags] = await Promise.all([
     db.prepare("SELECT * FROM events").all<EventRow>(),
     loadAllTags(db),
   ]);
 
-  const arrIcao = (context.arrival_icao as string) || "";
-  const hasArrival = !!arrIcao;
   const scored: [EventRow, number, Set<string>][] = [];
-
   for (const event of results) {
     const eTags = allTags.get(event.id) ?? new Set<string>();
     const score = scoreEvent(event, context, tags, eTags);
-    if (hasArrival ? event.airport_icao === arrIcao : score >= 20) {
-      scored.push([event, score, eTags]);
-    }
+    if (score >= 15) scored.push([event, score, eTags]);
   }
 
   return scored.sort(([, a], [, b]) => b - a);
