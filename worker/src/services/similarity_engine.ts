@@ -72,6 +72,17 @@ function severityMultiplier(severity: number | null): number {
   return 1.0;
 }
 
+// GA(일반항공) 기종 패턴 — Part 121 브리핑에서 관련성 없음
+const GA_AIRCRAFT_PATTERN = /DHC|CESSNA|PIPER|BEECH|CIRRUS|MOONEY|BONANZA|SENECA|BARON|SKYHAWK|SKYLANE|STINSON|MAULE|GRUMMAN|CHAMPION|ROBINSON|BELL 2|R22|R44|PA-2|PA-3|PA-4|C172|C182|C150|C152/i;
+
+function sourceQualityMultiplier(sourceName: string | null, aircraftType: string | null): number {
+  // 일반항공 기종 → Part 121 브리핑 관련성 낮음
+  if (aircraftType && GA_AIRCRAFT_PATTERN.test(aircraftType)) return 0.25;
+  // 샘플 데이터 — 실제 사고 데이터 우선
+  if (sourceName === "Sample/demo data") return 0.6;
+  return 1.0;
+}
+
 function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: string[], eTags: Set<string>): number {
   let score = 0;
 
@@ -116,8 +127,11 @@ function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: str
   const ac = (event.aircraft_type ?? "").toUpperCase().replace(/[-\s]/g, "").slice(0, 4);
   if (KE_AIRCRAFT.has(ac)) score += 7;
 
-  // 6. 중증도 가중치 (sᵢ) × 시간 감쇠 (dᵢ = exp(-λΔt))
-  score = score * severityMultiplier(event.severity) * recencyDecay(event.event_date);
+  // 6. 중증도 가중치 (sᵢ) × 시간 감쇠 (dᵢ = exp(-λΔt)) × 데이터 품질
+  score = score
+    * severityMultiplier(event.severity)
+    * recencyDecay(event.event_date)
+    * sourceQualityMultiplier(event.source_name, event.aircraft_type);
 
   return Math.min(score, 100);
 }

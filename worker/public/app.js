@@ -154,6 +154,20 @@ function renderContext(ctx) {
           <div class="ctx-block-label">METAR</div>
           <pre class="ctx-weather-text">${esc(ctx.metar)}</pre>
         </div>` : ""}
+      ${(ctx.risk_breakdown && ctx.risk_breakdown.length > 0) ? `
+        <div class="ctx-block">
+          <div class="ctx-block-label">위험도 상세 (${ctx.risk_score}/100)</div>
+          <div class="risk-breakdown-list">
+            ${ctx.risk_breakdown.map(b => `
+              <div class="risk-breakdown-item">
+                <span class="risk-breakdown-tag">${esc(b.label || b.tag)}</span>
+                <span class="risk-breakdown-bar-wrap">
+                  <span class="risk-breakdown-bar" style="width:${Math.min(100, Math.round(b.score * 2.5))}%"></span>
+                </span>
+                <span class="risk-breakdown-score">+${b.score}</span>
+              </div>`).join("")}
+          </div>
+        </div>` : ""}
     </div>
   `;
 }

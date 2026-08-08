@@ -644,6 +644,13 @@ body {
   text-transform: uppercase;
   margin-bottom: 8px;
 }
+/* ── risk breakdown ── */
+.risk-breakdown-list { display: flex; flex-direction: column; gap: 5px; }
+.risk-breakdown-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.risk-breakdown-tag { width: 110px; flex-shrink: 0; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.risk-breakdown-bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 5px; overflow: hidden; }
+.risk-breakdown-bar { display: block; height: 100%; background: var(--amber, #e8a020); border-radius: 4px; transition: width 0.4s ease; }
+.risk-breakdown-score { width: 28px; text-align: right; color: var(--subtle); font-variant-numeric: tabular-nums; }
 .ctx-weather-text {
   font-family: var(--font-mono);
   font-size: 12px;

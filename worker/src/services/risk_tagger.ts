@@ -96,6 +96,7 @@ const TAG_LABELS: Record<string, string> = {
   MIST: "박무", REDUCED_VISIBILITY: "시정감소", MARGINAL_VISIBILITY: "한계시정",
   LOW_CLOUD: "저운고도", WIND_HAZARD: "바람위험", TURBULENCE: "난기류",
   GPS_INTEGRITY: "RNAV무결성", ETOPS: "장거리ETOPS",
+  CONGESTED_AIRSPACE: "혼잡공역", NOISE_ABATEMENT: "소음경감절차", SHORT_SECTOR: "단거리구간",
 };
 
 /**
