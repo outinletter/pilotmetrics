@@ -158,6 +158,79 @@ function renderContext(ctx) {
   `;
 }
 
+// ── NOTAM 위협 렌더링 ─────────────────────────────────────────────────────────
+const NOTAM_CATEGORY_ICON = {
+  ILS_NAVAID:  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 19h20L12 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v5M12 17v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  VOR_NDB:     `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  RUNWAY:      `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 12h6M12 9v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  TAXIWAY:     `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M4 8l8-4 8 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  AIRSPACE:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+  LIGHTING:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h7l-1 8 9-12h-7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+  OBSTACLE:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M5 21h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  BIRD:        `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 10c3-4 7-5 9-2 2-3 6-2 9 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  COMM:        `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+  OTHER:       `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4M12 16v.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+};
+
+const NOTAM_SEV_CLASS = {
+  CRITICAL: "sev-critical", HIGH: "sev-high", MEDIUM: "sev-medium", LOW: "sev-low",
+};
+
+function formatNotamTime(iso) {
+  if (!iso || iso === "PERM") return iso || "PERM";
+  try {
+    return new Date(iso).toISOString().replace("T", " ").slice(0, 16) + "Z";
+  } catch { return iso; }
+}
+
+function renderNotamThreats(notams) {
+  // NOTAM 섹션 컨테이너 찾기 또는 생성
+  let section = document.getElementById("notamSection");
+  if (!section) {
+    section = document.createElement("section");
+    section.id = "notamSection";
+    section.className = "notam-section";
+    threatsEl.parentElement.insertBefore(section, threatsEl);
+  }
+
+  if (!notams || notams.length === 0) {
+    section.innerHTML = "";
+    return;
+  }
+
+  section.innerHTML = `
+    <div class="notam-header">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      NOTAM 활성 위협
+      <span class="notam-count">${notams.length}건 · ETA ±1h 이내</span>
+    </div>
+    <div class="notam-list">
+      ${notams.map(n => `
+        <div class="notam-card notam-${n.severity.toLowerCase()}">
+          <div class="notam-card-top">
+            <span class="notam-icon ${NOTAM_SEV_CLASS[n.severity]}">${NOTAM_CATEGORY_ICON[n.category] || NOTAM_CATEGORY_ICON.OTHER}</span>
+            <div class="notam-card-main">
+              <div class="notam-card-headline">${n.headline}</div>
+              <div class="notam-card-meta">
+                <span class="notam-id">${n.notamId}</span>
+                <span class="notam-time">${formatNotamTime(n.effectiveStart)} – ${formatNotamTime(n.effectiveEnd)}</span>
+              </div>
+            </div>
+            <div class="notam-score-badge notam-score-${n.severity.toLowerCase()}">${Math.round(n.riskScore)}</div>
+          </div>
+          <details class="notam-raw-wrap">
+            <summary class="notam-raw-toggle">NOTAM 원문 보기</summary>
+            <pre class="notam-raw">${n.rawText}</pre>
+          </details>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderThreats(threats) {
   if (!threats || threats.length === 0) {
     threatsEl.innerHTML = `
@@ -263,6 +336,7 @@ async function loadBriefing(flightNum) {
 
     renderContext(data.flight_context);
     renderThreats(data.top_threats || []);
+    renderNotamThreats(data.notam_threats || []);
 
     heroSection.classList.add("hidden");
     resultsWrap.classList.remove("hidden");

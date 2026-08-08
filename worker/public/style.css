@@ -909,6 +909,83 @@ details summary::marker { content: ""; }
   color: rgba(255,255,255,0.3);
 }
 
+/* ── NOTAM 위협 섹션 ──────────────────────────────────────── */
+.notam-section { margin-bottom: 24px; }
+
+.notam-header {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: rgba(255,255,255,0.5);
+  margin-bottom: 10px;
+}
+.notam-count {
+  font-weight: 400; color: rgba(255,255,255,0.3); margin-left: 4px;
+}
+.notam-list { display: flex; flex-direction: column; gap: 8px; }
+
+.notam-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  border-left-width: 3px;
+}
+.notam-card.notam-critical { border-left-color: #ef4444; }
+.notam-card.notam-high     { border-left-color: #f97316; }
+.notam-card.notam-medium   { border-left-color: #eab308; }
+.notam-card.notam-low      { border-left-color: #22c55e; }
+
+.notam-card-top {
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.notam-icon {
+  width: 32px; height: 32px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.notam-icon.sev-critical { background: rgba(239,68,68,0.15); color: #ef4444; }
+.notam-icon.sev-high     { background: rgba(249,115,22,0.15); color: #f97316; }
+.notam-icon.sev-medium   { background: rgba(234,179,8,0.15);  color: #eab308; }
+.notam-icon.sev-low      { background: rgba(34,197,94,0.12);  color: #22c55e; }
+
+.notam-card-main { flex: 1; min-width: 0; }
+.notam-card-headline {
+  font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 4px;
+}
+.notam-card-meta {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  font-size: 11px; color: rgba(255,255,255,0.35);
+  font-family: 'JetBrains Mono', monospace;
+}
+.notam-id { color: rgba(56,189,248,0.6); }
+
+.notam-score-badge {
+  font-size: 13px; font-weight: 700; min-width: 36px;
+  text-align: right; flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+.notam-score-badge.notam-score-critical { color: #ef4444; }
+.notam-score-badge.notam-score-high     { color: #f97316; }
+.notam-score-badge.notam-score-medium   { color: #eab308; }
+.notam-score-badge.notam-score-low      { color: #22c55e; }
+
+.notam-raw-wrap { margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; }
+.notam-raw-toggle {
+  font-size: 11px; color: rgba(255,255,255,0.3);
+  cursor: pointer; list-style: none; user-select: none;
+}
+.notam-raw-toggle:hover { color: rgba(255,255,255,0.5); }
+.notam-raw {
+  margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; line-height: 1.6;
+  color: rgba(255,255,255,0.4);
+  white-space: pre-wrap; word-break: break-all;
+  background: rgba(0,0,0,0.2); border-radius: 6px; padding: 10px;
+}
+
 /* ── RESPONSIVE ───────────────────────────────────────────── */
 
 /* ── 태블릿 (≤900px) ─────────────────────────────────────── */

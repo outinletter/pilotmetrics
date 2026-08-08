@@ -2,6 +2,7 @@ export type Env = {
   DB: D1Database;
   AI: Ai;
   AVIATIONSTACK_API_KEY: string;
+  FAA_NOTAM_API_KEY?: string;  // format: "client_id:client_secret"
   OPS_INTEL_AUTOSTART?: string;
   OPS_INTEL_INTERVAL_HOURS?: string;
   MAX_DETAIL_FETCHES?: string;

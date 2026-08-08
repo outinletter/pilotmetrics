@@ -10,6 +10,7 @@ import { parseWeatherTags, selectArrivalTafSegment, isNightArrival, arrivalWeath
 import { riskLevel, riskScore, riskSummary, riskBreakdown } from "./services/risk_tagger";
 import { airportFixedRisks, airportUtcOffset } from "./data/airport_hazards";
 import { buildThreats } from "./services/briefing_generator";
+import { fetchNotamThreats } from "./services/notam";
 import { collectOnce, refineOfficialItems } from "./services/ops_intel_collector";
 import { collectRecentOfficialEvents } from "./services/official_event_parsers";
 import { dailyBriefingMarkdown, reviewMarkdown } from "./services/report_generator";
@@ -137,7 +138,15 @@ app.get("/api/briefing/:flightNumber", async c => {
     flight.estimated_departure ?? null, flight.estimated_arrival ?? null,
     flight.aircraft_type ?? null, JSON.stringify(flight.raw ?? {})).run().catch(() => {});
 
-  return c.json({ flight_context: context, top_threats: await buildThreats(c.env.DB, context, tags) });
+  // NOTAM 위협 병렬 조회 (API 키 있을 때만)
+  const [threats, notamThreats] = await Promise.all([
+    buildThreats(c.env.DB, context, tags),
+    c.env.FAA_NOTAM_API_KEY && arrIcao
+      ? fetchNotamThreats(arrIcao, arrivalTime, c.env.FAA_NOTAM_API_KEY)
+      : Promise.resolve([]),
+  ]);
+
+  return c.json({ flight_context: context, top_threats: threats, notam_threats: notamThreats });
 });
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
