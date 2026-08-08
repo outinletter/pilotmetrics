@@ -1,6 +1,6 @@
 import type { EventRow } from "../types";
 import { threatForTags } from "./risk_tagger";
-import { jsonList, rankedEventsWithTags } from "./similarity_engine";
+import { jsonList, rankedEventsWithTags, rankedEventsWithLLM } from "./similarity_engine";
 
 function eventTitle(e: EventRow): string {
   const year = (e.event_date ?? "0000").slice(0, 4);
@@ -34,10 +34,14 @@ function recommendedAction(e: EventRow): string {
   return "Use for pilot briefing, SOP review, and training department trend monitoring.";
 }
 
-export async function buildThreats(db: D1Database, context: Record<string, unknown>, tags: string[]): Promise<unknown[]> {
+export async function buildThreats(db: D1Database, context: Record<string, unknown>, tags: string[], ai?: Ai): Promise<unknown[]> {
   const groups = new Map<string, { title: string; description: string; events: unknown[] }>();
 
-  for (const [event, similarity, eTags] of (await rankedEventsWithTags(db, context, tags)).slice(0, 18)) {
+  const ranked = ai
+    ? await rankedEventsWithLLM(db, ai, context, tags)
+    : await rankedEventsWithTags(db, context, tags);
+
+  for (const [event, similarity, eTags] of ranked.slice(0, 18)) {
     const [title, description] = threatForTags(eTags);
     if (!groups.has(title)) groups.set(title, { title, description, events: [] });
     const g = groups.get(title)!;

@@ -61,7 +61,7 @@ app.get("/api/briefing/:flightNumber", async c => {
       arrival_tags: tags,
       metar_tags: tags,
     };
-    return c.json({ flight_context: context, top_threats: await buildThreats(c.env.DB, context, tags) });
+    return c.json({ flight_context: context, top_threats: await buildThreats(c.env.DB, context, tags, c.env.AI) });
   }
 
   // ── 편명 처리 (KE629, OZ202 등) ──────────────────────────────────────────
@@ -140,7 +140,7 @@ app.get("/api/briefing/:flightNumber", async c => {
 
   // NOTAM 위협 병렬 조회 (API 키 있을 때만)
   const [threats, notamThreats] = await Promise.all([
-    buildThreats(c.env.DB, context, tags),
+    buildThreats(c.env.DB, context, tags, c.env.AI),
     c.env.FAA_NOTAM_API_KEY && arrIcao
       ? fetchNotamThreats(arrIcao, arrivalTime, c.env.FAA_NOTAM_API_KEY)
       : Promise.resolve([]),

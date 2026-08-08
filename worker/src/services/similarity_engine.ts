@@ -1,5 +1,28 @@
 import type { EventRow } from "../types";
 
+// ── 코사인 유사도 ─────────────────────────────────────────────────────────────
+
+function cosine(a: number[], b: number[]): number {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) { dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i]; }
+  return na && nb ? dot / (Math.sqrt(na) * Math.sqrt(nb)) : 0;
+}
+
+function contextText(context: Record<string, unknown>, tags: string[]): string {
+  return [
+    context.arrival_icao ? `arrival airport ${context.arrival_icao}` : "",
+    context.arrival_iata ? `IATA ${context.arrival_iata}` : "",
+    context.aircraft_type ? `aircraft ${context.aircraft_type}` : "",
+    context.route ? `route ${context.route}` : "",
+    tags.length ? `weather: ${tags.slice(0, 8).join(" ")}` : "",
+  ].filter(Boolean).join(". ");
+}
+
+function eventText(e: EventRow): string {
+  return [e.summary, e.weather_summary, e.core_event, e.lesson_keyword]
+    .filter(Boolean).join(". ").slice(0, 350);
+}
+
 export function jsonList(value: string | null | undefined): string[] {
   if (!value) return [];
   try { return JSON.parse(value) as string[]; } catch { return []; }
@@ -134,4 +157,45 @@ export async function rankedEventsWithTags(db: D1Database, context: Record<strin
   }
 
   return scored.sort(([, a], [, b]) => b - a);
+}
+
+// ── LLM 임베딩 재랭킹 (2단계 파이프라인) ────────────────────────────────────
+// 1차: 다중요소 스코어링 → Top 30 후보 선발
+// 2차: BGE 배치 임베딩 → 코사인 유사도 → blended score
+// AI 실패 시 1차 결과 그대로 fallback
+export async function rankedEventsWithLLM(
+  db: D1Database,
+  ai: Ai,
+  context: Record<string, unknown>,
+  tags: string[],
+): Promise<[EventRow, number, Set<string>][]> {
+  const candidates = (await rankedEventsWithTags(db, context, tags)).slice(0, 30);
+  if (candidates.length === 0) return [];
+
+  const queryText = contextText(context, tags);
+  const texts = [queryText, ...candidates.map(([e]) => eventText(e))];
+
+  let embeddings: number[][] | null = null;
+  try {
+    const result = await Promise.race([
+      (ai as unknown as { run: (m: string, p: unknown) => Promise<{ data: number[][] }> })
+        .run("@cf/baai/bge-base-en-v1.5", { text: texts }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
+    ]);
+    embeddings = result.data;
+  } catch {
+    return candidates.slice(0, 18);
+  }
+
+  if (!embeddings || embeddings.length < 2) return candidates.slice(0, 18);
+
+  const queryEmb = embeddings[0];
+  const reranked: [EventRow, number, Set<string>][] = candidates.map(([event, mfScore, eTags], i) => {
+    const sim = embeddings![i + 1] ? cosine(queryEmb, embeddings![i + 1]) : 0;
+    // 블렌딩: 다중요소 점수 50% + 코사인 유사도 50% (0-100 정규화)
+    const blended = Math.min(100, Math.round(0.5 * mfScore + 50 * sim));
+    return [event, blended, eTags];
+  });
+
+  return reranked.sort(([, a], [, b]) => b - a);
 }
