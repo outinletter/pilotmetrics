@@ -861,3 +861,74 @@ export async function ingestTsbBatch(db: D1Database, records: TsbRecord[]): Prom
   }
   return { checked: records.length, created };
 }
+
+// ── EASA Annual Safety Review ─────────────────────────────────────────────────
+
+export interface EasaRecord {
+  accidentId: string;  // unique key e.g. "EASA-2024-01"
+  occDate: string;     // "YYYY-MM-DD"
+  country: string;
+  location: string;
+  aircraftType: string;
+  operationType: string; // "CAT" | "SPECIALISED" | "GA" | "HELICOPTER"
+  headline: string;
+  fatalCount?: number;
+  sourceYear: number;  // which ASR edition it came from
+}
+
+async function upsertEasaEvent(db: D1Database, rec: EasaRecord): Promise<boolean> {
+  const safe = (s: string) => s.toUpperCase().replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, "");
+  const eventId = `EASA-${safe(rec.accidentId)}`;
+  const existing = await db.prepare("SELECT id FROM events WHERE id = ?").bind(eventId).first<{ id: string }>();
+  if (existing) return false;
+
+  const fatal = rec.fatalCount ?? 0;
+  const severity = fatal > 0 ? 5 : 3;
+
+  const tags: string[] = ["EASA", "EUROPE", "ACCIDENT"];
+  if (fatal > 0) tags.push("FATAL");
+  if (rec.operationType === "CAT") tags.push("COMMERCIAL_AIR_TRANSPORT", "PART_121_135_RELEVANT");
+  if (rec.operationType === "HELICOPTER") tags.push("HELICOPTER");
+
+  const summary = rec.headline.trim() || `EASA fatal accident — ${rec.location}, ${rec.country}`;
+  const sourceUrl = `https://www.easa.europa.eu/en/document-library/general-publications/annual-safety-review-${rec.sourceYear}`;
+  const now = new Date().toISOString();
+
+  await db.prepare(`INSERT INTO events (id,source_name,source_url,event_date,operation_type,airport_iata,airport_icao,runway,approach_type,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .bind(
+      eventId, `EASA ASR ${rec.sourceYear}`, sourceUrl,
+      rec.occDate.slice(0, 10),
+      rec.operationType === "CAT" ? "Commercial Air Transport" : rec.operationType,
+      "", "",
+      "", "",
+      "",
+      rec.aircraftType ?? "",
+      rec.aircraftType.toUpperCase().includes("HELICOPTER") ? "HELICOPTER" : "JET",
+      "",
+      `${rec.location}, ${rec.country}`,
+      "ACCIDENT",
+      severity,
+      "EASA Fatal Accident",
+      "EASA Annual Safety Review",
+      summary,
+      JSON.stringify([]), JSON.stringify([]),
+      `${rec.country} fatal accident — ${rec.aircraftType}. ${rec.headline}`.slice(0, 200),
+      0.7, now, now
+    ).run();
+
+  for (const tag of tags) {
+    await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId, "risk", tag).run();
+  }
+  return true;
+}
+
+export async function ingestEasaBatch(db: D1Database, records: EasaRecord[]): Promise<{ checked: number; created: number }> {
+  let created = 0;
+  for (const rec of records) {
+    try {
+      if (await upsertEasaEvent(db, rec)) created++;
+    } catch { /* skip */ }
+  }
+  return { checked: records.length, created };
+}

@@ -233,6 +233,24 @@ app.post("/api/ops-intel/ingest-tsb", async c => {
   return c.json(await ingestTsbBatch(c.env.DB, body.records as Parameters<typeof ingestTsbBatch>[1]));
 });
 
+// POST /api/ops-intel/ingest-easa  Body: { records: EasaRecord[] }
+app.post("/api/ops-intel/ingest-easa", async c => {
+  const body = await c.req.json<{ records?: unknown[] }>().catch(() => ({ records: [] }));
+  if (!Array.isArray(body.records) || body.records.length === 0) return c.json({ error: "records array required" }, 400);
+  const { ingestEasaBatch } = await import("./services/official_event_parsers");
+  return c.json(await ingestEasaBatch(c.env.DB, body.records as Parameters<typeof ingestEasaBatch>[1]));
+});
+
+// DELETE /api/ops-intel/purge-easa  — remove all EASA records (for re-ingestion)
+app.delete("/api/ops-intel/purge-easa", async c => {
+  const { results } = await c.env.DB.prepare("SELECT id FROM events WHERE id LIKE 'EASA-%'").all<{ id: string }>();
+  for (const row of results) {
+    await c.env.DB.prepare("DELETE FROM event_tags WHERE event_id = ?").bind(row.id).run();
+    await c.env.DB.prepare("DELETE FROM events WHERE id = ?").bind(row.id).run();
+  }
+  return c.json({ deleted: results.length });
+});
+
 app.get("/api/ops-intel/items", async c => {
   const { results } = await c.env.DB.prepare("SELECT source_name,source_url,title,category,severity,summary,operational_lesson,a350_b787_applicability,recommended_action,tags,last_status,last_checked_at FROM ops_intel_items ORDER BY updated_at DESC LIMIT 50").all();
   return c.json(results);
