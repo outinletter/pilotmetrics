@@ -156,6 +156,9 @@ body {
 }
 
 /* ── DATABASE SIDEBAR ─────────────────────────────────────── */
+.db-stats-grid {
+  display: contents; /* desktop: treat children as direct sidebar children */
+}
 .db-sidebar {
   flex: 0 0 280px;
   background: var(--navy-900);
@@ -917,6 +920,7 @@ details summary::marker { content: ""; }
     gap: 10px;
   }
   .db-sidebar-title { width: 100%; margin-bottom: 0; }
+  .db-stats-grid { display: contents; } /* tablet: treat as direct flex children */
   .db-stat-card { flex: 1 1 140px; }
   .db-sources-card { flex: 1 1 100%; }
   .db-sev-section { flex: 1 1 100%; }
@@ -973,29 +977,26 @@ details summary::marker { content: ""; }
   .ctx-block-label { font-size: 10px; }
   .ctx-weather-text { font-size: 11px; }
 
-  /* DB Sidebar on mobile: compact horizontal scroll */
-  .db-sidebar { padding: 12px; gap: 8px; }
-  .db-stat-card { flex: 0 0 auto; min-width: 130px; }
-  .db-sidebar > .db-stat-card,
-  .db-sidebar > .db-sources-card,
-  .db-sidebar > .db-sev-section,
-  .db-sidebar > .db-sidebar-footer {
-    flex: 0 0 auto;
-  }
-  /* stat cards: horizontal scroll strip */
+  /* DB Sidebar on mobile: full vertical layout */
   .db-sidebar {
-    flex-direction: row;
+    padding: 16px;
+    gap: 12px;
+    flex-direction: column;
     flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
   }
-  .db-sidebar::-webkit-scrollbar { display: none; }
-  .db-sidebar-title { display: none; }
-  .db-sources-card { display: none; }
-  .db-sev-section { display: none; }
-  .db-sidebar-footer { display: none; }
-  .db-stat-value { font-size: 15px; }
+  .db-sidebar-title { display: flex; }
+  .db-sources-card { display: block; }
+  .db-sev-section { display: block; }
+  .db-sidebar-footer { display: flex; }
+  /* stat cards: 2-column grid */
+  .db-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .db-stats-grid .db-stat-card { flex: unset; }
+  .db-stat-value { font-size: 16px; }
   .db-stat-label { font-size: 10px; }
   .db-stat-icon svg { width: 16px; height: 16px; }
 
