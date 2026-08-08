@@ -30,6 +30,25 @@ const MED_IMPACT_TAGS = new Set([
   "GUST","HEAVY_RAIN","UNSTABLE_APPROACH_RISK","WET_RWY",
 ]);
 
+// λ = 0.08 → half-life ≈ 8.7 years (older events fade but remain usable)
+const RECENCY_LAMBDA = 0.08;
+
+function recencyDecay(eventDate: string | null): number {
+  if (!eventDate) return 0.7; // unknown date → moderate penalty
+  const eventMs = new Date(eventDate).getTime();
+  if (isNaN(eventMs)) return 0.7;
+  const yearsAgo = (Date.now() - eventMs) / (365.25 * 24 * 3600 * 1000);
+  return Math.exp(-RECENCY_LAMBDA * Math.max(0, yearsAgo));
+}
+
+// severity field 1-10 → multiplier 1.0-1.3
+function severityMultiplier(severity: number | null): number {
+  if (!severity) return 1.0;
+  if (severity >= 8) return 1.3;
+  if (severity >= 5) return 1.15;
+  return 1.0;
+}
+
 function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: string[], eTags: Set<string>): number {
   let score = 0;
 
@@ -73,6 +92,9 @@ function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: str
   // 5. KE 운항 기종 일치
   const ac = (event.aircraft_type ?? "").toUpperCase().replace(/[-\s]/g, "").slice(0, 4);
   if (KE_AIRCRAFT.has(ac)) score += 7;
+
+  // 6. 중증도 가중치 (sᵢ) × 시간 감쇠 (dᵢ = exp(-λΔt))
+  score = score * severityMultiplier(event.severity) * recencyDecay(event.event_date);
 
   return Math.min(score, 100);
 }
