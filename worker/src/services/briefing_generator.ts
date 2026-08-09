@@ -21,22 +21,103 @@ function severityLabel(v: number | null): string {
 function matchLevel(s: number) { return s >= 70 ? "High match" : s >= 50 ? "Medium match" : "Low match"; }
 function matchClass(s: number) { return s >= 70 ? "high" : s >= 50 ? "medium" : "low"; }
 
+// Noise patterns that don't convey safety meaning
+const KW_NOISE = /^(tsb|ntsb|faa|easa|carol|occurrence|incident\s*-?\s*class\s*\d|accident\s*-?\s*class\s*\d|sample\/demo|part\s*121|air\s*transport|tsb\s+[a-z]\d+f\d+)$/i;
+
+// Aviation hazard vocabulary scanned against summary text
+const AVIATION_TERMS: [RegExp, string][] = [
+  [/unstable approach/i,        "Unstable Approach"],
+  [/go.around/i,                "Go-Around"],
+  [/missed approach/i,          "Missed Approach"],
+  [/wind.?shear/i,              "Windshear"],
+  [/GPWS|EGPWS|terrain/i,       "Terrain Warning (GPWS)"],
+  [/TCAS|RA|resolution advisory/i, "TCAS RA"],
+  [/low visibility|low vis/i,   "Low Visibility"],
+  [/fog|RVR/i,                  "Fog / Low RVR"],
+  [/turbulence/i,               "Turbulence"],
+  [/icing|ice accretion/i,      "Icing"],
+  [/thunderstorm|convect/i,     "Thunderstorm"],
+  [/engine failure|engine shut/i, "Engine Failure"],
+  [/bird strike/i,              "Bird Strike"],
+  [/hydraulic/i,                "Hydraulic System"],
+  [/fire.{0,10}warn|smoke/i,    "Fire / Smoke Warning"],
+  [/pressuri[sz]/i,             "Pressurization"],
+  [/spoiler/i,                  "Spoiler Malfunction"],
+  [/gear|landing gear/i,        "Landing Gear"],
+  [/flap/i,                     "Flap Issue"],
+  [/runway excursion|veer/i,    "Runway Excursion"],
+  [/tail strike/i,              "Tail Strike"],
+  [/hard landing/i,             "Hard Landing"],
+  [/incapacitat/i,              "Crew Incapacitation"],
+  [/fatigue/i,                  "Crew Fatigue"],
+  [/communication|ATC\s/i,      "ATC Communication"],
+  [/PAN.?PAN|MAYDAY/i,          "Emergency Declaration"],
+  [/fuel/i,                     "Fuel Management"],
+  [/depressuri[sz]/i,           "Depressurization"],
+  [/rejected takeoff|RTO/i,     "Rejected Takeoff"],
+  [/tail.?wind/i,               "Tailwind"],
+  [/crosswind/i,                "Crosswind"],
+];
+
+function toTitleCase(s: string): string {
+  return s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function cleanToken(raw: string): string {
+  return raw.replace(/^[-–•*]\s*/, "").split(/[,;.]/)[0].trim();
+}
+
+function isUsable(k: string): boolean {
+  return k.length > 2 && k.split(" ").length <= 6 && !KW_NOISE.test(k.trim());
+}
+
 function briefingKeywords(e: EventRow): string[] {
-  const raw: string[] = [];
-  if (e.lesson_keyword) raw.push(...e.lesson_keyword.split(/[,;|]+/).map(s => s.trim()).filter(Boolean));
-  if (e.event_type) raw.push(e.event_type.trim());
-  const factors = jsonList(e.contributing_factors);
-  for (const f of factors) {
-    // extract short keyword phrases (max 4 words) from contributing factors
-    const shortened = f.replace(/^[-–•]\s*/, "").split(/[,;.]/)[0].trim();
-    if (shortened && shortened.split(" ").length <= 5) raw.push(shortened);
+  const candidates: string[] = [];
+
+  // 1. lesson_keyword — comma/semicolon separated, filter noise
+  if (e.lesson_keyword) {
+    for (const part of e.lesson_keyword.split(/[,;|]+/)) {
+      const k = part.trim();
+      if (isUsable(k)) candidates.push(toTitleCase(k));
+    }
   }
-  // deduplicate, title-case, limit to 6
+
+  // 2. core_event — most reliable meaningful description
+  if (e.core_event) {
+    // split on " on ", " during ", " at ", " after ", "/" to get sub-phrases
+    const parts = e.core_event.split(/\s+(?:on|during|at|after|due to)\s+|\/|-(?=\s)/i);
+    for (const p of parts) {
+      const k = p.trim();
+      if (isUsable(k)) candidates.push(toTitleCase(k));
+    }
+  }
+
+  // 3. event_type — skip generic incident class codes
+  if (e.event_type && isUsable(e.event_type)) {
+    const k = e.event_type.replace(/_/g, " ").trim();
+    if (isUsable(k)) candidates.push(toTitleCase(k));
+  }
+
+  // 4. contributing_factors — short phrases only
+  for (const f of jsonList(e.contributing_factors)) {
+    const k = cleanToken(f);
+    if (isUsable(k)) candidates.push(toTitleCase(k));
+  }
+
+  // 5. summary — scan for known aviation hazard terms (fallback when other fields are empty)
+  if (e.summary) {
+    for (const [re, label] of AVIATION_TERMS) {
+      if (re.test(e.summary)) candidates.push(label);
+    }
+  }
+
+  // 6. flight_phase — always useful context
+  const phase = (e.flight_phase ?? "").toUpperCase().trim();
+  if (phase && !["UNKNOWN",""].includes(phase)) candidates.push(phase.charAt(0) + phase.slice(1).toLowerCase() + " Phase");
+
+  // deduplicate and limit
   const seen = new Set<string>();
-  return raw
-    .map(k => k.replace(/\b\w/g, c => c.toUpperCase()))
-    .filter(k => k.length > 2 && !seen.has(k.toLowerCase()) && seen.add(k.toLowerCase()))
-    .slice(0, 6);
+  return candidates.filter(k => !seen.has(k.toLowerCase()) && seen.add(k.toLowerCase())).slice(0, 6);
 }
 
 function a350b787(e: EventRow): string {
