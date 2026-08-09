@@ -144,6 +144,10 @@ function renderContext(ctx) {
           })()}
         </div>
         ${ctx.arrival_weather_brief ? `<div class="ctx-wx-brief">${esc(ctx.arrival_weather_brief)}</div>` : ""}
+        ${(ctx.arrival_tags && ctx.arrival_tags.length > 0) ? `
+          <div class="ctx-threat-tags">
+            ${ctx.arrival_tags.map(t => `<span class="ctx-threat-tag">${esc(t.replace(/_/g, ' '))}</span>`).join("")}
+          </div>` : ""}
         </div>
       </div>
     </div>
