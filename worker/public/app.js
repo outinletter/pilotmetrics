@@ -329,10 +329,10 @@ function isAirportCode(fn) {
 
 async function loadBriefing(flightNum) {
   const fn = normalizeInput(flightNum || flightInput.value);
-  if (!fn) { statusEl.textContent = "편명 또는 공항코드를 입력하세요."; return; }
+  if (!fn) { statusEl.textContent = "Enter a flight number or airport code."; return; }
   const isAirport = isAirportCode(fn);
   if (!isAirport && (!fn.startsWith("KE") || !/^KE\d{1,4}$/.test(fn))) {
-    statusEl.textContent = "대한항공 편명(KE + 숫자) 또는 공항코드(LAX, KLAX)를 입력하세요.";
+    statusEl.textContent = "Enter a Korean Air flight number (KE + digits) or airport code (LAX, KLAX).";
     return;
   }
 
