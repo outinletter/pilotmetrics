@@ -62,10 +62,11 @@ const TAG_SCORES: Record<string, number> = {
 // 같은 현상에서 파생된 태그 그룹 — 그룹 내 최고점 하나만 계산
 // 예: TSRA(35) + CB(35) → 35점만 (중복 제거)
 const SCORE_FAMILIES: string[][] = [
-  ["TSRA", "CB", "HEAVY_RAIN"],         // 뇌우 패밀리 — 최대 35점
+  ["TSRA", "CB", "HEAVY_RAIN"],                             // 뇌우 패밀리 — 최대 35점
   ["CAT_III_C", "CAT_III_B", "CAT_III_A", "CAT_II", "LOW_VISIBILITY"], // 시정/CAT — 최대 38점
-  ["FZRAIN", "BLOWING_SNOW", "SNOW"],   // 결빙/강설 — 최대 30점
-  ["STRONG_WIND", "GUST"],              // 바람 강도 — 최대 16점
+  ["FOG", "LOW_VISIBILITY", "MARINE_LAYER_FOG"],            // 안개/시정 — 최대 28점 (FOG+LOW_VIS 중복 방지)
+  ["FZRAIN", "BLOWING_SNOW", "SNOW"],                       // 결빙/강설 — 최대 30점
+  ["STRONG_WIND", "GUST"],                                  // 바람 강도 — 최대 16점
 ];
 
 // 복수 독립 고위험 태그 동시 발생 시 가산 (파생 태그 제외)

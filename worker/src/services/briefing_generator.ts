@@ -27,11 +27,22 @@ function a350b787(e: EventRow): string {
   return "Use as a comparable jet-operations lesson when briefing A350/B787 long-haul crews.";
 }
 
+const KNOWN_PHASES = new Set(["APPROACH", "LANDING", "CRUISE", "PREFLIGHT", "TAKEOFF", "CLIMB", "DESCENT"]);
+
 function recommendedAction(e: EventRow): string {
-  if (["APPROACH","LANDING"].includes(e.flight_phase ?? "")) return "Include in arrival briefing, stable-approach gates, go-around decision review, and recurrent simulator scenarios.";
-  if (e.flight_phase === "CRUISE") return "Review dispatch release, ETOPS alternates, fuel decision points, and enroute contingency briefing.";
-  if (e.flight_phase === "PREFLIGHT") return "Review MEL/CDL, dispatch release limitations, and crew threat briefing before acceptance.";
-  return "Use for pilot briefing, SOP review, and training department trend monitoring.";
+  const phase = (e.flight_phase ?? "").toUpperCase().trim();
+  if (["APPROACH", "LANDING"].includes(phase)) return "Include in arrival briefing, stable-approach gates, go-around decision review, and recurrent simulator scenarios.";
+  if (phase === "CRUISE") return "Review dispatch release, ETOPS alternates, fuel decision points, and enroute contingency briefing.";
+  if (phase === "PREFLIGHT") return "Review MEL/CDL, dispatch release limitations, and crew threat briefing before acceptance.";
+  if (["TAKEOFF", "CLIMB"].includes(phase)) return "Review departure briefing, performance calculations, and engine-failure or abnormal-procedure drills.";
+  if (phase === "DESCENT") return "Include in descent-planning review, STAR constraints, and weather-awareness briefing.";
+  // flight_phase 미상 또는 비표준 값 → General Awareness
+  return "General Awareness — use for safety trend monitoring, recurrent training, and threat-briefing supplements. Flight phase not specified in source data.";
+}
+
+function resolveFlightPhase(e: EventRow): string {
+  const phase = (e.flight_phase ?? "").toUpperCase().trim();
+  return KNOWN_PHASES.has(phase) ? phase : "UNKNOWN";
 }
 
 export async function buildThreats(db: D1Database, context: Record<string, unknown>, tags: string[], ai?: Ai): Promise<unknown[]> {
@@ -42,7 +53,13 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
     : await rankedEventsWithTags(db, context, tags);
 
   for (const [event, similarity, eTags] of ranked.slice(0, 18)) {
-    const [title, description] = threatForTags(eTags);
+    let [title, description] = threatForTags(eTags);
+
+    // flight_phase 불확실 이벤트는 위협 그룹 내에서 "General Awareness"로 표시
+    const phase = resolveFlightPhase(event);
+    const phaseLabel = phase === "UNKNOWN" ? " [General Awareness]" : "";
+    const recAction = recommendedAction(event);
+
     if (!groups.has(title)) groups.set(title, { title, description, events: [] });
     const g = groups.get(title)!;
     if (g.events.length < 4) {
@@ -53,11 +70,12 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
         source_name: event.source_name ?? "", source_url: event.source_url ?? "",
         operation_type: event.operation_type ?? "", aircraft_type: event.aircraft_type ?? "",
         operator: event.operator ?? "", severity: severityLabel(event.severity),
+        flight_phase: phase + phaseLabel,
         summary: event.summary ?? "",
         contributing_factors: jsonList(event.contributing_factors),
         operational_lessons: jsonList(event.operational_lessons),
         a350_b787_applicability: a350b787(event),
-        recommended_action: recommendedAction(event),
+        recommended_action: recAction,
         pilot_briefing_sentence: event.pilot_briefing_sentence ?? "",
       });
     }

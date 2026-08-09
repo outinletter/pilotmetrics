@@ -2,7 +2,10 @@ export type Env = {
   DB: D1Database;
   AI: Ai;
   AVIATIONSTACK_API_KEY: string;
-  FAA_NOTAM_API_KEY?: string;  // format: "client_id:client_secret"
+  FAA_NOTAM_API_KEY?: string;   // legacy: "client_id:client_secret"
+  NMS_CLIENT_ID?: string;       // NMS-API OAuth2 client_id
+  NMS_CLIENT_SECRET?: string;   // NMS-API OAuth2 client_secret
+  NMS_ENV?: string;             // "staging" | "prod" (default: staging)
   OPS_INTEL_AUTOSTART?: string;
   OPS_INTEL_INTERVAL_HOURS?: string;
   MAX_DETAIL_FETCHES?: string;
@@ -27,17 +30,20 @@ export type EventRow = {
   source_name: string | null;
   source_url: string | null;
   event_date: string | null;
+  event_time: string | null;
   published_date: string | null;
   operation_type: string | null;
   airport_iata: string | null;
   airport_icao: string | null;
   runway: string | null;
   approach_type: string | null;
+  flight_conditions: string | null;  // VMC/IMC (NTSB siteCondition)
   flight_phase: string | null;
   aircraft_type: string | null;
   aircraft_category: string | null;
   operator: string | null;
   weather_summary: string | null;
+  metar_source: string | null;       // 'mesonet_exact' | 'mesonet_noon' | null
   runway_condition: string | null;
   event_type: string | null;
   severity: number | null;

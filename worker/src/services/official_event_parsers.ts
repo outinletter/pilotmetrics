@@ -176,7 +176,55 @@ const US_STATES = new Set([
   "oh","ok","or","pa","ri","sc","sd","tn","tx","ut","vt","va","wa","wv","wi","wy","dc",
 ]);
 
-function airportForLocation(city: string, state: string, country: string): [string, string] {
+// 다중 공항 도시: 도시명 매핑이 여러 공항을 가진 경우 narrative/runway에서 구체 공항 추출
+// 도시명 → ICAO 복수 후보 목록 (주요 다중 공항 도시)
+const MULTI_AIRPORT_CITIES: Record<string, string[]> = {
+  "new york":     ["KJFK","KLGA","KEWR"],
+  "new york city":["KJFK","KLGA","KEWR"],
+  "chicago":      ["KORD","KMDW"],
+  "los angeles":  ["KLAX","KBUR","KLGB","KSNA","KONT"],
+  "london":       ["EGLL","EGKK","EGSS","EGLC","EGGW"],
+  "paris":        ["LFPG","LFPO","LFPB"],
+  "houston":      ["KIAH","KHOU"],
+  "dallas":       ["KDFW","KDAL"],
+  "san francisco":["KSFO","KOAK","KSJC"],
+  "washington":   ["KDCA","KIAD","KBWI"],
+  "miami":        ["KMIA","KFLL","KPBI"],
+  "boston":       ["KBOS","KBED","KORH"],
+  "tokyo":        ["RJTT","RJAA"],
+  "osaka":        ["RJBB","RJOO"],
+  "seoul":        ["RKSI","RKSS"],
+  "sydney":       ["YSSY","YSBK"],
+  "melbourne":    ["YMML","YMEN"],
+  "dubai":        ["OMDB","OMDW"],
+  "istanbul":     ["LTFM","LTFJ"],
+  "milan":        ["LIMC","LIML","LIME"],
+};
+
+// narrative 또는 runway 텍스트에서 ICAO/IATA 코드 추출
+// 후보 목록이 주어지면 그 중에서만 반환 (다중 공항 도시 disambiguation)
+function extractAirportFromText(text: string, candidates?: string[]): [string, string] {
+  if (!text) return ["", ""];
+
+  // ICAO (4자 대문자, 알파벳+숫자): 후보 목록이 있으면 그 중에서
+  const icaoMatches = text.match(/\b([A-Z]{4})\b/g) ?? [];
+  for (const code of icaoMatches) {
+    if (!candidates || candidates.includes(code)) return ["", code];
+  }
+
+  // IATA (3자 대문자)
+  const iataMatches = text.match(/\b([A-Z]{3})\b/g) ?? [];
+  for (const code of iataMatches) {
+    if (!candidates) return [code, ""];
+    // IATA를 ICAO로 변환 시도 (K 접두사 미국 공항)
+    const icaoUS = "K" + code;
+    if (candidates.includes(icaoUS)) return [code, icaoUS];
+  }
+
+  return ["", ""];
+}
+
+function airportForLocation(city: string, state: string, country: string, narrative?: string, runwayHint?: string): [string, string] {
   const c = city.toLowerCase().trim();
   const sRaw = state.toLowerCase().trim();
   const cn = country.toLowerCase().trim();
@@ -201,7 +249,17 @@ function airportForLocation(city: string, state: string, country: string): [stri
     const hit = US_CITY_AIRPORTS[`${c},${s}`]
       ?? US_CITY_AIRPORTS[`${c},${sRaw}`]
       ?? US_CITY_AIRPORTS[`${c},${cn}`];
-    if (hit) return hit;
+    if (hit) {
+      // 다중 공항 도시인 경우 narrative/runway에서 구체 공항 재추출 시도
+      const multiCandidates = MULTI_AIRPORT_CITIES[c] ?? MULTI_AIRPORT_CITIES[`${c} city`];
+      if (multiCandidates && (narrative || runwayHint)) {
+        const searchText = `${narrative ?? ""} ${runwayHint ?? ""}`;
+        const [rIata, rIcao] = extractAirportFromText(searchText, multiCandidates);
+        if (rIcao) return ["", rIcao];
+        if (rIata) return [rIata, ""];
+      }
+      return hit;
+    }
   }
 
   // 국제 도시 (국가 포함 또는 도시명만)
@@ -209,7 +267,17 @@ function airportForLocation(city: string, state: string, country: string): [stri
     ?? INTL_CITY_AIRPORTS[`${c},${s}`]
     ?? US_CITY_AIRPORTS[c]          // 국가 없이 도시명만 있는 경우 (tokyo, dubai 등)
     ?? INTL_CITY_AIRPORTS[c];
-  if (intlHit) return intlHit;
+  if (intlHit) {
+    // 다중 공항 도시 재추출
+    const multiCandidates = MULTI_AIRPORT_CITIES[c];
+    if (multiCandidates && (narrative || runwayHint)) {
+      const searchText = `${narrative ?? ""} ${runwayHint ?? ""}`;
+      const [rIata, rIcao] = extractAirportFromText(searchText, multiCandidates);
+      if (rIcao) return ["", rIcao];
+      if (rIata) return [rIata, ""];
+    }
+    return intlHit;
+  }
 
   return ["",""];
 }
@@ -440,7 +508,11 @@ async function upsertNtsbCase(db: D1Database, ntsbNum: string, c: Record<string,
       let airportIata = "", airportIcao = "";
       if (/^[A-Z]{4}$/.test(aptRaw)) { airportIcao = aptRaw; }
       else if (/^[A-Z]{3}$/.test(aptRaw)) { airportIata = aptRaw; }
-      else { [airportIata, airportIcao] = airportForLocation(city, state, country); }
+      else {
+        // 다중 공항 도시 disambiguation: narrative + 공항명 텍스트에서 구체 공항 재추출
+        const aptNameHint = String(c.airportName ?? c.cm_airportName ?? aptRaw ?? "");
+        [airportIata, airportIcao] = airportForLocation(city, state, country, `${narrative} ${aptNameHint}`, "");
+      }
 
       // 이벤트 유형: SOE > 기본값
       const eventType = soeGroups.filter(s => s.length > 2).slice(0, 3).join(" / ") || "NTSB CASE";
@@ -453,16 +525,17 @@ async function upsertNtsbCase(db: D1Database, ntsbNum: string, c: Record<string,
       ].filter(Boolean).join(" · ");
 
       const now = new Date().toISOString();
-      await db.prepare("INSERT INTO events (id,source_name,source_url,event_date,operation_type,airport_iata,airport_icao,runway,approach_type,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+      await db.prepare("INSERT INTO events (id,source_name,source_url,event_date,event_time,operation_type,airport_iata,airport_icao,runway,approach_type,flight_conditions,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
         .bind(
           eventId, "NTSB CAROL",
           `https://data.ntsb.gov/carol-main-public/basic-search?NTSBNumber=${ntsbNum}`,
-          eventDate, operationType,
+          eventDate, eventTimeUtc || null, operationType,
           airportIata, airportIcao,
           "",
-          siteCondition,   // approach_type 필드에 VMC/IMC 저장
+          null,            // approach_type: ILS/RNAV/VISUAL — CAROL에서 미제공
+          siteCondition || null,  // flight_conditions: VMC/IMC
           flightPhase, makeModel, "JET", operator,
-          locationStr,     // weather_summary 필드에 위치 저장
+          null,            // weather_summary: METAR 백필 후 채워짐
           eventType,
           severity,
           `NTSB ${ntsbNum}`,
@@ -545,6 +618,61 @@ export async function collectNtsbRange(db: D1Database, start: string, end: strin
   } catch (e) {
     return { start, end, checked: 0, created: 0, error: String(e) };
   }
+}
+
+// ── 기존 NTSB 이벤트 event_time 백필 ─────────────────────────────────────────
+// CAROL API를 날짜 범위로 재조회하여 cm_eventDate의 시각 부분을 event_time에 저장
+export async function backfillNtsbEventTime(db: D1Database, limit = 50): Promise<Record<string, unknown>> {
+  // event_time이 없는 NTSB 이벤트 — event_date 기준으로 CAROL 재조회
+  const { results } = await db.prepare(`
+    SELECT id, event_date FROM events
+    WHERE source_name = 'NTSB CAROL'
+      AND (event_time IS NULL OR event_time = '')
+      AND event_date IS NOT NULL AND event_date != ''
+    LIMIT ?
+  `).bind(limit).all<{ id: string; event_date: string }>();
+
+  const { remaining: rem } = await db.prepare(`
+    SELECT COUNT(*) as remaining FROM events
+    WHERE source_name = 'NTSB CAROL'
+      AND (event_time IS NULL OR event_time = '')
+      AND event_date IS NOT NULL AND event_date != ''
+  `).first<{ remaining: number }>() ?? { remaining: 0 };
+
+  // 날짜별로 그룹화하여 CAROL 배치 조회 최소화
+  const byDate = new Map<string, string[]>();
+  for (const e of results) {
+    const list = byDate.get(e.event_date) ?? [];
+    list.push(e.id);
+    byDate.set(e.event_date, list);
+  }
+
+  let updated = 0;
+  const errors: string[] = [];
+
+  for (const [date, ids] of byDate) {
+    try {
+      const cases = await fetchCarolCases(date, date);
+      const timeMap = new Map<string, string>();
+      for (const c of cases) {
+        const ntsbNum = (c.cm_ntsbNum ?? c.cm_NtsbNo ?? "") as string;
+        const dateRaw = String(c.cm_eventDate ?? "");
+        const t = dateRaw.length >= 16 ? dateRaw.slice(11, 16) : "";
+        if (ntsbNum && t) timeMap.set(`NTSB-${ntsbNum}`.toUpperCase().replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, ""), t);
+      }
+      for (const id of ids) {
+        const t = timeMap.get(id);
+        if (t) {
+          await db.prepare("UPDATE events SET event_time = ?, updated_at = datetime('now') WHERE id = ?").bind(t, id).run();
+          updated++;
+        }
+      }
+    } catch (e) {
+      errors.push(`${date}: ${String(e).slice(0, 80)}`);
+    }
+  }
+
+  return { processed: results.length, updated, remaining: rem - results.length, errors };
 }
 
 // ── 기존 이벤트 공항코드 백필 ──────────────────────────────────────────────────

@@ -19,8 +19,15 @@ function contextText(context: Record<string, unknown>, tags: string[]): string {
 }
 
 function eventText(e: EventRow): string {
-  return [e.summary, e.weather_summary, e.core_event, e.lesson_keyword]
-    .filter(Boolean).join(". ").slice(0, 350);
+  return [
+    e.summary,
+    // weather_summary는 METAR 백필이 확인된 경우(metar_source 있음)만 포함
+    // 미확인 시 포함하면 위치 텍스트 또는 정오 추정값이 임베딩 오염 유발
+    e.metar_source ? e.weather_summary : null,
+    e.flight_conditions,   // VMC/IMC — 비행 조건 유사도 기여
+    e.core_event,
+    e.lesson_keyword,
+  ].filter(Boolean).join(". ").slice(0, 350);
 }
 
 export function jsonList(value: string | null | undefined): string[] {
@@ -136,6 +143,38 @@ function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: str
   return Math.min(score, 100);
 }
 
+// ── 중복 억제 ─────────────────────────────────────────────────────────────────
+// 동일 날짜 + 동일 공항 + 유사 키워드(core_event 또는 lesson_keyword 접두 4자 일치)를
+// 같은 이벤트 클러스터로 간주하여 최고 점수 1건만 유지.
+// 이는 동일 사고의 여러 DB 레코드나 동일 날짜 연속 사건의 중복 노출을 방지.
+function deduplicateResults<T extends [EventRow, number, ...unknown[]]>(ranked: T[]): T[] {
+  const seen = new Map<string, number>(); // key → best score index
+  const keep: T[] = [];
+
+  for (const item of ranked) {
+    const [event, score] = item;
+    const airport = event.airport_icao || event.airport_iata || "?";
+    const date = (event.event_date ?? "").slice(0, 10);
+    const keywordA = (event.core_event ?? "").toLowerCase().slice(0, 6);
+    const keywordB = (event.lesson_keyword ?? "").toLowerCase().slice(0, 6);
+    // 공항+날짜가 같고 키워드 접두 6자 중 하나라도 일치하면 같은 클러스터
+    const clusterKey = `${airport}|${date}|${keywordA || keywordB}`;
+
+    if (!seen.has(clusterKey)) {
+      seen.set(clusterKey, keep.length);
+      keep.push(item);
+    } else {
+      // 이미 있는 클러스터 — 점수가 더 높으면 교체
+      const existIdx = seen.get(clusterKey)!;
+      if (score > (keep[existIdx][1] as number)) {
+        keep[existIdx] = item;
+      }
+    }
+  }
+
+  return keep;
+}
+
 // ─── 핵심 수정: 공항 ICAO 하드필터 제거 ────────────────────────────────────────
 // 기존: hasArrival이면 airport_icao가 일치하는 이벤트만 포함 → 69% 미매핑 이벤트 전부 누락
 // 변경: 항상 점수 임계값(15점) 기준으로 필터링
@@ -154,7 +193,7 @@ export async function rankedEvents(db: D1Database, context: Record<string, unkno
     if (score >= 15) scored.push([event, score]);
   }
 
-  return scored.sort(([, a], [, b]) => b - a);
+  return deduplicateResults(scored.sort(([, a], [, b]) => b - a));
 }
 
 export async function rankedEventsWithTags(db: D1Database, context: Record<string, unknown>, tags: string[]): Promise<[EventRow, number, Set<string>][]> {
@@ -170,7 +209,7 @@ export async function rankedEventsWithTags(db: D1Database, context: Record<strin
     if (score >= 15) scored.push([event, score, eTags]);
   }
 
-  return scored.sort(([, a], [, b]) => b - a);
+  return deduplicateResults(scored.sort(([, a], [, b]) => b - a));
 }
 
 // ── LLM 임베딩 재랭킹 (2단계 파이프라인) ────────────────────────────────────

@@ -1,52 +1,66 @@
-# SKIP된 구간만 재수집
-$BASE  = "https://pilot-briefing.outinletter.workers.dev"
-$URL   = $BASE + "/api/ops-intel/collect-ntsb"
-$DELAY = 20
+#!/usr/bin/env pwsh
+# METAR Backfill — Iowa State Mesonet API
+# Processes events with airport_icao but missing wind/weather data
+# Run: .\collect_gap.ps1 [-BatchSize 50] [-MaxBatches 999] [-DryRun]
 
-$gaps = @(
-    "2021-11",
-    "2021-12",
-    "2022-01",
-    "2024-08",
-    "2024-09",
-    "2024-10",
-    "2024-11"
+param(
+    [int]$BatchSize = 50,
+    [int]$MaxBatches = 999,
+    [switch]$DryRun
 )
 
-$monthDays = @{ "01"=31;"02"=28;"03"=31;"04"=30;"05"=31;"06"=30;"07"=31;"08"=31;"09"=30;"10"=31;"11"=30;"12"=31 }
+$endpoint = "https://pilot-briefing.outinletter.workers.dev/api/admin/backfill-metar"
+$totalProcessed = 0
+$totalUpdated = 0
+$totalSkipped = 0
+$batch = 0
+$remaining = 99999
 
-$totalCreated = 0
-Write-Host "[Gap fill]" -ForegroundColor Cyan
+Write-Host "=== METAR Backfill ===" -ForegroundColor Cyan
+Write-Host "Endpoint : $endpoint"
+Write-Host "BatchSize: $BatchSize  MaxBatches: $MaxBatches  DryRun: $DryRun"
+Write-Host ""
 
-foreach ($ym in $gaps) {
-    $yr = $ym.Substring(0, 4)
-    $mo = $ym.Substring(5, 2)
-    $start = $ym + "-01"
-    $end   = $ym + "-" + $monthDays[$mo]
-    Write-Host "  $ym ..." -NoNewline
+while ($remaining -gt 0 -and $batch -lt $MaxBatches) {
+    $batch++
+    $body = @{ limit = $BatchSize; dry_run = $DryRun.IsPresent } | ConvertTo-Json
 
-    $bodyJson = '{"start":"' + $start + '","end":"' + $end + '"}'
-    $ok = $false
-    $try = 0
-    while (-not $ok -and $try -lt 3) {
-        if ($try -eq 1) { Write-Host " retry(30s)..." -NoNewline; Start-Sleep -Seconds 30 }
-        if ($try -eq 2) { Write-Host " retry(60s)..." -NoNewline; Start-Sleep -Seconds 60 }
-        $try = $try + 1
-        try {
-            $r = Invoke-RestMethod -Uri $URL -Method POST -Body $bodyJson -ContentType "application/json" -TimeoutSec 120
-            $c  = 0; $ch = 0
-            if ($r.PSObject.Properties["created"]) { $c  = $r.created }
-            if ($r.PSObject.Properties["checked"]) { $ch = $r.checked }
-            $totalCreated = $totalCreated + $c
-            Write-Host " chk=$ch new=$c [total=$totalCreated]" -ForegroundColor Green
-            $ok = $true
-        } catch {
-            $msg = $_.Exception.Message.Split([Environment]::NewLine)[0]
-            Write-Host " ERROR: $msg" -ForegroundColor Red
+    try {
+        $resp = Invoke-RestMethod -Uri $endpoint -Method Post `
+            -ContentType "application/json" -Body $body -TimeoutSec 60
+
+        $remaining  = [int]$resp.remaining
+        $totalProcessed += [int]$resp.processed
+        $totalUpdated   += [int]$resp.updated
+        $totalSkipped   += [int]$resp.skipped
+
+        $pct = if ($remaining + $totalProcessed -gt 0) {
+            [math]::Round($totalUpdated / ($totalUpdated + $remaining + $totalSkipped) * 100, 1)
+        } else { 100 }
+
+        Write-Host ("[Batch {0,3}] processed={1} updated={2} skipped={3} remaining={4} ({5}%)" -f `
+            $batch, $resp.processed, $resp.updated, $resp.skipped, $remaining, $pct) `
+            -ForegroundColor $(if ($resp.updated -gt 0) { "Green" } else { "Yellow" })
+
+        if ($resp.errors -and $resp.errors.Count -gt 0) {
+            foreach ($e in $resp.errors) { Write-Host "  ERROR: $e" -ForegroundColor Red }
         }
+
+        if ($resp.processed -lt $BatchSize -and $remaining -le 0) { break }
+
+        # Mesonet rate-limit: 1 req/s per station is safe; we batch 50 events
+        # Each event hits Mesonet once, so 50 requests per batch → sleep 3s between batches
+        Start-Sleep -Seconds 3
+
+    } catch {
+        Write-Host "HTTP error: $_" -ForegroundColor Red
+        Start-Sleep -Seconds 10
     }
-    if (-not $ok) { Write-Host " SKIP" -ForegroundColor Yellow }
-    Start-Sleep -Seconds $DELAY
 }
 
-Write-Host "Done: created=$totalCreated" -ForegroundColor Green
+Write-Host ""
+Write-Host "=== Done ===" -ForegroundColor Cyan
+Write-Host "Batches : $batch"
+Write-Host "Updated : $totalUpdated"
+Write-Host "Skipped : $totalSkipped"
+Write-Host "Remaining: $remaining"

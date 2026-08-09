@@ -155,6 +155,9 @@ export const LOCAL_ROUTES: Record<string, RouteEntry> = {
   KE684: { departure_iata: "SGN", arrival_iata: "ICN", aircraft_type: "B737-900ER" },
   KE685: { departure_iata: "ICN", arrival_iata: "SGN", aircraft_type: "B737-900ER" },
   KE686: { departure_iata: "SGN", arrival_iata: "ICN", aircraft_type: "B737-900ER" },
+  // KTM (카투만두): KE695~696 — B787-9, 주 2회
+  KE695: { departure_iata: "ICN", arrival_iata: "KTM", aircraft_type: "B787-9" },
+  KE696: { departure_iata: "KTM", arrival_iata: "ICN", aircraft_type: "B787-9" },
   // HAN (하노이): KE691~698
   KE691: { departure_iata: "ICN", arrival_iata: "HAN", aircraft_type: "B737-900ER" },
   KE692: { departure_iata: "HAN", arrival_iata: "ICN", aircraft_type: "B737-900ER" },

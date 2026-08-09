@@ -12,6 +12,7 @@ import { airportFixedRisks, airportUtcOffset } from "./data/airport_hazards";
 import { buildThreats } from "./services/briefing_generator";
 import { fetchNotamThreats } from "./services/notam";
 import { collectOnce, refineOfficialItems } from "./services/ops_intel_collector";
+import { backfillMetar } from "./services/metar_backfill";
 import { collectRecentOfficialEvents } from "./services/official_event_parsers";
 import { dailyBriefingMarkdown, reviewMarkdown } from "./services/report_generator";
 
@@ -138,11 +139,17 @@ app.get("/api/briefing/:flightNumber", async c => {
     flight.estimated_departure ?? null, flight.estimated_arrival ?? null,
     flight.aircraft_type ?? null, JSON.stringify(flight.raw ?? {})).run().catch(() => {});
 
-  // NOTAM 위협 병렬 조회 (API 키 있을 때만)
+  // NOTAM 위협 병렬 조회 — NMS-API(OAuth2) 우선, legacy 폴백
+  const hasNotam = arrIcao && (c.env.NMS_CLIENT_ID || c.env.FAA_NOTAM_API_KEY);
   const [threats, notamThreats] = await Promise.all([
     buildThreats(c.env.DB, context, tags, c.env.AI),
-    c.env.FAA_NOTAM_API_KEY && arrIcao
-      ? fetchNotamThreats(arrIcao, arrivalTime, c.env.FAA_NOTAM_API_KEY)
+    hasNotam
+      ? fetchNotamThreats(arrIcao!, arrivalTime, {
+          nmsClientId:     c.env.NMS_CLIENT_ID,
+          nmsClientSecret: c.env.NMS_CLIENT_SECRET,
+          nmsEnv:          c.env.NMS_ENV,
+          legacyKey:       c.env.FAA_NOTAM_API_KEY,
+        })
       : Promise.resolve([]),
   ]);
 
@@ -272,6 +279,25 @@ app.post("/api/ops-intel/reports/daily", async c => c.json({ markdown: await dai
 app.post("/api/ops-intel/reports/weekly", async c => c.json({ markdown: await reviewMarkdown(c.env.DB, "weekly") }));
 
 app.post("/api/ops-intel/reports/monthly", async c => c.json({ markdown: await reviewMarkdown(c.env.DB, "monthly") }));
+
+// ─── METAR 백필 (Iowa State Mesonet) ─────────────────────────────────────────
+// POST /api/admin/backfill-metar  { "limit": 30, "dry_run": false }
+// 공항코드 있는 이벤트에 대해 역사적 METAR를 조회하여 wind/visibility/metar_text 채움
+app.post("/api/admin/backfill-metar", async c => {
+  const body = await c.req.json<{ limit?: number; dry_run?: boolean }>().catch(() => ({}));
+  const limit = Math.min(Number(body.limit ?? 30), 100);
+  return c.json(await backfillMetar(c.env.DB, limit));
+});
+
+// ─── NTSB event_time 백필 ─────────────────────────────────────────────────────
+// POST /api/admin/backfill-ntsb-time  { "limit": 50 }
+// CAROL API 재조회로 기존 NTSB 이벤트의 event_time(HH:MM UTC) 채움
+app.post("/api/admin/backfill-ntsb-time", async c => {
+  const body = await c.req.json<{ limit?: number }>().catch(() => ({}));
+  const limit = Math.min(Number(body.limit ?? 50), 200);
+  const { backfillNtsbEventTime } = await import("./services/official_event_parsers");
+  return c.json(await backfillNtsbEventTime(c.env.DB, limit));
+});
 
 // ─── Default: serve static assets ────────────────────────────────────────────
 // Cloudflare Workers Assets serve public/ automatically for non-API routes.
