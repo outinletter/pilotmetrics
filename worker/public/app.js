@@ -72,6 +72,17 @@ function fmtTime(iso) {
   return toUtcHHMM(iso) ?? null;
 }
 
+function summaryToList(text) {
+  if (!text || text.length < 180) return `<p class="event-summary-text">${esc(text)}</p>`;
+  // split on sentence boundaries, keeping abbreviations intact
+  const sentences = text
+    .split(/(?<=[.!?])\s+(?=[A-Z])/)
+    .map(s => s.trim())
+    .filter(s => s.length > 10);
+  if (sentences.length < 2) return `<p class="event-summary-text">${esc(text)}</p>`;
+  return `<ul class="event-list event-summary-list">${sentences.map(s => `<li>${esc(s)}</li>`).join("")}</ul>`;
+}
+
 function esc(v) {
   return String(v ?? "").replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
@@ -294,7 +305,7 @@ function renderThreats(threats) {
                 ${ev.category ? `<span class="event-meta-chip">${esc(ev.category)}</span>` : ""}
                 <span class="event-meta-chip sev-${sc}">${esc(String(ev.severity || "").toUpperCase() || "N/A")}</span>
               </div>
-              <p class="event-summary-text">${esc(ev.summary)}</p>
+              ${summaryToList(ev.summary)}
               ${ev.contributing_factors?.length ? `
                 <div class="event-section-label">Contributing Factors</div>
                 <ul class="event-list">${ev.contributing_factors.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}

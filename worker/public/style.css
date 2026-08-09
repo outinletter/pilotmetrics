@@ -891,6 +891,28 @@ details summary::marker { content: ""; }
   margin: 0 0 14px 18px;
   padding: 0;
 }
+.event-summary-list {
+  list-style: none;
+  margin-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.event-summary-list li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 15px;
+  color: rgba(232,240,249,0.82);
+  line-height: 1.55;
+}
+.event-summary-list li::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  color: var(--sky-400);
+  font-weight: 700;
+}
 .event-list li {
   font-size: 16px;
   color: rgba(232,240,249,0.75);
