@@ -782,8 +782,14 @@ body {
 /* ?? EVENT ITEM (inside threat) ????????????????????????????? */
 .event-item {
   border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
 }
 .event-item:last-child { border-bottom: none; }
+details[open].event-item {
+  border-left-color: var(--sky-400);
+  background: rgba(56,189,248,0.05);
+}
 
 .event-summary {
   display: flex;
@@ -796,6 +802,10 @@ body {
   transition: background 0.12s;
 }
 .event-summary:hover { background: rgba(255,255,255,0.04); }
+details[open] > .event-summary {
+  background: rgba(56,189,248,0.06);
+  padding-left: 17px;
+}
 .event-chevron {
   flex: 0 0 16px;
   color: var(--subtle);
@@ -838,9 +848,9 @@ details summary::marker { content: ""; }
 
 /* ?? EVENT DETAIL ??????????????????????????????????????????? */
 .event-detail {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(56,189,248,0.15);
   background: rgba(255,255,255,0.03);
-  padding: 20px;
+  padding: 20px 20px 20px 24px;
 }
 .event-detail-title {
   font-size: 18px;
