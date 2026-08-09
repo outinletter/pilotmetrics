@@ -1,9 +1,9 @@
 /**
- * FAA NOTAM API integration
- * Fetches NOTAMs for arrival airport, filters by ETA ±60 min,
- * classifies threats, and computes risk scores.
+ * FAA NOTAM integration — NMS-API (OAuth2) with legacy API fallback
  *
- * API docs: https://api.faa.gov/s/article/NOTAM-Search-API-User-Guide
+ * Primary:  NMS-API  https://api-staging.cgifederal-aim.com/nmsapi/v1
+ *           Auth: OAuth2 client_credentials (NMS_CLIENT_ID / NMS_CLIENT_SECRET)
+ * Fallback: legacy FAA NOTAM API (FAA_NOTAM_API_KEY = "client_id:client_secret")
  */
 
 export interface NotamThreat {
@@ -20,42 +20,179 @@ export interface NotamThreat {
 }
 
 export type NotamCategory =
-  | "ILS_NAVAID"      // ILS/GP/LOC 장애
-  | "VOR_NDB"         // VOR/NDB/DME 장애
-  | "RUNWAY"          // 활주로 폐쇄·제한
-  | "TAXIWAY"         // 유도로 폐쇄
-  | "AIRSPACE"        // TFR·공역 제한
-  | "LIGHTING"        // 조명 장애 (PAPI, MALSR, REIL)
-  | "OBSTACLE"        // 장애물
-  | "BIRD"            // 조류·야생동물
-  | "COMM"            // ATIS·ATC 통신 장애
-  | "CUSTOMS"         // 세관·서비스 시간 제한
-  | "OTHER";          // 기타
+  | "ILS_NAVAID"
+  | "VOR_NDB"
+  | "RUNWAY"
+  | "TAXIWAY"
+  | "AIRSPACE"
+  | "LIGHTING"
+  | "OBSTACLE"
+  | "BIRD"
+  | "COMM"
+  | "CUSTOMS"
+  | "OTHER";
 
-interface FaaNotamItem {
-  properties: {
-    coreNOTAMData: {
-      notam: {
-        id: string;
-        number: string;
-        text: string;
-        effectiveStart: string;   // ISO 8601
-        effectiveEnd: string;
-        classification: string;
-        location: string;
+// ── OAuth2 Token Cache ───────────────────────────────────────────────────────
+// Workers는 동일 인스턴스 내에서 모듈 스코프를 재사용하므로 토큰을 캐싱해 재발급 최소화.
+interface TokenEntry {
+  token: string;
+  expiresAt: number; // ms epoch
+}
+const tokenCache = new Map<string, TokenEntry>();
+
+async function fetchOAuth2Token(
+  tokenUrl: string,
+  clientId: string,
+  clientSecret: string,
+): Promise<string> {
+  const cacheKey = `${tokenUrl}::${clientId}`;
+  const cached = tokenCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now() + 30_000) return cached.token;
+
+  // FAQ 확인: curl -u CLIENT_ID:CLIENT_SECRET -d grant_type=client_credentials
+  // → HTTP Basic Auth 헤더 + form body에 grant_type만 전송
+  const basicAuth = btoa(`${clientId}:${clientSecret}`);
+  const res = await fetch(tokenUrl, {
+    method: "POST",
+    headers: {
+      "Authorization": `Basic ${basicAuth}`,
+      // Content-Type 생략 or x-www-form-urlencoded — FAQ: removing content-type resolves issues
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: "grant_type=client_credentials",
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) throw new Error(`OAuth2 token fetch failed: HTTP ${res.status} ${await res.text().catch(() => "")}`);
+
+  // expires_in은 문자열로 반환됨 ("1799") — FAQ 참고
+  const json = await res.json() as { access_token: string; expires_in?: string | number };
+  if (!json.access_token) throw new Error("OAuth2: no access_token in response");
+
+  const ttlSec = Number(json.expires_in ?? 1799);
+  tokenCache.set(cacheKey, { token: json.access_token, expiresAt: Date.now() + ttlSec * 1000 });
+  return json.access_token;
+}
+
+// ── NMS-API NOTAM Fetch ──────────────────────────────────────────────────────
+// FAQ 확인: 토큰 URL은 /nmsapi 없는 경로, NOTAM 조회는 /nmsapi/v1 경로
+const NMS_STAGING_AUTH = "https://api-staging.cgifederal-aim.com/v1/auth/token";
+const NMS_STAGING_API  = "https://api-staging.cgifederal-aim.com/nmsapi/v1";
+const NMS_PROD_AUTH    = "https://api-nms.aim.faa.gov/v1/auth/token";
+const NMS_PROD_API     = "https://api-nms.aim.faa.gov/nmsapi/v1";
+
+interface NmsNotamItem {
+  properties?: {
+    coreNOTAMData?: {
+      notam?: {
+        id?: string;
+        number?: string;
+        text?: string;
+        effectiveStart?: string;
+        effectiveEnd?: string;
+        classification?: string;
+        location?: string;
       };
+      notamTranslation?: Array<{ type?: string; simpleText?: string; domestic_message?: string }>;
     };
+  };
+  // flat fallback
+  id?: string;
+  notamNumber?: string;
+  notamText?: string;
+  effectiveStartDate?: string;
+  effectiveEndDate?: string;
+}
+
+interface NmsResponse {
+  status?: string;
+  data?: {
+    geojson?: NmsNotamItem[];
+    aixm?: string[];
   };
 }
 
-interface FaaNotamResponse {
-  items: FaaNotamItem[];
-  pageSize: number;
-  pageNum: number;
-  totalCount: number;
+async function fetchFromNms(
+  icao: string,
+  clientId: string,
+  clientSecret: string,
+  env: "staging" | "prod",
+): Promise<NmsNotamItem[]> {
+  const tokenUrl = env === "prod" ? NMS_PROD_AUTH  : NMS_STAGING_AUTH;
+  const apiBase  = env === "prod" ? NMS_PROD_API   : NMS_STAGING_API;
+
+  const token = await fetchOAuth2Token(tokenUrl, clientId, clientSecret);
+
+  // spec: param is "location" (ICAO or domestic), nmsResponseFormat header is REQUIRED
+  const url = `${apiBase}/notams?location=${icao.toUpperCase()}`;
+
+  async function doFetch(tok: string): Promise<Response> {
+    return fetch(url, {
+      headers: {
+        "Authorization": `Bearer ${tok}`,
+        "nmsResponseFormat": "GEOJSON",
+        "Accept": "application/json",
+      },
+      signal: AbortSignal.timeout(10_000),
+    });
+  }
+
+  let res = await doFetch(token);
+
+  // 401 → 토큰 캐시 클리어 후 1회 재발급
+  if (res.status === 401) {
+    tokenCache.delete(`${tokenUrl}::${clientId}`);
+    const token2 = await fetchOAuth2Token(tokenUrl, clientId, clientSecret);
+    res = await doFetch(token2);
+  }
+
+  if (!res.ok) throw new Error(`NMS-API HTTP ${res.status}`);
+  const data = await res.json() as NmsResponse;
+  return data.data?.geojson ?? [];
 }
 
-// ── Classifier rules ────────────────────────────────────────────────────────
+// ── Legacy FAA API Fetch ─────────────────────────────────────────────────────
+interface LegacyFaaResponse {
+  items?: NmsNotamItem[];
+  pageSize?: number;
+  pageNum?: number;
+  totalCount?: number;
+}
+
+async function fetchFromLegacyFaa(
+  icao: string,
+  apiKey: string,
+): Promise<NmsNotamItem[]> {
+  const [clientId, clientSecret] = apiKey.split(":");
+  const url = `https://external-api.faa.gov/notamapi/v1/notams?` +
+    `icaoLocation=${icao.toUpperCase()}&pageSize=100&pageNum=1`;
+  const res = await fetch(url, {
+    headers: { client_id: clientId, client_secret: clientSecret ?? clientId },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) throw new Error(`Legacy FAA API HTTP ${res.status}`);
+  const data = await res.json() as LegacyFaaResponse;
+  return data.items ?? [];
+}
+
+// ── NOTAM Item Normalizer ────────────────────────────────────────────────────
+// NMS-API와 legacy API 모두 같은 내부 구조(coreNOTAMData 래핑)를 사용하지만,
+// NMS-API가 일부 필드를 최상위로 올리는 경우 대비해 양쪽 모두 시도.
+function extractNotamFields(item: NmsNotamItem): {
+  id: string;
+  text: string;
+  start: string;
+  end: string;
+} {
+  const core = item.properties?.coreNOTAMData?.notam;
+  return {
+    id:    core?.number ?? core?.id ?? item.notamNumber ?? item.id ?? "UNKNOWN",
+    text:  core?.text   ?? item.notamText ?? "",
+    start: core?.effectiveStart ?? item.effectiveStartDate ?? "",
+    end:   core?.effectiveEnd   ?? item.effectiveEndDate   ?? "",
+  };
+}
+
+// ── Classifier Rules ─────────────────────────────────────────────────────────
 
 interface Rule {
   pattern: RegExp;
@@ -67,91 +204,78 @@ interface Rule {
 }
 
 const RULES: Rule[] = [
-  // CRITICAL — 활주로 폐쇄
   {
     pattern: /RWY\s*([\d]{2}[LRC]?)\s*(CLSD|CLOSED)/i,
     category: "RUNWAY", severity: "CRITICAL", riskScore: 88,
     tag: "RUNWAY_CLOSURE",
     headline: m => `Runway ${m[1]} closed`,
   },
-  // CRITICAL — 활주로 임시 제한
   {
     pattern: /RWY\s*([\d]{2}[LRC]?)\s*(RESTRICTED|AVBL\s*\d+M)/i,
     category: "RUNWAY", severity: "HIGH", riskScore: 72,
     tag: "RUNWAY_RESTRICTION",
     headline: m => `Runway ${m[1]} restricted`,
   },
-  // HIGH — ILS 장애
   {
     pattern: /ILS\s+(?:OR\s+LOC\s+)?(?:RWY\s*[\d]{2}[LRC]?)?\s*(?:GP|GLIDE\s*PATH|GLIDESLOPE)?\s*(?:U\/S|UNMON|OUT\s*OF\s*SVC|NOT\s*AVBL)/i,
     category: "ILS_NAVAID", severity: "HIGH", riskScore: 78,
     tag: "ILS_OUTAGE",
     headline: () => "ILS out of service — precision approach unavailable",
   },
-  // HIGH — ILS GP 장애만
   {
     pattern: /(?:GP|GLIDE\s*(?:PATH|SLOPE))\s*(?:U\/S|UNMON|NOT\s*AVBL)/i,
     category: "ILS_NAVAID", severity: "HIGH", riskScore: 68,
     tag: "ILS_GP_OUTAGE",
     headline: () => "ILS glidepath unmonitored — non-precision approach only",
   },
-  // HIGH — LOC 장애
   {
     pattern: /LOC\s+(?:RWY\s*[\d]{2}[LRC]?)?\s*(?:U\/S|UNMON|NOT\s*AVBL)/i,
     category: "ILS_NAVAID", severity: "HIGH", riskScore: 65,
     tag: "LOC_OUTAGE",
     headline: () => "Localizer unserviceable",
   },
-  // MEDIUM — VOR/NDB/DME 장애
   {
     pattern: /(VOR|NDB|DME|TACAN)\s*(?:[\w]{2,4}\s*)?(?:U\/S|UNMON|NOT\s*AVBL|OUT\s*OF\s*SVC)/i,
     category: "VOR_NDB", severity: "MEDIUM", riskScore: 48,
     tag: "NAVAID_OUTAGE",
     headline: m => `${m[1]} navaid unserviceable`,
   },
-  // HIGH — 공역 제한
   {
     pattern: /(?:TFR|TEMPORARY\s*FLIGHT\s*RESTRICTION|RESTRICTED\s*AREA|PROHIBITED\s*AREA)/i,
     category: "AIRSPACE", severity: "HIGH", riskScore: 70,
     tag: "AIRSPACE_RESTRICTION",
     headline: () => "Airspace restriction / TFR active",
   },
-  // MEDIUM — PAPI/VASI/MALSR 조명 장애
   {
     pattern: /(PAPI|VASI|MALSR|SSALR|REIL|ODALS|ALS)\s*(?:RWY\s*[\d]{2}[LRC]?)?\s*(?:U\/S|NOT\s*AVBL|OUT\s*OF\s*SVC)/i,
     category: "LIGHTING", severity: "MEDIUM", riskScore: 42,
     tag: "APPROACH_LIGHTING_OUTAGE",
     headline: m => `${m[1]} approach lighting out of service`,
   },
-  // MEDIUM — 장애물 (고도 300ft 이상)
   {
     pattern: /OBST\s+[\w\s]+\s+(\d+)FT/i,
     category: "OBSTACLE", severity: "MEDIUM", riskScore: 35,
     tag: "OBSTACLE",
     headline: m => `Obstacle reported at ${m[1]}ft`,
   },
-  // LOW — 크레인
   {
     pattern: /CRANE/i,
     category: "OBSTACLE", severity: "LOW", riskScore: 22,
     tag: "CRANE_OBSTACLE",
     headline: () => "Crane obstacle in vicinity",
   },
-  // MEDIUM — 조류
   {
     pattern: /(?:BIRD|WILDLIFE)\s*(?:ACTIVITY|HAZARD|WARNING)/i,
     category: "BIRD", severity: "MEDIUM", riskScore: 38,
     tag: "BIRD_STRIKE_RISK",
     headline: () => "Bird/wildlife activity hazard reported",
   },
-  // LOW — 유도로 폐쇄
   {
     pattern: /TWY\s*([A-Z][\w]*)\s*(?:CLSD|CLOSED)/i,
     category: "TAXIWAY", severity: "LOW", riskScore: 15,
     tag: "TAXIWAY_CLOSURE",
     headline: m => `Taxiway ${m[1]} closed`,
   },
-  // LOW — ATIS 장애
   {
     pattern: /(?:ATIS|D-ATIS)\s*(?:U\/S|NOT\s*AVBL|OUT\s*OF\s*SVC)/i,
     category: "COMM", severity: "LOW", riskScore: 20,
@@ -161,93 +285,85 @@ const RULES: Rule[] = [
 ];
 
 function classifyNotam(text: string): {
-  category: NotamCategory;
-  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-  riskScore: number;
-  tag: string;
-  headline: string;
+  category: NotamCategory; severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  riskScore: number; tag: string; headline: string;
 } | null {
   const upper = text.toUpperCase();
   for (const rule of RULES) {
     const m = upper.match(rule.pattern);
-    if (m) {
-      return {
-        category: rule.category,
-        severity: rule.severity,
-        riskScore: rule.riskScore,
-        tag: rule.tag,
-        headline: rule.headline(m),
-      };
-    }
+    if (m) return {
+      category: rule.category, severity: rule.severity,
+      riskScore: rule.riskScore, tag: rule.tag, headline: rule.headline(m),
+    };
   }
   return null;
 }
 
-// ── Time overlap check ───────────────────────────────────────────────────────
+// ── ETA Overlap ──────────────────────────────────────────────────────────────
 
-function overlapsEta(
-  startIso: string,
-  endIso: string,
-  etaMs: number,
-  windowMs = 60 * 60 * 1000,  // ±60 min
-): boolean {
+function overlapsEta(startIso: string, endIso: string, etaMs: number, windowMs = 60 * 60 * 1000): boolean {
   try {
     const s = new Date(startIso).getTime();
-    const e = endIso === "PERM" || !endIso
-      ? etaMs + windowMs + 1
-      : new Date(endIso).getTime();
-    const lo = etaMs - windowMs;
-    const hi = etaMs + windowMs;
-    return s <= hi && e >= lo;
-  } catch {
-    return true; // if parse fails, include it
-  }
+    const e = (endIso === "PERM" || !endIso) ? etaMs + windowMs + 1 : new Date(endIso).getTime();
+    return s <= etaMs + windowMs && e >= etaMs - windowMs;
+  } catch { return true; }
 }
 
-// ── FAA API fetch ────────────────────────────────────────────────────────────
+// ── Public API ───────────────────────────────────────────────────────────────
+
+export interface NotamCredentials {
+  nmsClientId?: string;
+  nmsClientSecret?: string;
+  nmsEnv?: string;
+  legacyKey?: string;  // "client_id:client_secret"
+}
 
 export async function fetchNotamThreats(
   icao: string,
   etaIso: string | null,
-  apiKey: string,
+  credOrKey: string | NotamCredentials,
 ): Promise<NotamThreat[]> {
-  if (!icao || !apiKey) return [];
+  if (!icao) return [];
+
+  // 하위 호환: 문자열로 넘어오면 legacy key로 처리
+  const creds: NotamCredentials = typeof credOrKey === "string"
+    ? { legacyKey: credOrKey }
+    : credOrKey;
 
   const etaMs = etaIso ? new Date(etaIso).getTime() : Date.now();
-  const url = `https://external-api.faa.gov/notamapi/v1/notams?` +
-    `icaoLocation=${icao.toUpperCase()}&pageSize=100&pageNum=1`;
+  let items: NmsNotamItem[] = [];
 
-  let data: FaaNotamResponse;
-  try {
-    const res = await fetch(url, {
-      headers: {
-        "client_id": apiKey.split(":")[0],
-        "client_secret": apiKey.split(":")[1] ?? apiKey,
-      },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) return [];
-    data = await res.json() as FaaNotamResponse;
-  } catch {
+  // 1순위: NMS-API OAuth2
+  if (creds.nmsClientId && creds.nmsClientSecret) {
+    try {
+      const env = creds.nmsEnv === "prod" ? "prod" : "staging";
+      items = await fetchFromNms(icao, creds.nmsClientId, creds.nmsClientSecret, env);
+    } catch (e) {
+      console.warn("[NOTAM] NMS-API failed, trying legacy:", e);
+      // 폴백
+      if (creds.legacyKey) {
+        try { items = await fetchFromLegacyFaa(icao, creds.legacyKey); } catch { /* both failed */ }
+      }
+    }
+  } else if (creds.legacyKey) {
+    // NMS 크리덴셜 없으면 legacy만
+    try { items = await fetchFromLegacyFaa(icao, creds.legacyKey); } catch { /* no data */ }
+  } else {
     return [];
   }
 
   const threats: NotamThreat[] = [];
+  for (const item of items) {
+    const { id, text, start, end } = extractNotamFields(item);
+    if (!text) continue;
 
-  for (const item of data.items ?? []) {
-    const n = item.properties?.coreNOTAMData?.notam;
-    if (!n) continue;
+    const classification = classifyNotam(text);
+    if (!classification) continue;
 
-    const start = n.effectiveStart ?? "";
-    const end   = n.effectiveEnd ?? "";
     const active = overlapsEta(start, end, etaMs);
-
-    const classification = classifyNotam(n.text ?? "");
-    if (!classification) continue;  // 위협 없는 NOTAM은 skip
-
     threats.push({
-      notamId: n.number ?? n.id,
-      rawText: (n.text ?? "").trim(),
+      notamId: id,
+      rawText: text.trim(),
       category: classification.category,
       threatTag: classification.tag,
       headline: classification.headline,
@@ -259,8 +375,5 @@ export async function fetchNotamThreats(
     });
   }
 
-  // ETA 시간대 활성 NOTAM만 반환, 위험도 내림차순 정렬
-  return threats
-    .filter(t => t.isActive)
-    .sort((a, b) => b.riskScore - a.riskScore);
+  return threats.filter(t => t.isActive).sort((a, b) => b.riskScore - a.riskScore);
 }
