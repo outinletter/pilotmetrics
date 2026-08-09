@@ -492,9 +492,17 @@ body {
   justify-content: center;
   position: relative;
 }
-.ctx-header-row1 .risk-badge {
+.ctx-header-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ctx-risk-badge {
   position: absolute;
   right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 .ctx-header-brand {
   display: flex;

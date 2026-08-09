@@ -107,10 +107,9 @@ function renderContext(ctx) {
 
   contextEl.innerHTML = `
     <div class="ctx-header">
-      <div class="ctx-header-row1">
-        <span class="risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
-      </div>
-      <div class="ctx-header-center">
+      <div class="ctx-header-inner">
+        <span class="risk-badge ctx-risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
+        <div class="ctx-header-center">
         <div class="ctx-flight-row">
           <span class="ctx-flight">${esc(ctx.flight_number)}</span>
           <span class="ctx-flight-sep">·</span>
@@ -134,6 +133,7 @@ function renderContext(ctx) {
           })()}
         </div>
         ${ctx.arrival_weather_brief ? `<div class="ctx-wx-brief">${esc(ctx.arrival_weather_brief)}</div>` : ""}
+        </div>
       </div>
     </div>
     <div class="ctx-body">
@@ -156,7 +156,7 @@ function renderContext(ctx) {
         </div>` : ""}
       ${(ctx.risk_breakdown && ctx.risk_breakdown.length > 0) ? `
         <div class="ctx-block">
-          <div class="ctx-block-label">위험도 상세 (${ctx.risk_score}/100)</div>
+          <div class="ctx-block-label">Risk Details (${ctx.risk_score}/100)</div>
           <div class="risk-breakdown-list">
             ${ctx.risk_breakdown.map(b => `
               <div class="risk-breakdown-item">
