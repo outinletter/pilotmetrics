@@ -215,8 +215,14 @@ async function fetchCandidates(db: D1Database, context: Record<string, unknown>)
   }
 
   // 2차: 전체 JET 풀 (공항 무관 — 날씨/유사 태그 매칭용)
+  // 35년 이내 + severity >= 2 로 후보를 800건 이하로 제한 (스케일링 감사 P1)
   const { results: jetRows } = await db.prepare(
-    "SELECT * FROM events WHERE aircraft_category = 'JET' LIMIT 5000"
+    `SELECT * FROM events
+     WHERE aircraft_category = 'JET'
+       AND (event_date >= date('now','-35 years') OR event_date IS NULL)
+       AND (severity IS NULL OR severity >= 2)
+     ORDER BY severity DESC, event_date DESC
+     LIMIT 800`
   ).all<EventRow>();
 
   // 병합 — 공항 일치 행 우선, ID 기준 중복 제거

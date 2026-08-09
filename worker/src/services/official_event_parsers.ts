@@ -201,10 +201,58 @@ const MULTI_AIRPORT_CITIES: Record<string, string[]> = {
   "milan":        ["LIMC","LIML","LIME"],
 };
 
+// Airport name → ICAO mapping for disambiguation (audit P2: name-based matching)
+// Covers secondary airports that rarely appear as ICAO/IATA codes in narrative text
+const AIRPORT_NAME_ICAO: [RegExp, string][] = [
+  [/\bgatwick\b/i,     "EGKK"],
+  [/\bstandsted\b/i,   "EGSS"],
+  [/\bluton\b/i,       "EGGW"],
+  [/\bcity\s+airport\b/i, "EGLC"],  // London City
+  [/\bmanchester\b/i,  "EGCC"],
+  [/\bbirmingham\b/i,  "EGBB"],
+  [/\bheathrow\b/i,    "EGLL"],
+  [/\borly\b/i,        "LFPO"],
+  [/\bbourget\b/i,     "LFPB"],
+  [/\blaguardia\b|la\s+guardia/i, "KLGA"],
+  [/\bnewark\b/i,      "KEWR"],
+  [/\bmidway\b/i,      "KMDW"],
+  [/\bburbank\b/i,     "KBUR"],
+  [/\blong\s+beach\b/i,"KLGB"],
+  [/\bontario\b/i,     "KONT"],
+  [/\bsanta\s+ana\b|john\s+wayne/i, "KSNA"],
+  [/\bdulles\b/i,      "KIAD"],
+  [/\breagan\b|national\s+airport/i,"KDCA"],
+  [/\bbwi\b|thurgood\s+marshall/i,  "KBWI"],
+  [/\bhobby\b/i,       "KHOU"],
+  [/\bdove\s*r?\b|love\s+field/i,   "KDAL"],
+  [/\bfort\s+lauderdale\b/i,        "KFLL"],
+  [/\bwest\s+palm\b/i, "KPBI"],
+  [/\bneda\b|haneda\b/i,"RJTT"],
+  [/\bnarita\b/i,      "RJAA"],
+  [/\bkansai\b/i,      "RJBB"],
+  [/\bitami\b/i,       "RJOO"],
+  [/\bincheon\b/i,     "RKSI"],
+  [/\bgimpo\b/i,       "RKSS"],
+  [/\bmalpensa\b/i,    "LIMC"],
+  [/\blinate\b/i,      "LIML"],
+  [/\borio\s+al\s+serio\b/i, "LIME"],
+  [/\bataturk\b/i,     "LTFM"],
+  [/\bsabiha\b/i,      "LTFJ"],
+  [/\bal\s+maktoum\b/i,"OMDW"],
+  [/\bbankstown\b/i,   "YSBK"],
+  [/\btullamarine\b/i, "YMML"],
+  [/\bessendon\b/i,    "YMEN"],
+];
+
 // narrative 또는 runway 텍스트에서 ICAO/IATA 코드 추출
 // 후보 목록이 주어지면 그 중에서만 반환 (다중 공항 도시 disambiguation)
 function extractAirportFromText(text: string, candidates?: string[]): [string, string] {
   if (!text) return ["", ""];
+
+  // Airport name keyword scan first (more specific than bare code matching)
+  for (const [re, icao] of AIRPORT_NAME_ICAO) {
+    if (re.test(text) && (!candidates || candidates.includes(icao))) return ["", icao];
+  }
 
   // ICAO (4자 대문자, 알파벳+숫자): 후보 목록이 있으면 그 중에서
   const icaoMatches = text.match(/\b([A-Z]{4})\b/g) ?? [];
