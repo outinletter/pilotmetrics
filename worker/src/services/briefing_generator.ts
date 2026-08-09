@@ -21,8 +21,8 @@ function severityLabel(v: number | null): string {
 function matchLevel(s: number) { return s >= 70 ? "High match" : s >= 50 ? "Medium match" : "Low match"; }
 function matchClass(s: number) { return s >= 70 ? "high" : s >= 50 ? "medium" : "low"; }
 
-// Noise patterns that don't convey safety meaning
-const KW_NOISE = /^(tsb|ntsb|faa|easa|carol|occurrence|incident\s*-?\s*class\s*\d|accident\s*-?\s*class\s*\d|sample\/demo|part\s*121|air\s*transport|tsb\s+[a-z]\d+f\d+)$/i;
+// Noise patterns — substring match, not meaningful safety info
+const KW_NOISE = /tsb|ntsb|carol|faa\b|easa\b|occurrence|incident.*class|accident.*class|sample.*demo|part\s*121|air\s*transport|\b[a-z]\d{2}[a-z]\d{4}\b/i;
 
 // Aviation hazard vocabulary scanned against summary text
 const AVIATION_TERMS: [RegExp, string][] = [
@@ -68,7 +68,8 @@ function cleanToken(raw: string): string {
 }
 
 function isUsable(k: string): boolean {
-  return k.length > 2 && k.split(" ").length <= 6 && !KW_NOISE.test(k.trim());
+  const t = k.trim();
+  return t.length > 2 && t.split(/\s+/).length <= 6 && !KW_NOISE.test(t);
 }
 
 function briefingKeywords(e: EventRow): string[] {
