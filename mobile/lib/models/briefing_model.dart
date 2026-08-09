@@ -33,7 +33,7 @@ class FlightContext {
   final int riskScore;
   final String riskLevel;
   final String riskSummary;
-  final Map<String, dynamic> riskBreakdown;
+  final List<Map<String, dynamic>> riskBreakdown;
   final String arrivalWeatherBrief;
   final bool nightArrival;
   final int airportEventCount;
@@ -54,7 +54,7 @@ class FlightContext {
     required this.riskScore,
     required this.riskLevel,
     required this.riskSummary,
-    required this.riskBreakdown,
+    required this.riskBreakdown,  // List<{tag, score, label}>
     required this.arrivalWeatherBrief,
     required this.nightArrival,
     required this.airportEventCount,
@@ -77,7 +77,9 @@ class FlightContext {
       riskScore: (json['risk_score'] as num?)?.toInt() ?? 0,
       riskLevel: json['risk_level'] ?? 'UNKNOWN',
       riskSummary: json['risk_summary'] ?? '',
-      riskBreakdown: Map<String, dynamic>.from(json['risk_breakdown'] ?? {}),
+      riskBreakdown: (json['risk_breakdown'] as List? ?? [])
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList(),
       arrivalWeatherBrief: json['arrival_weather_brief'] ?? '',
       nightArrival: json['night_arrival'] ?? false,
       airportEventCount: (json['airport_event_count'] as num?)?.toInt() ?? 0,

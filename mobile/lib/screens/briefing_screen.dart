@@ -156,10 +156,10 @@ class _RiskTab extends StatelessWidget {
           if (ctx.riskBreakdown.isNotEmpty) ...[
             _SectionHeader('Risk Breakdown'),
             const SizedBox(height: 6),
-            ...ctx.riskBreakdown.entries.map(
+            ...ctx.riskBreakdown.map(
               (e) => _BreakdownRow(
-                label: _breakdownLabel(e.key),
-                value: (e.value as num?)?.toInt() ?? 0,
+                label: e['label'] as String? ?? e['tag'] as String? ?? '',
+                value: (e['score'] as num?)?.toInt() ?? 0,
               ),
             ),
             const SizedBox(height: 16),
@@ -202,16 +202,6 @@ class _RiskTab extends StatelessWidget {
     }
   }
 
-  String _breakdownLabel(String key) {
-    const map = {
-      'base': 'Base score',
-      'b_hist': 'Historical events',
-      'b_night': 'Night arrival',
-      'b_notam': 'Active NOTAMs',
-      'b_weather': 'Weather conditions',
-    };
-    return map[key] ?? key;
-  }
 }
 
 class _BreakdownRow extends StatelessWidget {
