@@ -190,7 +190,7 @@ export async function rankedEvents(db: D1Database, context: Record<string, unkno
   for (const event of results) {
     const eTags = allTags.get(event.id) ?? new Set<string>();
     const score = scoreEvent(event, context, tags, eTags);
-    if (score >= 15) scored.push([event, score]);
+    if (score >= 22) scored.push([event, score]);
   }
 
   return deduplicateResults(scored.sort(([, a], [, b]) => b - a));

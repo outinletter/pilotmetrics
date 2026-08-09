@@ -8,7 +8,16 @@ function eventTitle(e: EventRow): string {
 }
 
 function oneLine(e: EventRow, sim: number): string {
-  return `${sim}% | ${e.runway ?? "ROUTE"} | ${e.weather_summary} | ${e.approach_type} | ${e.aircraft_type} | ${e.event_type} | ${e.lesson_keyword}`.toUpperCase();
+  const kw = (!e.lesson_keyword || KW_NOISE.test(e.lesson_keyword))
+    ? (e.core_event ?? e.event_type ?? "")
+    : e.lesson_keyword;
+  const parts = [
+    e.airport_iata || e.airport_icao || "",
+    e.aircraft_type || "",
+    e.flight_phase || "",
+    kw,
+  ].filter(Boolean);
+  return `${sim}% | ${parts.join(" | ")}`.toUpperCase();
 }
 
 function severityLabel(v: number | null): string {

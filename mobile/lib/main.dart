@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
@@ -55,6 +56,14 @@ class _WebAppScreenState extends State<WebAppScreen> {
           onPageStarted: (_) => setState(() => _isLoading = true),
           onPageFinished: (_) => setState(() => _isLoading = false),
           onWebResourceError: (error) => setState(() => _isLoading = false),
+          onNavigationRequest: (request) {
+            final uri = Uri.parse(request.url);
+            if (uri.host != Uri.parse(_url).host) {
+              launchUrl(uri, mode: LaunchMode.externalApplication);
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
         ),
       )
       ..loadRequest(Uri.parse(_url));

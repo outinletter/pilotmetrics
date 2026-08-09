@@ -591,6 +591,8 @@ body {
   margin-top: 8px;
   font-size: 15px;
   color: var(--sky-300);
+  word-break: break-word;
+  overflow-wrap: break-word;
   background: rgba(56,189,248,0.08);
   border: 1px solid rgba(56,189,248,0.18);
   border-radius: 6px;
@@ -641,6 +643,8 @@ body {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 14px;
+  min-width: 0;
+  overflow: hidden;
 }
 .ctx-block-label {
   font-size: 12px;
@@ -664,7 +668,10 @@ body {
   color: var(--text);
   line-height: 1.6;
   white-space: pre-wrap;
-  word-break: break-all;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow-x: auto;
+  max-width: 100%;
 }
 .ctx-msg {
   grid-column: 1 / -1;
