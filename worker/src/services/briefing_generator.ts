@@ -130,6 +130,53 @@ function briefingKeywords(e: EventRow): string[] {
   return candidates.filter(k => !seen.has(k.toLowerCase()) && seen.add(k.toLowerCase())).slice(0, 6);
 }
 
+// Fuel/Decision Support advisory — generated from event tags + flight phase
+function fuelAdvisory(eTags: Set<string>, context: Record<string, unknown>): string | null {
+  const ctxTags = new Set((context.arrival_tags as string[] | undefined) ?? []);
+  const allTags = new Set([...eTags, ...ctxTags]);
+  const isEtops = ETOPS_CONTEXT_TYPES.has(
+    ((context.aircraft_type as string) ?? "").toUpperCase().replace(/[-\s]/g, "").slice(0, 4)
+  );
+
+  const lines: string[] = [];
+
+  // ETOPS sectors: diversion fuel check
+  if (isEtops && (allTags.has("ETOPS") || (context.route as string ?? "").length > 6)) {
+    lines.push("Confirm ETOPS diversion fuel covers worst-case equal-time point (ETP) with 30 min reserve at alternate.");
+  }
+
+  // Tailwind → landing distance performance
+  if (allTags.has("TAILWIND")) {
+    lines.push("Tailwind increases landing distance. Verify LDA with tailwind component; consider requesting upwind runway or holding for wind shift.");
+  }
+
+  // Low visibility / CAT II/III → missed approach fuel
+  if (["CAT_III_C","CAT_III_B","CAT_III_A","CAT_II","LOW_VISIBILITY","FOG"].some(t => allTags.has(t))) {
+    lines.push("Low-vis operation increases missed approach probability. Carry extra fuel for one additional approach + alternate + 30 min final reserve.");
+  }
+
+  // Windshear / convective → go-around fuel
+  if (allTags.has("WINDSHEAR") || allTags.has("TSRA") || allTags.has("CB")) {
+    lines.push("Windshear or convective weather: pre-brief go-around fuel state. Ensure fuel supports diversion to alternate if go-around initiated below 1,000 ft AAL.");
+  }
+
+  // Contaminated runway → braking action uncertainty
+  if (allTags.has("FZRAIN") || allTags.has("BLOWING_SNOW") || allTags.has("CONTAMINATED_SURFACE")) {
+    lines.push("Contaminated runway: validate RCAM/RWYCC before descent. If RWYCC < 3, recalculate landing distance with increased stopping margin.");
+  }
+
+  // Icing on approach
+  if (allTags.has("ICING") || allTags.has("FZRAIN")) {
+    lines.push("Icing environment: confirm anti-ice on prior to FAF; account for fuel burn increase with continuous ignition and anti-ice systems active.");
+  }
+
+  if (lines.length === 0) return null;
+  return lines.join(" | ");
+}
+
+// ETOPS-capable types (duplicated from similarity_engine to avoid circular import)
+const ETOPS_CONTEXT_TYPES = new Set(["B787","B788","B789","B78X","A359","A35K","A350","B772","B773","B77W","B77L"]);
+
 function a350b787(e: EventRow): string {
   const ac = e.aircraft_type ?? "";
   if (["A350","B787","B78"].some(x => ac.includes(x))) return "Directly applicable to A350/B787 long-haul operations.";
@@ -185,6 +232,7 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
         operational_lessons: jsonList(event.operational_lessons),
         a350_b787_applicability: a350b787(event),
         recommended_action: recAction,
+        fuel_advisory: fuelAdvisory(eTags, context),
         briefing_keywords: briefingKeywords(event),
       });
     }

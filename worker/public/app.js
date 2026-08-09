@@ -322,6 +322,9 @@ function renderThreats(threats) {
               ${ev.briefing_keywords?.length ? `
                 <div class="event-section-label">Watch For</div>
                 <div class="briefing-kw-row">${ev.briefing_keywords.map(k => `<span class="briefing-kw">${esc(k)}</span>`).join("")}</div>` : ""}
+              ${ev.fuel_advisory ? `
+                <div class="event-section-label fuel-advisory-label">⛽ Fuel / Decision Advisory</div>
+                <p class="event-summary-text fuel-advisory-text">${esc(ev.fuel_advisory).replace(/\s*\|\s*/g, '<br>• ')}</p>` : ""}
             </div>
           </details>`;
         }).join("")}

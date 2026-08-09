@@ -955,6 +955,19 @@ details summary::marker { content: ""; }
   border: 1px solid rgba(56,189,248,0.25);
   white-space: nowrap;
 }
+.fuel-advisory-label {
+  color: #f59e0b;
+}
+.fuel-advisory-text {
+  background: rgba(245,158,11,0.08);
+  border-left: 3px solid rgba(245,158,11,0.4);
+  padding: 8px 12px;
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary, #94a3b8);
+  margin-top: 4px;
+}
 .event-briefing {
   background: linear-gradient(135deg, var(--navy-800), var(--navy-600));
   border-radius: 10px;

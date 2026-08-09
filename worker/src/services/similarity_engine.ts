@@ -52,6 +52,43 @@ async function loadAllTags(db: D1Database): Promise<Map<string, Set<string>>> {
 
 const KE_AIRCRAFT = new Set(["B737","B738","B739","B773","B777","B787","B788","B789","B78X","A333","A330","A350","A359","A380","A388"]);
 
+// Aircraft family groupings — variants within a family share operating characteristics
+const AC_FAMILIES: string[][] = [
+  ["B737","B738","B739","B73G","B37M","B38M","B39M"],  // 737 Classic/NG/MAX
+  ["B772","B773","B77L","B77W","B777"],                 // 777 variants
+  ["B787","B788","B789","B78X"],                        // 787 variants
+  ["A332","A333","A338","A339","A330"],                 // A330 variants
+  ["A359","A35K","A350"],                               // A350 variants
+  ["A388","A380"],                                      // A380 variants
+];
+
+// Long-haul / ETOPS aircraft where ETOPS-related events carry extra weight
+const ETOPS_TYPES = new Set(["B787","B788","B789","B78X","A359","A35K","A350","B772","B773","B77W","B77L"]);
+
+function acFamily(code: string): string[] | null {
+  const norm = code.toUpperCase().replace(/[-\s]/g, "").slice(0, 4);
+  return AC_FAMILIES.find(f => f.some(v => v.startsWith(norm) || norm.startsWith(v))) ?? null;
+}
+
+function aircraftMatchScore(eventAc: string | null, contextAc: string | null): number {
+  if (!eventAc) return 0;
+  const eNorm = eventAc.toUpperCase().replace(/[-\s]/g, "").slice(0, 4);
+  const cNorm = (contextAc ?? "").toUpperCase().replace(/[-\s]/g, "").slice(0, 4);
+
+  // Exact prefix match (e.g. B789 vs B789)
+  if (eNorm === cNorm) return 12;
+
+  const eFamily = acFamily(eNorm);
+  const cFamily = acFamily(cNorm);
+
+  // Same family (e.g. B788 vs B789 → both B787 family)
+  if (eFamily && cFamily && eFamily[0] === cFamily[0]) return 8;
+
+  // Either is a KE-operated type → general relevance
+  if (KE_AIRCRAFT.has(eNorm)) return 4;
+  return 0;
+}
+
 const HIGH_IMPACT_TAGS = new Set([
   "TSRA","CB","THUNDERSTORM","CONVECTIVE_WEATHER",
   "WINDSHEAR","FOG","LOW_VISIBILITY",
@@ -148,9 +185,13 @@ function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: str
   if (["APPROACH","LANDING"].includes(event.flight_phase ?? "")) score += 10;
   if (["VISUAL","RNAV","ILS"].includes(event.approach_type ?? "")) score += 5;
 
-  // 5. KE 운항 기종 일치
-  const ac = (event.aircraft_type ?? "").toUpperCase().replace(/[-\s]/g, "").slice(0, 4);
-  if (KE_AIRCRAFT.has(ac)) score += 7;
+  // 5. Aircraft variant-aware matching
+  const acScore = aircraftMatchScore(event.aircraft_type, context.aircraft_type as string | null);
+  score += acScore;
+
+  // ETOPS bonus: long-haul aircraft context + ETOPS-relevant event
+  const ctxAcNorm = ((context.aircraft_type as string) ?? "").toUpperCase().replace(/[-\s]/g, "").slice(0, 4);
+  if (ETOPS_TYPES.has(ctxAcNorm) && (eTags.has("ETOPS") || (event.flight_phase ?? "").toUpperCase() === "CRUISE")) score += 5;
 
   // 6. 중증도 가중치 (sᵢ) × 시간 감쇠 (dᵢ = exp(-λΔt)) × 데이터 품질
   score = score
