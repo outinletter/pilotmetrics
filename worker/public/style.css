@@ -1,5 +1,5 @@
-/* ============================================================
-   PilotMetrics — Professional Aviation Briefing UI
+﻿/* ============================================================
+   PilotMetrics ??Professional Aviation Briefing UI
    ============================================================ */
 
 :root {
@@ -48,10 +48,10 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overscroll-behavior-y: none; /* 모바일 당겨서 새로고침 방지 */
+  overscroll-behavior-y: none; /* 紐⑤컮???밴꺼???덈줈怨좎묠 諛⑹? */
 }
 
-/* ── NAV ──────────────────────────────────────────────────── */
+/* ?? NAV ???????????????????????????????????????????????????? */
 .nav {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -80,13 +80,13 @@ body {
   gap: 10px;
 }
 .nav-title {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.02em;
 }
 .nav-badge {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--sky-400);
@@ -102,7 +102,7 @@ body {
 }
 .nav-utc {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--sky-300);
 }
 .nav-dot {
@@ -117,13 +117,13 @@ body {
   50% { opacity: 0.4; }
 }
 .nav-status {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--green-500);
   letter-spacing: 0.08em;
 }
 
-/* ── HERO ─────────────────────────────────────────────────── */
+/* ?? HERO ??????????????????????????????????????????????????? */
 .hero {
   min-height: 100vh;
   display: flex;
@@ -134,7 +134,7 @@ body {
     linear-gradient(180deg, var(--navy-900) 0%, #0a1628 100%);
   padding: 80px 24px 60px;
 }
-/* ── PAGE LAYOUT ──────────────────────────────────────────── */
+/* ?? PAGE LAYOUT ???????????????????????????????????????????? */
 .page-layout {
   display: flex;
   align-items: flex-start;
@@ -156,7 +156,7 @@ body {
   text-align: center;
 }
 
-/* ── DATABASE SIDEBAR ─────────────────────────────────────── */
+/* ?? DATABASE SIDEBAR ??????????????????????????????????????? */
 .db-stats-grid {
   display: contents; /* desktop: treat children as direct sidebar children */
 }
@@ -180,7 +180,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -206,19 +206,19 @@ body {
 .db-stat-info { flex: 1; min-width: 0; }
 .db-stat-value {
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.1;
 }
 .db-stat-label {
-  font-size: 11px;
+  font-size: 13px;
   color: rgba(255,255,255,0.4);
   margin-top: 2px;
 }
 .db-sev-section { padding: 4px 0 0; }
 .db-sev-label {
-  font-size: 11px;
+  font-size: 13px;
   color: rgba(255,255,255,0.4);
   margin-bottom: 8px;
   font-weight: 600;
@@ -230,7 +230,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .db-sev-name {
   width: 60px;
@@ -257,7 +257,7 @@ body {
   text-align: right;
   color: rgba(255,255,255,0.4);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   flex: 0 0 auto;
 }
 .db-sev-skeleton {
@@ -275,7 +275,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 13px;
   color: rgba(255,255,255,0.4);
   font-weight: 600;
   text-transform: uppercase;
@@ -288,7 +288,7 @@ body {
   gap: 6px;
 }
 .db-source-tag {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--sky-300);
   background: rgba(56,189,248,0.08);
@@ -301,7 +301,7 @@ body {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
+  font-size: 13px;
   color: rgba(255,255,255,0.3);
   padding-top: 4px;
   border-top: 1px solid rgba(255,255,255,0.06);
@@ -319,7 +319,7 @@ body {
   50% { opacity: 0.4; }
 }
 .hero-eyebrow {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.16em;
   color: var(--sky-400);
@@ -335,14 +335,14 @@ body {
   letter-spacing: -0.02em;
 }
 .hero-sub {
-  font-size: 16px;
+  font-size: 18px;
   color: rgba(255,255,255,0.55);
   line-height: 1.65;
   max-width: 480px;
   margin: 0 auto 36px;
 }
 
-/* ── SEARCH BOX ───────────────────────────────────────────── */
+/* ?? SEARCH BOX ????????????????????????????????????????????? */
 .search-box {
   display: flex;
   gap: 8px;
@@ -370,7 +370,7 @@ body {
   border: none;
   background: transparent;
   font-family: var(--font-mono);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
   color: #ffffff;
   letter-spacing: 0.06em;
@@ -384,7 +384,7 @@ body {
   border: none;
   border-radius: 10px;
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   padding: 0 28px;
   height: 48px;
@@ -397,7 +397,7 @@ body {
 .search-btn:disabled { opacity: 0.5; cursor: wait; }
 
 .status-msg {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--amber-400);
   min-height: 20px;
   margin-bottom: 24px;
@@ -410,7 +410,7 @@ body {
   justify-content: center;
 }
 .hero-tags span {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   color: rgba(255,255,255,0.35);
   border: 1px solid rgba(255,255,255,0.1);
@@ -419,13 +419,13 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* ── NAV NEW SEARCH BUTTON ────────────────────────────────── */
+/* ?? NAV NEW SEARCH BUTTON ?????????????????????????????????? */
 .nav-new-search {
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 8px;
   color: rgba(255,255,255,0.75);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   padding: 5px 13px;
   cursor: pointer;
@@ -435,7 +435,7 @@ body {
 }
 .nav-new-search:hover { background: rgba(255,255,255,0.14); color: #fff; }
 
-/* ── CONTAINER ────────────────────────────────────────────── */
+/* ?? CONTAINER ?????????????????????????????????????????????? */
 .container {
   max-width: 1100px;
   margin: 0 auto;
@@ -453,19 +453,19 @@ body {
   min-height: 40vh;
 }
 .no-threat-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text);
 }
 .no-threat-sub {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--muted);
   max-width: 320px;
   line-height: 1.6;
 }
 .hidden { display: none !important; }
 
-/* ── CONTEXT PANEL ────────────────────────────────────────── */
+/* ?? CONTEXT PANEL ?????????????????????????????????????????? */
 .ctx-panel {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -510,13 +510,13 @@ body {
   gap: 8px;
 }
 .ctx-header-brand-name {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: rgba(255,255,255,0.95);
   letter-spacing: 0.01em;
 }
 .ctx-header-brand-badge {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--sky-400);
@@ -537,29 +537,29 @@ body {
 }
 .ctx-flight {
   font-family: var(--font-mono);
-  font-size: 36px;
+  font-size: 38px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.04em;
 }
 .ctx-flight-sep {
-  font-size: 22px;
+  font-size: 24px;
   color: rgba(255,255,255,0.3);
 }
 .ctx-route-inline {
-  font-size: 18px;
+  font-size: 20px;
   color: rgba(255,255,255,0.7);
   letter-spacing: 0.04em;
 }
 .ctx-aircraft-inline {
   font-family: var(--font-mono);
-  font-size: 16px;
+  font-size: 18px;
   color: var(--sky-300);
 }
 .ctx-time-inline { display: none; }
 .ctx-time-paren {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--sky-400);
   margin-left: 3px;
   opacity: 0.85;
@@ -571,7 +571,7 @@ body {
   gap: 10px;
   margin-top: 6px;
   font-family: var(--font-mono);
-  font-size: 16px;
+  font-size: 18px;
   color: rgba(255,255,255,0.75);
   letter-spacing: 0.05em;
 }
@@ -586,12 +586,12 @@ body {
 .ctx-search-icon { font-style: normal; margin-left: 3px; }
 .ctx-icao-arrow {
   color: var(--sky-400);
-  font-size: 18px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 .ctx-wx-brief {
   margin-top: 8px;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--sky-300);
   background: rgba(56,189,248,0.08);
   border: 1px solid rgba(56,189,248,0.18);
@@ -603,7 +603,7 @@ body {
 .ctx-route { display: none; }
 .ctx-aircraft { display: none; }
 .risk-badge {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.1em;
   padding: 6px 14px;
@@ -629,7 +629,7 @@ body {
 }
 .chip {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--muted);
   background: var(--bg);
@@ -645,23 +645,23 @@ body {
   padding: 14px;
 }
 .ctx-block-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
   color: var(--subtle);
   text-transform: uppercase;
   margin-bottom: 8px;
 }
-/* ── risk breakdown ── */
+/* ?? risk breakdown ?? */
 .risk-breakdown-list { display: flex; flex-direction: column; gap: 5px; }
-.risk-breakdown-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.risk-breakdown-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .risk-breakdown-tag { width: 110px; flex-shrink: 0; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .risk-breakdown-bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 5px; overflow: hidden; }
 .risk-breakdown-bar { display: block; height: 100%; background: var(--amber, #e8a020); border-radius: 4px; transition: width 0.4s ease; }
 .risk-breakdown-score { width: 28px; text-align: right; color: var(--subtle); font-variant-numeric: tabular-nums; }
 .ctx-weather-text {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text);
   line-height: 1.6;
@@ -670,7 +670,7 @@ body {
 }
 .ctx-msg {
   grid-column: 1 / -1;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--amber-500);
   background: var(--amber-100);
   border: 1px solid rgba(245, 158, 11, 0.2);
@@ -684,7 +684,7 @@ body {
   gap: 8px;
 }
 .ctx-link {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--navy-600);
   text-decoration: none;
   background: var(--bg);
@@ -695,7 +695,7 @@ body {
 }
 .ctx-link:hover { background: rgba(255,255,255,0.08); }
 
-/* ── THREATS SECTION ──────────────────────────────────────── */
+/* ?? THREATS SECTION ???????????????????????????????????????? */
 .threats-section {}
 .threats-header {
   display: flex;
@@ -704,12 +704,12 @@ body {
   margin-bottom: 20px;
 }
 .threats-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text);
 }
 .threats-count {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--muted);
   background: var(--bg);
@@ -718,7 +718,7 @@ body {
   padding: 2px 10px;
 }
 
-/* ── THREAT CARD ──────────────────────────────────────────── */
+/* ?? THREAT CARD ???????????????????????????????????????????? */
 .threat-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -743,7 +743,7 @@ body {
   background: var(--navy-800);
   color: var(--sky-400);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   border-radius: 8px;
   display: flex;
@@ -752,20 +752,20 @@ body {
 }
 .threat-title-wrap { flex: 1; min-width: 0; }
 .threat-title {
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.3;
 }
 .threat-desc {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--muted);
   margin-top: 3px;
   line-height: 1.45;
 }
 .threat-event-count {
   flex: 0 0 auto;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
   background: var(--bg);
@@ -774,7 +774,7 @@ body {
   padding: 3px 10px;
 }
 
-/* ── EVENT ITEM (inside threat) ───────────────────────────── */
+/* ?? EVENT ITEM (inside threat) ????????????????????????????? */
 .event-item {
   border-bottom: 1px solid var(--border);
 }
@@ -794,7 +794,7 @@ body {
 .event-chevron {
   flex: 0 0 16px;
   color: var(--subtle);
-  font-size: 12px;
+  font-size: 14px;
   transition: transform 0.2s;
 }
 details[open] .event-chevron { transform: rotate(90deg); }
@@ -803,7 +803,7 @@ details summary::marker { content: ""; }
 
 .event-one-line {
   flex: 1;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text);
   font-family: var(--font-mono);
   white-space: nowrap;
@@ -812,7 +812,7 @@ details summary::marker { content: ""; }
 }
 .event-match {
   flex: 0 0 auto;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   letter-spacing: 0.06em;
@@ -831,14 +831,14 @@ details summary::marker { content: ""; }
 .sev-dot.high     { background: var(--orange-500); }
 .sev-dot.critical { background: var(--red-500); }
 
-/* ── EVENT DETAIL ─────────────────────────────────────────── */
+/* ?? EVENT DETAIL ??????????????????????????????????????????? */
 .event-detail {
   border-top: 1px solid var(--border);
   background: rgba(255,255,255,0.03);
   padding: 20px;
 }
 .event-detail-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #e8f0f9;
   margin-bottom: 12px;
@@ -851,7 +851,7 @@ details summary::marker { content: ""; }
   margin-bottom: 14px;
 }
 .event-meta-chip {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   background: var(--surface);
   border: 1px solid var(--border);
@@ -859,13 +859,13 @@ details summary::marker { content: ""; }
   padding: 3px 10px;
 }
 .event-summary-text {
-  font-size: 15px;
+  font-size: 17px;
   color: rgba(232,240,249,0.8);
   line-height: 1.65;
   margin-bottom: 16px;
 }
 .event-section-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -877,7 +877,7 @@ details summary::marker { content: ""; }
   padding: 0;
 }
 .event-list li {
-  font-size: 14px;
+  font-size: 16px;
   color: rgba(232,240,249,0.75);
   line-height: 1.55;
   margin-bottom: 3px;
@@ -889,7 +889,7 @@ details summary::marker { content: ""; }
   margin-top: 12px;
 }
 .event-briefing-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--sky-400);
@@ -897,13 +897,13 @@ details summary::marker { content: ""; }
   margin-bottom: 6px;
 }
 .event-briefing-text {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   color: #ffffff;
   line-height: 1.5;
 }
 
-/* ── FOOTER ───────────────────────────────────────────────── */
+/* ?? FOOTER ????????????????????????????????????????????????? */
 .footer {
   background: var(--navy-900);
   border-top: 1px solid rgba(255,255,255,0.06);
@@ -920,16 +920,16 @@ details summary::marker { content: ""; }
   gap: 8px;
 }
 .footer-inner span {
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(255,255,255,0.3);
 }
 
-/* ── NOTAM 위협 섹션 ──────────────────────────────────────── */
+/* ?? NOTAM ?꾪삊 ?뱀뀡 ???????????????????????????????????????? */
 .notam-section { margin-bottom: 24px; }
 
 .notam-header {
   display: flex; align-items: center; gap: 8px;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
   text-transform: uppercase; color: rgba(255,255,255,0.5);
   margin-bottom: 10px;
 }
@@ -965,19 +965,19 @@ details summary::marker { content: ""; }
 
 .notam-card-main { flex: 1; min-width: 0; }
 .notam-card-headline {
-  font-size: 13px; font-weight: 600;
+  font-size: 15px; font-weight: 600;
   color: rgba(255,255,255,0.92);
   margin-bottom: 4px;
 }
 .notam-card-meta {
   display: flex; gap: 10px; flex-wrap: wrap;
-  font-size: 11px; color: rgba(255,255,255,0.35);
+  font-size: 13px; color: rgba(255,255,255,0.35);
   font-family: 'JetBrains Mono', monospace;
 }
 .notam-id { color: rgba(56,189,248,0.6); }
 
 .notam-score-badge {
-  font-size: 13px; font-weight: 700; min-width: 36px;
+  font-size: 15px; font-weight: 700; min-width: 36px;
   text-align: right; flex-shrink: 0;
   font-family: 'JetBrains Mono', monospace;
 }
@@ -988,22 +988,22 @@ details summary::marker { content: ""; }
 
 .notam-raw-wrap { margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; }
 .notam-raw-toggle {
-  font-size: 11px; color: rgba(255,255,255,0.3);
+  font-size: 13px; color: rgba(255,255,255,0.3);
   cursor: pointer; list-style: none; user-select: none;
 }
 .notam-raw-toggle:hover { color: rgba(255,255,255,0.5); }
 .notam-raw {
   margin-top: 8px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; line-height: 1.6;
+  font-size: 13px; line-height: 1.6;
   color: rgba(255,255,255,0.4);
   white-space: pre-wrap; word-break: break-all;
   background: rgba(0,0,0,0.2); border-radius: 6px; padding: 10px;
 }
 
-/* ── RESPONSIVE ───────────────────────────────────────────── */
+/* ?? RESPONSIVE ????????????????????????????????????????????? */
 
-/* ── 태블릿 (≤900px) ─────────────────────────────────────── */
+/* ?? ?쒕툝由?(??00px) ??????????????????????????????????????? */
 @media (max-width: 900px) {
   .page-layout { display: block; margin-right: 0; }
   .page-main { display: block; min-height: 0; }
@@ -1027,7 +1027,7 @@ details summary::marker { content: ""; }
   .ctx-flight-row { justify-content: flex-start; }
 }
 
-/* ── 모바일 (≤640px) ─────────────────────────────────────── */
+/* ?? 紐⑤컮??(??40px) ??????????????????????????????????????? */
 @media (max-width: 640px) {
   .results-wrap { min-height: 0; }
 
@@ -1035,20 +1035,20 @@ details summary::marker { content: ""; }
   .nav-inner { padding: 0 14px; }
   .nav-utc { display: none; }
   .nav-badge { display: none; }
-  .nav-title { font-size: 13px; }
+  .nav-title { font-size: 15px; }
 
   /* Hero */
   .hero { padding: 72px 16px 40px; }
   .hero-inner { text-align: left; }
   .hero-title { font-size: clamp(28px, 8vw, 40px); }
-  .hero-sub { font-size: 14px; margin-bottom: 24px; text-align: left; }
+  .hero-sub { font-size: 16px; margin-bottom: 24px; text-align: left; }
   .hero-eyebrow { margin-bottom: 12px; }
   .hero-tags { justify-content: flex-start; }
 
   /* Search */
   .search-box { flex-direction: column; gap: 0; padding: 6px 6px 6px 6px; }
   .search-input-wrap { padding: 10px 12px; min-height: 52px; }
-  .search-input { font-size: 18px; }
+  .search-input { font-size: 20px; }
   .search-btn { width: 100%; height: 52px; border-radius: 10px; margin-top: 8px; }
 
   /* Container */
@@ -1060,22 +1060,22 @@ details summary::marker { content: ""; }
     margin-top: 8px;
     gap: 8px;
   }
-  .ctx-header-brand-name { font-size: 15px; }
-  .ctx-header-brand-badge { font-size: 11px; padding: 2px 7px; }
+  .ctx-header-brand-name { font-size: 17px; }
+  .ctx-header-brand-badge { font-size: 13px; padding: 2px 7px; }
 
   /* Flight info row: wrap to 2 lines */
-  .ctx-flight { font-size: 26px; }
-  .ctx-flight-sep { font-size: 18px; }
-  .ctx-route-inline { font-size: 14px; }
-  .ctx-time-paren { font-size: 12px; }
+  .ctx-flight { font-size: 28px; }
+  .ctx-flight-sep { font-size: 20px; }
+  .ctx-route-inline { font-size: 16px; }
+  .ctx-time-paren { font-size: 14px; }
 
   /* Risk badge */
-  .risk-badge { font-size: 11px; padding: 4px 10px; }
+  .risk-badge { font-size: 13px; padding: 4px 10px; }
 
   /* ctx-body */
   .ctx-body { padding: 14px; grid-template-columns: 1fr; gap: 10px; }
-  .ctx-block-label { font-size: 10px; }
-  .ctx-weather-text { font-size: 11px; }
+  .ctx-block-label { font-size: 12px; }
+  .ctx-weather-text { font-size: 13px; }
 
   /* DB Sidebar on mobile: full vertical layout */
   .db-sidebar {
@@ -1099,40 +1099,40 @@ details summary::marker { content: ""; }
     gap: 10px;
   }
   .db-stats-grid .db-stat-card { flex: unset; }
-  .db-stat-value { font-size: 16px; }
-  .db-stat-label { font-size: 10px; }
+  .db-stat-value { font-size: 18px; }
+  .db-stat-label { font-size: 12px; }
   .db-stat-icon svg { width: 16px; height: 16px; }
 
   /* Threat cards */
   .threats-section { margin-top: 0; }
-  .threats-title { font-size: 16px; }
+  .threats-title { font-size: 18px; }
   .threat-card-header { padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
-  .threat-title { font-size: 14px; }
-  .threat-desc { font-size: 12px; }
-  .threat-num { width: 28px; height: 28px; font-size: 12px; }
+  .threat-title { font-size: 16px; }
+  .threat-desc { font-size: 14px; }
+  .threat-num { width: 28px; height: 28px; font-size: 14px; }
 
   /* Event rows */
   .event-summary { padding: 12px 14px; }
-  .event-one-line { font-size: 11px; white-space: normal; }
-  .event-match { font-size: 10px; }
+  .event-one-line { font-size: 13px; white-space: normal; }
+  .event-match { font-size: 12px; }
 
   /* Event detail */
   .event-detail { padding: 14px; }
-  .event-detail-title { font-size: 14px; }
-  .event-summary-text { font-size: 13px; }
+  .event-detail-title { font-size: 16px; }
+  .event-summary-text { font-size: 15px; }
   .event-briefing { padding: 12px; }
-  .event-briefing-text { font-size: 13px; }
+  .event-briefing-text { font-size: 15px; }
 
   /* Footer */
   .footer { padding: 14px 16px; }
   .footer-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
 }
 
-/* ── 소형 폰 (≤380px) ────────────────────────────────────── */
+/* ?? ?뚰삎 ??(??80px) ?????????????????????????????????????? */
 @media (max-width: 380px) {
-  .ctx-flight { font-size: 22px; }
-  .ctx-route-inline { font-size: 12px; }
-  .ctx-flight-sep { font-size: 14px; }
+  .ctx-flight { font-size: 24px; }
+  .ctx-route-inline { font-size: 14px; }
+  .ctx-flight-sep { font-size: 16px; }
   .nav-status { display: none; }
-  .nav-new-search { font-size: 11px; padding: 4px 10px; }
+  .nav-new-search { font-size: 13px; padding: 4px 10px; }
 }
