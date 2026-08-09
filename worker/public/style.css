@@ -499,10 +499,7 @@ body {
   justify-content: center;
 }
 .ctx-risk-badge {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  position: static;
 }
 .ctx-header-brand {
   display: flex;

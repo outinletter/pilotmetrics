@@ -108,12 +108,9 @@ function renderContext(ctx) {
   contextEl.innerHTML = `
     <div class="ctx-header">
       <div class="ctx-header-inner">
-        <span class="risk-badge ctx-risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
         <div class="ctx-header-center">
         <div class="ctx-flight-row">
-          <span class="ctx-flight">${esc(ctx.flight_number)}</span>
-          <span class="ctx-flight-sep">·</span>
-          <span class="ctx-route-inline">${esc(ctx.route)}</span>
+          <span class="risk-badge ctx-risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
         </div>
         <div class="ctx-icao-row">
           ${(() => {
