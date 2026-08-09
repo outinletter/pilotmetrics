@@ -335,7 +335,7 @@ body {
   letter-spacing: -0.02em;
 }
 .hero-sub {
-  font-size: 18px;
+  font-size: 16px;
   color: rgba(255,255,255,0.55);
   line-height: 1.65;
   max-width: 480px;
@@ -527,8 +527,9 @@ body {
 }
 .ctx-flight-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
+  gap: 10px;
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -1038,7 +1039,7 @@ details summary::marker { content: ""; }
   .hero { padding: 72px 16px 40px; }
   .hero-inner { text-align: left; }
   .hero-title { font-size: clamp(28px, 8vw, 40px); }
-  .hero-sub { font-size: 16px; margin-bottom: 24px; text-align: left; }
+  .hero-sub { font-size: 14px; margin-bottom: 24px; text-align: left; }
   .hero-eyebrow { margin-bottom: 12px; }
   .hero-tags { justify-content: flex-start; }
 
