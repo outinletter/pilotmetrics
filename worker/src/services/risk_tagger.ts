@@ -82,22 +82,22 @@ export type RiskBreakdown = {
 };
 
 const TAG_LABELS: Record<string, string> = {
-  WINDSHEAR: "윈드시어", TSRA: "뇌우+강우", CB: "적란운", FOG: "안개",
-  LOW_VISIBILITY: "시정불량", CAT_III_C: "CAT IIIc RVR", CAT_III_B: "CAT IIIb RVR",
-  CAT_III_A: "CAT IIIa RVR", CAT_II: "CAT II RVR", CAT_II_VIS: "CAT II 가시도",
-  CAT_I_VIS: "CAT I 가시도", RVR_RESTRICTED: "RVR 제한", FZRAIN: "결빙강수",
-  BLOWING_SNOW: "날리는 눈", ICING: "착빙", SNOW: "강설", HEAVY_RAIN: "폭우",
-  SQUALL: "스콜", STRONG_WIND: "강풍", GUST: "돌풍", CROSSWIND: "측풍",
-  TAILWIND: "배풍", CONVECTIVE_WEATHER: "대류성기상", UNSTABLE_APPROACH_RISK: "불안정접근",
-  WET_RWY: "습윤활주로", CONTAMINATED_SURFACE: "오염활주로면", CAT_APPROACH_RISK: "계기접근위험",
-  MOUNTAIN_APPROACH: "산악접근", HIGH_ALTITUDE: "고고도공항", ONE_SIDED_GO_AROUND: "편측복행",
-  ISLAND_APPROACH: "도서접근", TROPICAL_CONVECTION: "열대대류", TYPHOON_RISK: "태풍위험",
-  DUST: "먼지/모래폭풍", VOLCANIC_ASH: "화산재", HIGH_TEMP_PERF: "고온성능저하",
-  SEVERE_COLD: "혹한결빙환경", MARINE_LAYER_FOG: "해무", DUST_RISK: "먼지위험",
-  MIST: "박무", REDUCED_VISIBILITY: "시정감소", MARGINAL_VISIBILITY: "한계시정",
-  LOW_CLOUD: "저운고도", WIND_HAZARD: "바람위험", TURBULENCE: "난기류",
-  GPS_INTEGRITY: "RNAV무결성", ETOPS: "장거리ETOPS",
-  CONGESTED_AIRSPACE: "혼잡공역", NOISE_ABATEMENT: "소음경감절차", SHORT_SECTOR: "단거리구간",
+  WINDSHEAR: "Wind Shear", TSRA: "Thunderstorm+Rain", CB: "Cumulonimbus", FOG: "Fog",
+  LOW_VISIBILITY: "Low Visibility", CAT_III_C: "CAT IIIc RVR", CAT_III_B: "CAT IIIb RVR",
+  CAT_III_A: "CAT IIIa RVR", CAT_II: "CAT II RVR", CAT_II_VIS: "CAT II Visibility",
+  CAT_I_VIS: "CAT I Visibility", RVR_RESTRICTED: "RVR Restricted", FZRAIN: "Freezing Rain",
+  BLOWING_SNOW: "Blowing Snow", ICING: "Icing", SNOW: "Snow", HEAVY_RAIN: "Heavy Rain",
+  SQUALL: "Squall", STRONG_WIND: "Strong Wind", GUST: "Gusts", CROSSWIND: "Crosswind",
+  TAILWIND: "Tailwind", CONVECTIVE_WEATHER: "Convective Weather", UNSTABLE_APPROACH_RISK: "Unstable Approach",
+  WET_RWY: "Wet Runway", CONTAMINATED_SURFACE: "Contaminated Surface", CAT_APPROACH_RISK: "ILS Approach Risk",
+  MOUNTAIN_APPROACH: "Mountain Approach", HIGH_ALTITUDE: "High-Altitude Airport", ONE_SIDED_GO_AROUND: "One-Sided Go-Around",
+  ISLAND_APPROACH: "Island Approach", TROPICAL_CONVECTION: "Tropical Convection", TYPHOON_RISK: "Typhoon Risk",
+  DUST: "Dust/Sandstorm", VOLCANIC_ASH: "Volcanic Ash", HIGH_TEMP_PERF: "High Temp Performance",
+  SEVERE_COLD: "Severe Cold/Icing Env", MARINE_LAYER_FOG: "Marine Layer Fog", DUST_RISK: "Dust Risk",
+  MIST: "Mist", REDUCED_VISIBILITY: "Reduced Visibility", MARGINAL_VISIBILITY: "Marginal Visibility",
+  LOW_CLOUD: "Low Ceiling", WIND_HAZARD: "Wind Hazard", TURBULENCE: "Turbulence",
+  GPS_INTEGRITY: "RNAV Integrity", ETOPS: "Long-Haul ETOPS",
+  CONGESTED_AIRSPACE: "Congested Airspace", NOISE_ABATEMENT: "Noise Abatement", SHORT_SECTOR: "Short Sector",
 };
 
 /**
@@ -175,17 +175,17 @@ export function riskBreakdown(tags: string[], airportCnt = 0, nightArrival = fal
   }
 
   const highHits = [...HIGH_TAGS].filter(x => t.has(x) && !suppressed.has(x)).length;
-  if (highHits >= 3)      items.push({ tag: "COMPOUND_HIGH", score: 15, label: "복합고위험가산" });
-  else if (highHits >= 2) items.push({ tag: "COMPOUND_HIGH", score:  7, label: "복합고위험가산" });
+  if (highHits >= 3)      items.push({ tag: "COMPOUND_HIGH", score: 15, label: "Compound High Risk" });
+  else if (highHits >= 2) items.push({ tag: "COMPOUND_HIGH", score:  7, label: "Compound High Risk" });
 
-  if (airportCnt >= 50)      items.push({ tag: "AIRPORT_HISTORY", score: 15, label: "공항사고이력(다발)" });
-  else if (airportCnt >= 20) items.push({ tag: "AIRPORT_HISTORY", score: 10, label: "공항사고이력(고)" });
-  else if (airportCnt >= 10) items.push({ tag: "AIRPORT_HISTORY", score:  7, label: "공항사고이력(중)" });
-  else if (airportCnt >= 5)  items.push({ tag: "AIRPORT_HISTORY", score:  4, label: "공항사고이력(저)" });
+  if (airportCnt >= 50)      items.push({ tag: "AIRPORT_HISTORY", score: 15, label: "Airport Incident History" });
+  else if (airportCnt >= 20) items.push({ tag: "AIRPORT_HISTORY", score: 10, label: "Airport Incident History" });
+  else if (airportCnt >= 10) items.push({ tag: "AIRPORT_HISTORY", score:  7, label: "Airport Incident History" });
+  else if (airportCnt >= 5)  items.push({ tag: "AIRPORT_HISTORY", score:  4, label: "Airport Incident History" });
 
   if (nightArrival) {
     const hasHighWx = ["WINDSHEAR","LOW_VISIBILITY","FOG","SNOW","ICING","FZRAIN","TSRA","CB"].some(x => t.has(x));
-    items.push({ tag: "NIGHT_ARRIVAL", score: hasHighWx ? 10 : 5, label: "야간도착" });
+    items.push({ tag: "NIGHT_ARRIVAL", score: hasHighWx ? 10 : 5, label: "Night Arrival" });
   }
 
   return items.sort((a, b) => b.score - a.score);
@@ -233,10 +233,10 @@ export function threatForTags(tags: Set<string>): [string, string] {
 export function riskSummary(score: number, level: string, tags: string[], nightArrival = false): string {
   const wxTags = tags.filter(t => !["COMPOUND_HIGH","AIRPORT_HISTORY","NIGHT_ARRIVAL"].includes(t));
   const wx = wxTags.length > 0 ? wxTags.slice(0, 4).join(", ") : "CLEAR";
-  const night = nightArrival ? " [야간도착]" : "";
+  const night = nightArrival ? " [Night Arrival]" : "";
   if (level === "HIGH")
-    return `위험도 ${score}/100${night} — ${wx} 조건으로 즉각 대응 필요. Go-around 기준 재확인, 교체공항 연료 확보 권고.`;
+    return `Risk ${score}/100${night} — ${wx}: immediate action required. Re-confirm go-around criteria and ensure alternate fuel.`;
   if (level === "MEDIUM")
-    return `위험도 ${score}/100${night} — ${wx} 조건. 강화 브리핑 실시, 안정적 접근 기준 엄수.`;
-  return `위험도 ${score}/100${night} — 기상 조건 양호. 통상 절차 적용.`;
+    return `Risk ${score}/100${night} — ${wx}: enhanced briefing required. Maintain stabilized approach standards.`;
+  return `Risk ${score}/100${night} — Weather conditions acceptable. Apply standard procedures.`;
 }

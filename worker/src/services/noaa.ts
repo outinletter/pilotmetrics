@@ -191,10 +191,10 @@ async function fetchMetar(icao: string): Promise<[string, string | null]> {
           fetchOpenMeteoSynthetic(icao),
           fetchYrnoSynthetic(icao),
         ]);
-        return [synth, "[SYNTH] 실제 METAR 미수신 — Open-Meteo/Yr.no 합성 기상 표시"];
+        return [synth, "[SYNTH] Live METAR unavailable — showing Open-Meteo/Yr.no synthesized weather"];
       } catch { /* fall through */ }
     }
-    return ["", "Weather API unavailable — 모든 기상 소스 응답 없음."];
+    return ["", "Weather API unavailable — all weather sources failed to respond."];
   }
 }
 

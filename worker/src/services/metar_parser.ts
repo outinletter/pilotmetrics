@@ -241,21 +241,20 @@ export function isNightArrival(arrivalTimeUtc: string | null | undefined, utcOff
   return localHour >= 22 || localHour < 5;
 }
 
-// ─── 기상현상 한국어 약어 ─────────────────────────────────────────────────────
+// ─── Weather phenomenon labels ────────────────────────────────────────────
 const WX_KO: Record<string, string> = {
-  TSRA: "뇌우+강우", CB: "적란운", THUNDERSTORM: "뇌우", HEAVY_RAIN: "폭우",
-  WINDSHEAR: "윈드시어", FOG: "안개", MIST: "박무", ICING: "착빙",
-  SNOW: "강설", FZRAIN: "결빙강수", BLOWING_SNOW: "날리는 눈",
-  DUST: "먼지/모래", SQUALL: "스콜", VOLCANIC_ASH: "화산재",
-  LOW_CLOUD: "저운고도", CROSSWIND: "측풍", TAILWIND: "배풍",
+  TSRA: "Thunderstorm+Rain", CB: "Cumulonimbus", THUNDERSTORM: "Thunderstorm", HEAVY_RAIN: "Heavy Rain",
+  WINDSHEAR: "Wind Shear", FOG: "Fog", MIST: "Mist", ICING: "Icing",
+  SNOW: "Snow", FZRAIN: "Freezing Rain", BLOWING_SNOW: "Blowing Snow",
+  DUST: "Dust/Sand", SQUALL: "Squall", VOLCANIC_ASH: "Volcanic Ash",
+  LOW_CLOUD: "Low Ceiling", CROSSWIND: "Crosswind", TAILWIND: "Tailwind",
 };
 
 function cloudCeilingKo(text: string): string | null {
-  // BKN/OVC + 3자리 높이 (100ft 단위)
   const m = text.match(/\b(BKN|OVC)(\d{3})\b/);
   if (!m) return null;
   const ft = parseInt(m[2]) * 100;
-  return `운고 ${ft.toLocaleString()}ft`;
+  return `Ceiling ${ft.toLocaleString()}ft`;
 }
 
 /**
@@ -279,21 +278,21 @@ export function arrivalWeatherBrief(
     ? (() => {
         const localH = ((d.getUTCHours() + utcOffset) % 24 + 24) % 24;
         const localM = d.getUTCMinutes();
-        return `${String(localH).padStart(2, "0")}:${String(localM).padStart(2, "0")} 현지`;
+        return `${String(localH).padStart(2, "0")}:${String(localM).padStart(2, "0")} LT`;
       })()
     : null;
 
   const parts: string[] = [];
 
-  // 풍향/풍속
+  // Wind
   const wind = parseWind(src);
   if (wind) {
-    const dirStr = wind.dir !== null ? `${wind.dir}°` : "가변";
+    const dirStr = wind.dir !== null ? `${wind.dir}°` : "VRB";
     const gustStr = wind.gust > wind.speed ? `/G${wind.gust}` : "";
-    parts.push(`바람 ${dirStr} ${wind.speed}${gustStr}kt`);
+    parts.push(`Wind ${dirStr} ${wind.speed}${gustStr}kt`);
   }
 
-  // 가시거리
+  // Visibility
   const vis = (() => {
     const tokens = src.split(/\s+/);
     for (const t of tokens) {
@@ -302,14 +301,14 @@ export function arrivalWeatherBrief(
     return null;
   })();
   if (vis !== null) {
-    parts.push(vis >= 9999 ? "시정 10km+" : `시정 ${vis}m`);
+    parts.push(vis >= 9999 ? "Vis 10km+" : `Vis ${vis}m`);
   }
 
   // RVR
   const { rvr_m, cat } = parseRvr(src);
   if (rvr_m !== null) parts.push(`RVR ${rvr_m}m(${cat})`);
 
-  // 기상현상 (중복 없이 최대 3개)
+  // Weather phenomena (max 3, no duplicates)
   const wxHits: string[] = [];
   for (const [tag, re] of Object.entries(WEATHER_CHECKS)) {
     if (re.test(src) && WX_KO[tag] && !wxHits.includes(WX_KO[tag])) {
@@ -317,15 +316,15 @@ export function arrivalWeatherBrief(
       if (wxHits.length >= 3) break;
     }
   }
-  if (wxHits.length) parts.push(wxHits.join("·"));
+  if (wxHits.length) parts.push(wxHits.join(", "));
 
-  // 운고
+  // Ceiling
   const ceiling = cloudCeilingKo(src);
   if (ceiling) parts.push(ceiling);
 
-  if (parts.length === 0) parts.push("기상 양호(CAVOK)");
+  if (parts.length === 0) parts.push("Conditions OK (CAVOK)");
 
-  const prefix = timeStr ? `도착 ${timeStr}` : "도착 예정";
+  const prefix = timeStr ? `Arrival ${timeStr}` : "Arrival forecast";
   const source = arrivalTaf ? "TAF" : "METAR";
-  return `${prefix} 기상(${source}): ${parts.join(", ")}`;
+  return `${prefix} weather (${source}): ${parts.join(", ")}`;
 }
