@@ -880,6 +880,23 @@ details summary::marker { content: ""; }
   line-height: 1.55;
   margin-bottom: 3px;
 }
+.briefing-kw-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.briefing-kw {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(56,189,248,0.12);
+  color: var(--sky-300);
+  border: 1px solid rgba(56,189,248,0.25);
+  white-space: nowrap;
+}
 .event-briefing {
   background: linear-gradient(135deg, var(--navy-800), var(--navy-600));
   border-radius: 10px;

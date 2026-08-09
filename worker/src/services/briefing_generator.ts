@@ -21,6 +21,24 @@ function severityLabel(v: number | null): string {
 function matchLevel(s: number) { return s >= 70 ? "High match" : s >= 50 ? "Medium match" : "Low match"; }
 function matchClass(s: number) { return s >= 70 ? "high" : s >= 50 ? "medium" : "low"; }
 
+function briefingKeywords(e: EventRow): string[] {
+  const raw: string[] = [];
+  if (e.lesson_keyword) raw.push(...e.lesson_keyword.split(/[,;|]+/).map(s => s.trim()).filter(Boolean));
+  if (e.event_type) raw.push(e.event_type.trim());
+  const factors = jsonList(e.contributing_factors);
+  for (const f of factors) {
+    // extract short keyword phrases (max 4 words) from contributing factors
+    const shortened = f.replace(/^[-–•]\s*/, "").split(/[,;.]/)[0].trim();
+    if (shortened && shortened.split(" ").length <= 5) raw.push(shortened);
+  }
+  // deduplicate, title-case, limit to 6
+  const seen = new Set<string>();
+  return raw
+    .map(k => k.replace(/\b\w/g, c => c.toUpperCase()))
+    .filter(k => k.length > 2 && !seen.has(k.toLowerCase()) && seen.add(k.toLowerCase()))
+    .slice(0, 6);
+}
+
 function a350b787(e: EventRow): string {
   const ac = e.aircraft_type ?? "";
   if (["A350","B787","B78"].some(x => ac.includes(x))) return "Directly applicable to A350/B787 long-haul operations.";
@@ -76,7 +94,7 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
         operational_lessons: jsonList(event.operational_lessons),
         a350_b787_applicability: a350b787(event),
         recommended_action: recAction,
-        pilot_briefing_sentence: event.pilot_briefing_sentence ?? "",
+        briefing_keywords: briefingKeywords(event),
       });
     }
     if (groups.size >= 5 && [...groups.values()].every(g => g.events.length > 0)) break;

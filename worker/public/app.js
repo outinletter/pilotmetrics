@@ -304,6 +304,9 @@ function renderThreats(threats) {
               ${ev.a350_b787_applicability ? `
                 <div class="event-section-label">A350 / B787 Applicability</div>
                 <p class="event-summary-text">${esc(ev.a350_b787_applicability)}</p>` : ""}
+              ${ev.briefing_keywords?.length ? `
+                <div class="event-section-label">Watch For</div>
+                <div class="briefing-kw-row">${ev.briefing_keywords.map(k => `<span class="briefing-kw">${esc(k)}</span>`).join("")}</div>` : ""}
             </div>
           </details>`;
         }).join("")}
