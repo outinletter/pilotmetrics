@@ -850,7 +850,7 @@ details summary::marker { content: ""; }
 .event-detail {
   border-top: 1px solid rgba(56,189,248,0.15);
   background: rgba(255,255,255,0.03);
-  padding: 20px 20px 20px 40px;
+  padding: 20px 20px 20px 56px;
 }
 .event-detail-title {
   font-size: 18px;
@@ -1171,7 +1171,7 @@ details summary::marker { content: ""; }
   .event-match { font-size: 12px; }
 
   /* Event detail */
-  .event-detail { padding: 14px 14px 14px 32px; }
+  .event-detail { padding: 14px 14px 14px 44px; }
   .event-detail-title { font-size: 16px; }
   .event-summary-text { font-size: 15px; }
   .event-briefing { padding: 12px; }
