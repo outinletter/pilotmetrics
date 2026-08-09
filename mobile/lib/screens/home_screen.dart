@@ -239,7 +239,7 @@ class _StatsBar extends StatelessWidget {
       items.add(_StatItem(
         label: 'Incidents',
         value: _fmt(stats['total_events']),
-        icon: Icons.database,
+        icon: Icons.storage,
       ));
     }
     if (stats['airports_covered'] != null) {
@@ -253,7 +253,7 @@ class _StatsBar extends StatelessWidget {
       items.add(_StatItem(
         label: 'Sources',
         value: _fmt(stats['sources']),
-        icon: Icons.source,
+        icon: Icons.article_outlined,
       ));
     }
 
