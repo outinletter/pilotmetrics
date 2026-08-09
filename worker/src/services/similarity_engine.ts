@@ -60,6 +60,30 @@ const MED_IMPACT_TAGS = new Set([
   "GUST","HEAVY_RAIN","UNSTABLE_APPROACH_RISK","WET_RWY",
 ]);
 
+// P2 Fix: Weather tag families — only the highest-scoring tag per family counts
+// Prevents FOG+LOW_VISIBILITY or THUNDERSTORM+CB+TSRA from inflating scores
+const WEATHER_FAMILIES: string[][] = [
+  ["TSRA","CB","THUNDERSTORM","CONVECTIVE_WEATHER"],  // convective family
+  ["FOG","LOW_VISIBILITY"],                           // visibility family
+  ["GUST","HEAVY_RAIN"],                              // precipitation family
+];
+function deduplicatedWeatherScore(matchedTags: string[]): number {
+  const scored = matchedTags.map(t =>
+    HIGH_IMPACT_TAGS.has(t) ? 8 : MED_IMPACT_TAGS.has(t) ? 4 : 2
+  );
+  const used = new Set<string>();
+  let total = 0;
+  // sort descending by score so the best tag in each family wins
+  const pairs = matchedTags.map((t, i) => [t, scored[i]] as [string, number])
+    .sort(([,a],[,b]) => b - a);
+  for (const [tag, pts] of pairs) {
+    const family = WEATHER_FAMILIES.find(f => f.includes(tag));
+    const familyKey = family ? family[0] : tag; // canonical family key
+    if (!used.has(familyKey)) { used.add(familyKey); total += pts; }
+  }
+  return total;
+}
+
 // λ = 0.08 → half-life ≈ 8.7 years (older events fade but remain usable)
 const RECENCY_LAMBDA = 0.08;
 
@@ -98,17 +122,11 @@ function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: str
   else if (event.airport_iata && event.airport_iata === context.arrival_iata)  score += 20;
   if (event.runway && event.runway === context.destination_runway) score += 10;
 
-  // 2. 도착 시간대 TAF 날씨 태그 (가중치 적용)
+  // 2. 도착 시간대 TAF 날씨 태그 (패밀리 중복 제거 후 가중치 적용)
   const arrivalTags = new Set((context.arrival_tags as string[] | undefined) ?? []);
   if (arrivalTags.size > 0 && eTags.size > 0) {
-    let wx = 0;
-    for (const t of arrivalTags) {
-      if (!eTags.has(t)) continue;
-      if (HIGH_IMPACT_TAGS.has(t)) wx += 8;
-      else if (MED_IMPACT_TAGS.has(t)) wx += 4;
-      else wx += 2;
-    }
-    score += Math.min(35, wx);
+    const matched = [...arrivalTags].filter(t => eTags.has(t));
+    score += Math.min(35, deduplicatedWeatherScore(matched));
   } else {
     const tagSet = new Set(tags);
     if (tagSet.size && eTags.size) {
@@ -143,29 +161,32 @@ function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: str
   return Math.min(score, 100);
 }
 
-// ── 중복 억제 ─────────────────────────────────────────────────────────────────
-// 동일 날짜 + 동일 공항 + 유사 키워드(core_event 또는 lesson_keyword 접두 4자 일치)를
-// 같은 이벤트 클러스터로 간주하여 최고 점수 1건만 유지.
-// 이는 동일 사고의 여러 DB 레코드나 동일 날짜 연속 사건의 중복 노출을 방지.
+// ── 중복 억제 (P3: 크로스소스 개선) ─────────────────────────────────────────
+// 동일 사고가 NTSB + TSB + SKYbrary 등 여러 소스에 중복 수록되는 경우 방지.
+// 클러스터 키: (공항, 연-월, 이벤트 유형 접두 4자) → 동일 월 동일 공항 동일 유형은 1건만.
 function deduplicateResults<T extends [EventRow, number, ...unknown[]]>(ranked: T[]): T[] {
-  const seen = new Map<string, number>(); // key → best score index
+  const seen = new Map<string, number>();
   const keep: T[] = [];
 
   for (const item of ranked) {
     const [event, score] = item;
-    const airport = event.airport_icao || event.airport_iata || "?";
-    const date = (event.event_date ?? "").slice(0, 10);
-    const keywordA = (event.core_event ?? "").toLowerCase().slice(0, 6);
-    const keywordB = (event.lesson_keyword ?? "").toLowerCase().slice(0, 6);
-    // 공항+날짜가 같고 키워드 접두 6자 중 하나라도 일치하면 같은 클러스터
-    const clusterKey = `${airport}|${date}|${keywordA || keywordB}`;
+    const airport = event.airport_icao || event.airport_iata || "UNKN";
+    // 월 단위 윈도우: 동일 공항+동일 월 내 동일 이벤트 유형은 같은 사고로 간주
+    const yearMonth = (event.event_date ?? "").slice(0, 7);
+    const evtPrefix = (event.event_type ?? event.core_event ?? "").toLowerCase().slice(0, 4);
+    const clusterKey = `${airport}|${yearMonth}|${evtPrefix}`;
 
-    if (!seen.has(clusterKey)) {
-      seen.set(clusterKey, keep.length);
+    // 보조 키: 정확히 같은 날짜 + 공항 (소스 무관 중복 억제)
+    const exactKey = `${airport}|${(event.event_date ?? "").slice(0, 10)}`;
+
+    const key = seen.has(exactKey) ? exactKey : clusterKey;
+
+    if (!seen.has(key)) {
+      seen.set(key, keep.length);
+      seen.set(exactKey, keep.length); // 정확한 날짜 키도 등록
       keep.push(item);
     } else {
-      // 이미 있는 클러스터 — 점수가 더 높으면 교체
-      const existIdx = seen.get(clusterKey)!;
+      const existIdx = seen.get(key)!;
       if (score > (keep[existIdx][1] as number)) {
         keep[existIdx] = item;
       }
@@ -175,14 +196,38 @@ function deduplicateResults<T extends [EventRow, number, ...unknown[]]>(ranked: 
   return keep;
 }
 
-// ─── 핵심 수정: 공항 ICAO 하드필터 제거 ────────────────────────────────────────
-// 기존: hasArrival이면 airport_icao가 일치하는 이벤트만 포함 → 69% 미매핑 이벤트 전부 누락
-// 변경: 항상 점수 임계값(15점) 기준으로 필터링
-//       - 공항 매칭 시 +20~25점이므로 공항 일치 이벤트는 자동으로 상위 랭크
-//       - 날씨 태그 고위험 2개 이상 일치 시에도 포함 (wx >= 16점 → 임계값 통과)
+// ── P1: SQL 사전 필터링 ───────────────────────────────────────────────────────
+// SELECT * FROM events (22k rows) → JS 반복은 메모리/CPU 한계 도달 위험.
+// 전략: aircraft_category='JET' SQL 필터로 GA 제외 → 약 60% 행 감소.
+// 추가로 도착 공항 일치 이벤트(ICAO/IATA)를 먼저 조회해 상위 후보에 포함.
+async function fetchCandidates(db: D1Database, context: Record<string, unknown>): Promise<EventRow[]> {
+  const arrIcao = (context.arrival_icao as string | undefined) ?? "";
+  const arrIata = (context.arrival_iata as string | undefined) ?? "";
+
+  // 1차: 공항 일치 이벤트 (소규모 → 빠름)
+  const airportRows: EventRow[] = [];
+  if (arrIcao || arrIata) {
+    const { results } = await db.prepare(
+      `SELECT * FROM events WHERE aircraft_category = 'JET'
+       AND (airport_icao = ? OR airport_iata = ?) LIMIT 300`
+    ).bind(arrIcao || "", arrIata || "").all<EventRow>();
+    airportRows.push(...results);
+  }
+
+  // 2차: 전체 JET 풀 (공항 무관 — 날씨/유사 태그 매칭용)
+  const { results: jetRows } = await db.prepare(
+    "SELECT * FROM events WHERE aircraft_category = 'JET' LIMIT 5000"
+  ).all<EventRow>();
+
+  // 병합 — 공항 일치 행 우선, ID 기준 중복 제거
+  const seen = new Set<string>(airportRows.map(r => r.id));
+  for (const r of jetRows) if (!seen.has(r.id)) { seen.add(r.id); airportRows.push(r); }
+  return airportRows;
+}
+
 export async function rankedEvents(db: D1Database, context: Record<string, unknown>, tags: string[]): Promise<[EventRow, number][]> {
-  const [{ results }, allTags] = await Promise.all([
-    db.prepare("SELECT * FROM events").all<EventRow>(),
+  const [results, allTags] = await Promise.all([
+    fetchCandidates(db, context),
     loadAllTags(db),
   ]);
 
@@ -197,8 +242,8 @@ export async function rankedEvents(db: D1Database, context: Record<string, unkno
 }
 
 export async function rankedEventsWithTags(db: D1Database, context: Record<string, unknown>, tags: string[]): Promise<[EventRow, number, Set<string>][]> {
-  const [{ results }, allTags] = await Promise.all([
-    db.prepare("SELECT * FROM events").all<EventRow>(),
+  const [results, allTags] = await Promise.all([
+    fetchCandidates(db, context),
     loadAllTags(db),
   ]);
 
@@ -206,7 +251,7 @@ export async function rankedEventsWithTags(db: D1Database, context: Record<strin
   for (const event of results) {
     const eTags = allTags.get(event.id) ?? new Set<string>();
     const score = scoreEvent(event, context, tags, eTags);
-    if (score >= 15) scored.push([event, score, eTags]);
+    if (score >= 22) scored.push([event, score, eTags]);
   }
 
   return deduplicateResults(scored.sort(([, a], [, b]) => b - a));

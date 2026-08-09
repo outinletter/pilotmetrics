@@ -144,7 +144,12 @@ function tafWindowMatches(token: string, arrival: Date): boolean {
   const [, sd, sh, ed, eh] = m.map(Number);
   const ad = arrival.getUTCDate(), ah = arrival.getUTCHours();
   let start = sd * 24 + sh, end = ed * 24 + eh, arr = ad * 24 + ah;
-  if (end < start) { end += 31 * 24; if (arr < start) arr += 31 * 24; }
+  if (end < start) {
+    // month-aware wrap: use actual days in the arrival month instead of fixed 31
+    const daysInMonth = new Date(Date.UTC(arrival.getUTCFullYear(), arrival.getUTCMonth() + 1, 0)).getUTCDate();
+    end += daysInMonth * 24;
+    if (arr < start) arr += daysInMonth * 24;
+  }
   return start <= arr && arr <= end;
 }
 
@@ -216,10 +221,11 @@ export function selectArrivalTafSegment(taf: string, arrivalTime: string | null 
     const seg = fmSegments[i];
     const nextStart = fmSegments[i + 1]?.startMin ?? Infinity;
     // 월말 경계 처리: 다음 FM의 day가 작으면 다음 달로 넘어간 것
+    const daysInMonth = new Date(Date.UTC(arrival.getUTCFullYear(), arrival.getUTCMonth() + 1, 0)).getUTCDate();
     const effectiveNext = fmSegments[i + 1] && fmSegments[i + 1].startMin < seg.startMin
-      ? fmSegments[i + 1].startMin + 31 * 1440
+      ? fmSegments[i + 1].startMin + daysInMonth * 1440
       : nextStart;
-    const effectiveArr = arrMin < seg.startMin ? arrMin + 31 * 1440 : arrMin;
+    const effectiveArr = arrMin < seg.startMin ? arrMin + daysInMonth * 1440 : arrMin;
     if (effectiveArr >= seg.startMin && effectiveArr < effectiveNext) {
       bestFm = seg;
     }
