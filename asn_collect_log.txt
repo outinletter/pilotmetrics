@@ -1,0 +1,3848 @@
+
+[ASN] Starting (16 years)
+  Downloading 2010... done (6.2 MB)
+  [2010] 3934 accidents in file
+  [2010] Pending: 3934
+  Batch @0 (1/3934)... chk=20 new=7 [total=7]
+  Batch @20... FAILED (skipped, one-by-one)
+  Batch @40 (41/3934)... chk=20 new=7 [total=14]
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80 (81/3934)... chk=20 new=3 [total=17]
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120... FAILED (skipped, one-by-one)
+  Batch @140 (141/3934)... chk=20 new=5 [total=22]
+  Batch @160... FAILED (skipped, one-by-one)
+  Batch @180 (181/3934)... chk=20 new=6 [total=28]
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240 (241/3934)... chk=20 new=5 [total=33]
+  Batch @260 (261/3934)... chk=20 new=5 [total=38]
+  Batch @280 (281/3934)... chk=20 new=1 [total=39]
+  Batch @300 (301/3934)... chk=20 new=5 [total=44]
+  Batch @320 (321/3934)... chk=20 new=5 [total=49]
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360... FAILED (skipped, one-by-one)
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400 (401/3934)... chk=20 new=4 [total=53]
+  Batch @420 (421/3934)... chk=20 new=1 [total=54]
+  Batch @440 (441/3934)... chk=20 new=6 [total=60]
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500 (501/3934)... chk=20 new=1 [total=61]
+  Batch @520 (521/3934)... chk=20 new=4 [total=65]
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560 (561/3934)... chk=20 new=5 [total=70]
+  Batch @580 (581/3934)... chk=20 new=5 [total=75]
+  Batch @600 (601/3934)... chk=20 new=3 [total=78]
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740 (741/3934)... chk=20 new=3 [total=81]
+  Batch @760 (761/3934)... chk=20 new=3 [total=84]
+  Batch @780... FAILED (skipped, one-by-one)
+  Batch @800 (801/3934)... chk=20 new=5 [total=89]
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840 (841/3934)... chk=20 new=2 [total=91]
+  Batch @860 (861/3934)... chk=20 new=3 [total=94]
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900 (901/3934)... chk=20 new=5 [total=99]
+  Batch @920 (921/3934)... chk=20 new=2 [total=101]
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960 (961/3934)... chk=20 new=2 [total=103]
+  Batch @980... FAILED (skipped, one-by-one)
+  Batch @1000 (1001/3934)... chk=20 new=5 [total=108]
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040 (1041/3934)... chk=20 new=4 [total=112]
+  Batch @1060... FAILED (skipped, one-by-one)
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100 (1101/3934)... chk=20 new=3 [total=115]
+  Batch @1120 (1121/3934)... chk=20 new=3 [total=118]
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160 (1161/3934)... chk=20 new=3 [total=121]
+  Batch @1180 (1181/3934)... chk=20 new=3 [total=124]
+  Batch @1200 (1201/3934)... chk=20 new=3 [total=127]
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240 (1241/3934)... chk=20 new=4 [total=131]
+  Batch @1260 (1261/3934)... chk=20 new=2 [total=133]
+  Batch @1280 (1281/3934)... chk=20 new=3 [total=136]
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340 (1341/3934)... chk=20 new=2 [total=138]
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380 (1381/3934)... chk=20 new=3 [total=141]
+  Batch @1400 (1401/3934)... chk=20 new=4 [total=145]
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440 (1441/3934)... chk=20 new=4 [total=149]
+  Batch @1460 (1461/3934)... chk=20 new=1 [total=150]
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540 (1541/3934)... chk=20 new=4 [total=154]
+  Batch @1560 (1561/3934)... chk=20 new=4 [total=158]
+  Batch @1580 (1581/3934)... chk=20 new=3 [total=161]
+  Batch @1600 (1601/3934)... chk=20 new=4 [total=165]
+  Batch @1620 (1621/3934)... chk=20 new=2 [total=167]
+  Batch @1640 (1641/3934)... chk=20 new=3 [total=170]
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680 (1681/3934)... chk=20 new=2 [total=172]
+  Batch @1700 (1701/3934)... chk=20 new=6 [total=178]
+  Batch @1720... FAILED (skipped, one-by-one)
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760 (1761/3934)... chk=20 new=4 [total=182]
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820... FAILED (skipped, one-by-one)
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860 (1861/3934)... chk=20 new=1 [total=183]
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900 (1901/3934)... chk=20 new=1 [total=184]
+  Batch @1920 (1921/3934)... chk=20 new=4 [total=188]
+  Batch @1940 (1941/3934)... chk=20 new=4 [total=192]
+  Batch @1960 (1961/3934)... chk=20 new=0 [total=192]
+  Batch @1980... FAILED (skipped, one-by-one)
+  Batch @2000 (2001/3934)... chk=20 new=2 [total=194]
+  Batch @2020 (2021/3934)... chk=20 new=2 [total=196]
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080 (2081/3934)... chk=20 new=0 [total=196]
+  Batch @2100 (2101/3934)... chk=20 new=0 [total=196]
+  Batch @2120 (2121/3934)... chk=20 new=5 [total=201]
+  Batch @2140 (2141/3934)... chk=20 new=4 [total=205]
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180 (2181/3934)... chk=20 new=3 [total=208]
+  Batch @2200 (2201/3934)... chk=20 new=4 [total=212]
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260 (2261/3934)... chk=20 new=3 [total=215]
+  Batch @2280 (2281/3934)... chk=20 new=3 [total=218]
+  Batch @2300 (2301/3934)... chk=20 new=5 [total=223]
+  Batch @2320 (2321/3934)... chk=20 new=0 [total=223]
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360 (2361/3934)... chk=20 new=4 [total=227]
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400 (2401/3934)... chk=20 new=7 [total=234]
+  Batch @2420... FAILED (skipped, one-by-one)
+  Batch @2440... FAILED (skipped, one-by-one)
+  Batch @2460 (2461/3934)... chk=20 new=4 [total=238]
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520 (2521/3934)... chk=20 new=2 [total=240]
+  Batch @2540 (2541/3934)... chk=20 new=3 [total=243]
+  Batch @2560 (2561/3934)... chk=20 new=5 [total=248]
+  Batch @2580 (2581/3934)... chk=20 new=2 [total=250]
+  Batch @2600 (2601/3934)... chk=20 new=1 [total=251]
+  Batch @2620 (2621/3934)... chk=20 new=2 [total=253]
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660 (2661/3934)... chk=20 new=4 [total=257]
+  Batch @2680 (2681/3934)... chk=20 new=8 [total=265]
+  Batch @2700 (2701/3934)... chk=20 new=4 [total=269]
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740... FAILED (skipped, one-by-one)
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780 (2781/3934)... chk=20 new=3 [total=272]
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820 (2821/3934)... chk=20 new=4 [total=276]
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860 (2861/3934)... chk=20 new=2 [total=278]
+  Batch @2880 (2881/3934)... chk=20 new=1 [total=279]
+  Batch @2900 (2901/3934)... chk=20 new=5 [total=284]
+  Batch @2920 (2921/3934)... chk=20 new=6 [total=290]
+  Batch @2940 (2941/3934)... chk=20 new=5 [total=295]
+  Batch @2960 (2961/3934)... chk=20 new=4 [total=299]
+  Batch @2980 (2981/3934)... chk=20 new=4 [total=303]
+  Batch @3000 (3001/3934)... chk=20 new=3 [total=306]
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060 (3061/3934)... chk=20 new=2 [total=308]
+  Batch @3080 (3081/3934)... chk=20 new=5 [total=313]
+  Batch @3100 (3101/3934)... chk=20 new=7 [total=320]
+  Batch @3120 (3121/3934)... chk=20 new=4 [total=324]
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180 (3181/3934)... chk=20 new=4 [total=328]
+  Batch @3200 (3201/3934)... chk=20 new=5 [total=333]
+  Batch @3220 (3221/3934)... chk=20 new=4 [total=337]
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300 (3301/3934)... chk=20 new=4 [total=341]
+  Batch @3320 (3321/3934)... chk=20 new=3 [total=344]
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360 (3361/3934)... chk=20 new=8 [total=352]
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420 (3421/3934)... chk=20 new=6 [total=358]
+  Batch @3440... FAILED (skipped, one-by-one)
+  Batch @3460 (3461/3934)... chk=20 new=4 [total=362]
+  Batch @3480 (3481/3934)... chk=20 new=3 [total=365]
+  Batch @3500 (3501/3934)... chk=20 new=3 [total=368]
+  Batch @3520... FAILED (skipped, one-by-one)
+  Batch @3540 (3541/3934)... chk=20 new=5 [total=373]
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580 (3581/3934)... chk=20 new=3 [total=376]
+  Batch @3600 (3601/3934)... chk=20 new=8 [total=384]
+  Batch @3620 (3621/3934)... chk=20 new=10 [total=394]
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660 (3661/3934)... chk=20 new=3 [total=397]
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700... FAILED (skipped, one-by-one)
+  Batch @3720 (3721/3934)... chk=20 new=4 [total=401]
+  Batch @3740 (3741/3934)... chk=20 new=4 [total=405]
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780 (3781/3934)... chk=20 new=7 [total=412]
+  Batch @3800 (3801/3934)... chk=20 new=7 [total=419]
+  Batch @3820 (3821/3934)... chk=20 new=5 [total=424]
+  Batch @3840 (3841/3934)... chk=20 new=4 [total=428]
+  Batch @3860 (3861/3934)... chk=20 new=2 [total=430]
+  Batch @3880 (3881/3934)... chk=20 new=5 [total=435]
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920 (3921/3934)... chk=14 new=2 [total=437]
+  Downloading 2011... done (0.8 MB)
+  [2011] 3934 accidents in file
+  [2011] Pending: 3934
+  Batch @0 (1/3934)... chk=20 new=0 [total=437]
+  Batch @20... FAILED (skipped, one-by-one)
+  Batch @40 (41/3934)... chk=20 new=0 [total=437]
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80 (81/3934)... chk=20 new=0 [total=437]
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120... FAILED (skipped, one-by-one)
+  Batch @140 (141/3934)... chk=20 new=0 [total=437]
+  Batch @160... FAILED (skipped, one-by-one)
+  Batch @180 (181/3934)... chk=20 new=0 [total=437]
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240 (241/3934)... chk=20 new=0 [total=437]
+  Batch @260 (261/3934)... chk=20 new=0 [total=437]
+  Batch @280 (281/3934)... chk=20 new=0 [total=437]
+  Batch @300 (301/3934)... chk=20 new=0 [total=437]
+  Batch @320 (321/3934)... chk=20 new=0 [total=437]
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360... FAILED (skipped, one-by-one)
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400 (401/3934)... chk=20 new=0 [total=437]
+  Batch @420 (421/3934)... chk=20 new=0 [total=437]
+  Batch @440 (441/3934)... chk=20 new=0 [total=437]
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500 (501/3934)... chk=20 new=0 [total=437]
+  Batch @520 (521/3934)... chk=20 new=0 [total=437]
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560 (561/3934)... chk=20 new=0 [total=437]
+  Batch @580 (581/3934)... chk=20 new=0 [total=437]
+  Batch @600 (601/3934)... chk=20 new=0 [total=437]
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740 (741/3934)... chk=20 new=0 [total=437]
+  Batch @760 (761/3934)... chk=20 new=0 [total=437]
+  Batch @780... FAILED (skipped, one-by-one)
+  Batch @800 (801/3934)... chk=20 new=0 [total=437]
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840 (841/3934)... chk=20 new=0 [total=437]
+  Batch @860 (861/3934)... chk=20 new=0 [total=437]
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900 (901/3934)... chk=20 new=0 [total=437]
+  Batch @920 (921/3934)... chk=20 new=0 [total=437]
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960 (961/3934)... chk=20 new=0 [total=437]
+  Batch @980... FAILED (skipped, one-by-one)
+  Batch @1000 (1001/3934)... chk=20 new=0 [total=437]
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040 (1041/3934)... chk=20 new=0 [total=437]
+  Batch @1060... FAILED (skipped, one-by-one)
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100 (1101/3934)... chk=20 new=0 [total=437]
+  Batch @1120 (1121/3934)... chk=20 new=0 [total=437]
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160 (1161/3934)... chk=20 new=0 [total=437]
+  Batch @1180 (1181/3934)... chk=20 new=0 [total=437]
+  Batch @1200 (1201/3934)... chk=20 new=0 [total=437]
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240 (1241/3934)... chk=20 new=0 [total=437]
+  Batch @1260 (1261/3934)... chk=20 new=0 [total=437]
+  Batch @1280 (1281/3934)... chk=20 new=0 [total=437]
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340 (1341/3934)... chk=20 new=0 [total=437]
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380 (1381/3934)... chk=20 new=0 [total=437]
+  Batch @1400 (1401/3934)... chk=20 new=0 [total=437]
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440 (1441/3934)... chk=20 new=0 [total=437]
+  Batch @1460 (1461/3934)... chk=20 new=0 [total=437]
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540 (1541/3934)... chk=20 new=0 [total=437]
+  Batch @1560 (1561/3934)... chk=20 new=0 [total=437]
+  Batch @1580 (1581/3934)... chk=20 new=0 [total=437]
+  Batch @1600 (1601/3934)... chk=20 new=0 [total=437]
+  Batch @1620 (1621/3934)... chk=20 new=0 [total=437]
+  Batch @1640 (1641/3934)... chk=20 new=0 [total=437]
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680 (1681/3934)... chk=20 new=0 [total=437]
+  Batch @1700 (1701/3934)... chk=20 new=0 [total=437]
+  Batch @1720... FAILED (skipped, one-by-one)
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760 (1761/3934)... chk=20 new=0 [total=437]
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820... FAILED (skipped, one-by-one)
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860 (1861/3934)... chk=20 new=0 [total=437]
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900 (1901/3934)... chk=20 new=0 [total=437]
+  Batch @1920 (1921/3934)... chk=20 new=0 [total=437]
+  Batch @1940 (1941/3934)... chk=20 new=0 [total=437]
+  Batch @1960 (1961/3934)... chk=20 new=0 [total=437]
+  Batch @1980... FAILED (skipped, one-by-one)
+  Batch @2000 (2001/3934)... chk=20 new=0 [total=437]
+  Batch @2020 (2021/3934)... chk=20 new=0 [total=437]
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080 (2081/3934)... chk=20 new=0 [total=437]
+  Batch @2100 (2101/3934)... chk=20 new=0 [total=437]
+  Batch @2120 (2121/3934)... chk=20 new=0 [total=437]
+  Batch @2140 (2141/3934)... chk=20 new=0 [total=437]
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180 (2181/3934)... chk=20 new=0 [total=437]
+  Batch @2200 (2201/3934)... chk=20 new=0 [total=437]
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260 (2261/3934)... chk=20 new=0 [total=437]
+  Batch @2280 (2281/3934)... chk=20 new=0 [total=437]
+  Batch @2300 (2301/3934)... chk=20 new=0 [total=437]
+  Batch @2320 (2321/3934)... chk=20 new=0 [total=437]
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360 (2361/3934)... chk=20 new=0 [total=437]
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400 (2401/3934)... chk=20 new=0 [total=437]
+  Batch @2420... FAILED (skipped, one-by-one)
+  Batch @2440... FAILED (skipped, one-by-one)
+  Batch @2460 (2461/3934)... chk=20 new=0 [total=437]
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520 (2521/3934)... chk=20 new=0 [total=437]
+  Batch @2540 (2541/3934)... chk=20 new=0 [total=437]
+  Batch @2560 (2561/3934)... chk=20 new=0 [total=437]
+  Batch @2580 (2581/3934)... chk=20 new=0 [total=437]
+  Batch @2600 (2601/3934)... chk=20 new=0 [total=437]
+  Batch @2620 (2621/3934)... chk=20 new=0 [total=437]
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660 (2661/3934)... chk=20 new=0 [total=437]
+  Batch @2680 (2681/3934)... chk=20 new=0 [total=437]
+  Batch @2700 (2701/3934)... chk=20 new=0 [total=437]
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740... FAILED (skipped, one-by-one)
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780 (2781/3934)... chk=20 new=0 [total=437]
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820 (2821/3934)... chk=20 new=0 [total=437]
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860 (2861/3934)... chk=20 new=0 [total=437]
+  Batch @2880 (2881/3934)... chk=20 new=0 [total=437]
+  Batch @2900 (2901/3934)... chk=20 new=0 [total=437]
+  Batch @2920 (2921/3934)... chk=20 new=0 [total=437]
+  Batch @2940 (2941/3934)... chk=20 new=0 [total=437]
+  Batch @2960 (2961/3934)... chk=20 new=0 [total=437]
+  Batch @2980 (2981/3934)... chk=20 new=0 [total=437]
+  Batch @3000 (3001/3934)... chk=20 new=0 [total=437]
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060 (3061/3934)... chk=20 new=0 [total=437]
+  Batch @3080 (3081/3934)... chk=20 new=0 [total=437]
+  Batch @3100 (3101/3934)... chk=20 new=0 [total=437]
+  Batch @3120 (3121/3934)... chk=20 new=0 [total=437]
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180 (3181/3934)... chk=20 new=0 [total=437]
+  Batch @3200 (3201/3934)... chk=20 new=0 [total=437]
+  Batch @3220 (3221/3934)... chk=20 new=0 [total=437]
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300 (3301/3934)... chk=20 new=0 [total=437]
+  Batch @3320 (3321/3934)... chk=20 new=0 [total=437]
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360 (3361/3934)... chk=20 new=0 [total=437]
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420 (3421/3934)... chk=20 new=0 [total=437]
+  Batch @3440... FAILED (skipped, one-by-one)
+  Batch @3460 (3461/3934)... chk=20 new=0 [total=437]
+  Batch @3480 (3481/3934)... chk=20 new=0 [total=437]
+  Batch @3500 (3501/3934)... chk=20 new=0 [total=437]
+  Batch @3520... FAILED (skipped, one-by-one)
+  Batch @3540 (3541/3934)... chk=20 new=0 [total=437]
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580 (3581/3934)... chk=20 new=0 [total=437]
+  Batch @3600 (3601/3934)... chk=20 new=0 [total=437]
+  Batch @3620 (3621/3934)... chk=20 new=0 [total=437]
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660 (3661/3934)... chk=20 new=0 [total=437]
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700... FAILED (skipped, one-by-one)
+  Batch @3720 (3721/3934)... chk=20 new=0 [total=437]
+  Batch @3740 (3741/3934)... chk=20 new=0 [total=437]
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780 (3781/3934)... chk=20 new=0 [total=437]
+  Batch @3800 (3801/3934)... chk=20 new=0 [total=437]
+  Batch @3820 (3821/3934)... chk=20 new=0 [total=437]
+  Batch @3840 (3841/3934)... chk=20 new=0 [total=437]
+  Batch @3860 (3861/3934)... chk=20 new=0 [total=437]
+  Batch @3880 (3881/3934)... chk=20 new=0 [total=437]
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920 (3921/3934)... chk=14 new=0 [total=437]
+  Downloading 2012... done (7.3 MB)
+  [2012] 4567 accidents in file
+  [2012] Pending: 4567
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20... FAILED (skipped, one-by-one)
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80... FAILED (skipped, one-by-one)
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120... FAILED (skipped, one-by-one)
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160 (161/4567)... chk=20 new=5 [total=442]
+  Batch @180 (181/4567)... chk=20 new=4 [total=446]
+  Batch @200 (201/4567)... chk=20 new=6 [total=452]
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240... FAILED (skipped, one-by-one)
+  Batch @260... FAILED (skipped, one-by-one)
+  Batch @280... FAILED (skipped, one-by-one)
+  Batch @300 (301/4567)... chk=20 new=5 [total=457]
+  Batch @320 (321/4567)... chk=20 new=3 [total=460]
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360... FAILED (skipped, one-by-one)
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420 (421/4567)... chk=20 new=6 [total=466]
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460 (461/4567)... chk=20 new=8 [total=474]
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520... FAILED (skipped, one-by-one)
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560 (561/4567)... chk=20 new=5 [total=479]
+  Batch @580 (581/4567)... chk=20 new=5 [total=484]
+  Batch @600 (601/4567)... chk=20 new=8 [total=492]
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700 (701/4567)... chk=20 new=7 [total=499]
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740 (741/4567)... chk=20 new=4 [total=503]
+  Batch @760 (761/4567)... chk=20 new=6 [total=509]
+  Batch @780 (781/4567)... chk=20 new=3 [total=512]
+  Batch @800 (801/4567)... chk=20 new=5 [total=517]
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840 (841/4567)... chk=20 new=5 [total=522]
+  Batch @860 (861/4567)... chk=20 new=3 [total=525]
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900... FAILED (skipped, one-by-one)
+  Batch @920... FAILED (skipped, one-by-one)
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960... FAILED (skipped, one-by-one)
+  Batch @980 (981/4567)... chk=20 new=2 [total=527]
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060 (1061/4567)... chk=20 new=5 [total=532]
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100 (1101/4567)... chk=20 new=9 [total=541]
+  Batch @1120... FAILED (skipped, one-by-one)
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180 (1181/4567)... chk=20 new=4 [total=545]
+  Batch @1200... FAILED (skipped, one-by-one)
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240... FAILED (skipped, one-by-one)
+  Batch @1260 (1261/4567)... chk=20 new=4 [total=549]
+  Batch @1280... FAILED (skipped, one-by-one)
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380... FAILED (skipped, one-by-one)
+  Batch @1400 (1401/4567)... chk=20 new=3 [total=552]
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440 (1441/4567)... chk=20 new=4 [total=556]
+  Batch @1460... FAILED (skipped, one-by-one)
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520 (1521/4567)... chk=20 new=3 [total=559]
+  Batch @1540 (1541/4567)... chk=20 new=2 [total=561]
+  Batch @1560... FAILED (skipped, one-by-one)
+  Batch @1580... FAILED (skipped, one-by-one)
+  Batch @1600... FAILED (skipped, one-by-one)
+  Batch @1620... FAILED (skipped, one-by-one)
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660 (1661/4567)... chk=20 new=0 [total=561]
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720... FAILED (skipped, one-by-one)
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800 (1801/4567)... chk=20 new=4 [total=565]
+  Batch @1820 (1821/4567)... chk=20 new=6 [total=571]
+  Batch @1840 (1841/4567)... chk=20 new=4 [total=575]
+  Batch @1860 (1861/4567)... chk=20 new=4 [total=579]
+  Batch @1880 (1881/4567)... chk=20 new=3 [total=582]
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940 (1941/4567)... chk=20 new=5 [total=587]
+  Batch @1960 (1961/4567)... chk=20 new=4 [total=591]
+  Batch @1980... FAILED (skipped, one-by-one)
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020 (2021/4567)... chk=20 new=1 [total=592]
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080 (2081/4567)... chk=20 new=6 [total=598]
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140... FAILED (skipped, one-by-one)
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180 (2181/4567)... chk=20 new=1 [total=599]
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220 (2221/4567)... chk=20 new=0 [total=599]
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260 (2261/4567)... chk=20 new=2 [total=601]
+  Batch @2280 (2281/4567)... chk=20 new=4 [total=605]
+  Batch @2300 (2301/4567)... chk=20 new=6 [total=611]
+  Batch @2320 (2321/4567)... chk=20 new=4 [total=615]
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380 (2381/4567)... chk=20 new=1 [total=616]
+  Batch @2400... FAILED (skipped, one-by-one)
+  Batch @2420... FAILED (skipped, one-by-one)
+  Batch @2440 (2441/4567)... chk=20 new=1 [total=617]
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480 (2481/4567)... chk=20 new=7 [total=624]
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520 (2521/4567)... chk=20 new=1 [total=625]
+  Batch @2540 (2541/4567)... chk=20 new=0 [total=625]
+  Batch @2560... FAILED (skipped, one-by-one)
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600... FAILED (skipped, one-by-one)
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660 (2661/4567)... chk=20 new=5 [total=630]
+  Batch @2680 (2681/4567)... chk=20 new=2 [total=632]
+  Batch @2700... FAILED (skipped, one-by-one)
+  Batch @2720 (2721/4567)... chk=20 new=4 [total=636]
+  Batch @2740... FAILED (skipped, one-by-one)
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780... FAILED (skipped, one-by-one)
+  Batch @2800 (2801/4567)... chk=20 new=3 [total=639]
+  Batch @2820 (2821/4567)... chk=20 new=4 [total=643]
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920... FAILED (skipped, one-by-one)
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980... FAILED (skipped, one-by-one)
+  Batch @3000 (3001/4567)... chk=20 new=4 [total=647]
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060 (3061/4567)... chk=20 new=4 [total=651]
+  Batch @3080 (3081/4567)... chk=20 new=6 [total=657]
+  Batch @3100... FAILED (skipped, one-by-one)
+  Batch @3120... FAILED (skipped, one-by-one)
+  Batch @3140 (3141/4567)... chk=20 new=3 [total=660]
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200 (3201/4567)... chk=20 new=2 [total=662]
+  Batch @3220... FAILED (skipped, one-by-one)
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260 (3261/4567)... chk=20 new=1 [total=663]
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340 (3341/4567)... chk=20 new=3 [total=666]
+  Batch @3360 (3361/4567)... chk=20 new=2 [total=668]
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440 (3441/4567)... chk=20 new=3 [total=671]
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480... FAILED (skipped, one-by-one)
+  Batch @3500... FAILED (skipped, one-by-one)
+  Batch @3520... FAILED (skipped, one-by-one)
+  Batch @3540... FAILED (skipped, one-by-one)
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600... FAILED (skipped, one-by-one)
+  Batch @3620 (3621/4567)... chk=20 new=2 [total=673]
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660 (3661/4567)... chk=20 new=7 [total=680]
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700... FAILED (skipped, one-by-one)
+  Batch @3720... FAILED (skipped, one-by-one)
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760 (3761/4567)... chk=20 new=4 [total=684]
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800... FAILED (skipped, one-by-one)
+  Batch @3820 (3821/4567)... chk=20 new=8 [total=692]
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920 (3921/4567)... chk=20 new=5 [total=697]
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960... FAILED (skipped, one-by-one)
+  Batch @3980 (3981/4567)... chk=20 new=4 [total=701]
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060 (4061/4567)... chk=20 new=4 [total=705]
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100... FAILED (skipped, one-by-one)
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140 (4141/4567)... chk=20 new=6 [total=711]
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180 (4181/4567)... chk=20 new=5 [total=716]
+  Batch @4200... FAILED (skipped, one-by-one)
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240 (4241/4567)... chk=20 new=6 [total=722]
+  Batch @4260 (4261/4567)... chk=20 new=5 [total=727]
+  Batch @4280... FAILED (skipped, one-by-one)
+  Batch @4300 (4301/4567)... chk=20 new=3 [total=730]
+  Batch @4320... FAILED (skipped, one-by-one)
+  Batch @4340 (4341/4567)... chk=20 new=4 [total=734]
+  Batch @4360 (4361/4567)... chk=20 new=3 [total=737]
+  Batch @4380... FAILED (skipped, one-by-one)
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420... FAILED (skipped, one-by-one)
+  Batch @4440 (4441/4567)... chk=20 new=0 [total=737]
+  Batch @4460... FAILED (skipped, one-by-one)
+  Batch @4480... FAILED (skipped, one-by-one)
+  Batch @4500... FAILED (skipped, one-by-one)
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540... FAILED (skipped, one-by-one)
+  Batch @4560 (4561/4567)... chk=7 new=2 [total=739]
+  Downloading 2013... done (6.6 MB)
+  [2013] 4221 accidents in file
+  [2013] Pending: 4221
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20... FAILED (skipped, one-by-one)
+  Batch @40 (41/4221)... chk=20 new=6 [total=745]
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80... FAILED (skipped, one-by-one)
+  Batch @100 (101/4221)... chk=20 new=6 [total=751]
+  Batch @120... FAILED (skipped, one-by-one)
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160 (161/4221)... chk=20 new=8 [total=759]
+  Batch @180 (181/4221)... chk=20 new=6 [total=765]
+  Batch @200 (201/4221)... chk=20 new=8 [total=773]
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240... FAILED (skipped, one-by-one)
+  Batch @260... FAILED (skipped, one-by-one)
+  Batch @280... FAILED (skipped, one-by-one)
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360 (361/4221)... chk=20 new=5 [total=778]
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400 (401/4221)... chk=20 new=8 [total=786]
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440 (441/4221)... chk=20 new=4 [total=790]
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480 (481/4221)... chk=20 new=9 [total=799]
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520 (521/4221)... chk=20 new=7 [total=806]
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580... FAILED (skipped, one-by-one)
+  Batch @600 (601/4221)... chk=20 new=5 [total=811]
+  Batch @620 (621/4221)... chk=20 new=8 [total=819]
+  Batch @640 (641/4221)... chk=20 new=8 [total=827]
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720 (721/4221)... chk=20 new=4 [total=831]
+  Batch @740 (741/4221)... chk=20 new=3 [total=834]
+  Batch @760... FAILED (skipped, one-by-one)
+  Batch @780 (781/4221)... chk=20 new=4 [total=838]
+  Batch @800 (801/4221)... chk=20 new=5 [total=843]
+  Batch @820 (821/4221)... chk=20 new=3 [total=846]
+  Batch @840 (841/4221)... chk=20 new=4 [total=850]
+  Batch @860... FAILED (skipped, one-by-one)
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900... FAILED (skipped, one-by-one)
+  Batch @920... FAILED (skipped, one-by-one)
+  Batch @940 (941/4221)... chk=20 new=1 [total=851]
+  Batch @960... FAILED (skipped, one-by-one)
+  Batch @980 (981/4221)... chk=20 new=4 [total=855]
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020 (1021/4221)... chk=20 new=6 [total=861]
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060 (1061/4221)... chk=20 new=1 [total=862]
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100 (1101/4221)... chk=20 new=1 [total=863]
+  Batch @1120... FAILED (skipped, one-by-one)
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180... FAILED (skipped, one-by-one)
+  Batch @1200... FAILED (skipped, one-by-one)
+  Batch @1220 (1221/4221)... chk=20 new=2 [total=865]
+  Batch @1240... FAILED (skipped, one-by-one)
+  Batch @1260 (1261/4221)... chk=20 new=1 [total=866]
+  Batch @1280... FAILED (skipped, one-by-one)
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340 (1341/4221)... chk=20 new=4 [total=870]
+  Batch @1360 (1361/4221)... chk=20 new=3 [total=873]
+  Batch @1380 (1381/4221)... chk=20 new=3 [total=876]
+  Batch @1400 (1401/4221)... chk=20 new=4 [total=880]
+  Batch @1420 (1421/4221)... chk=20 new=2 [total=882]
+  Batch @1440 (1441/4221)... chk=20 new=5 [total=887]
+  Batch @1460 (1461/4221)... chk=20 new=4 [total=891]
+  Batch @1480 (1481/4221)... chk=20 new=2 [total=893]
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520 (1521/4221)... chk=20 new=6 [total=899]
+  Batch @1540 (1541/4221)... chk=20 new=2 [total=901]
+  Batch @1560... FAILED (skipped, one-by-one)
+  Batch @1580 (1581/4221)... chk=20 new=2 [total=903]
+  Batch @1600... FAILED (skipped, one-by-one)
+  Batch @1620 (1621/4221)... chk=20 new=2 [total=905]
+  Batch @1640 (1641/4221)... chk=20 new=3 [total=908]
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720... FAILED (skipped, one-by-one)
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820 (1821/4221)... chk=20 new=4 [total=912]
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860 (1861/4221)... chk=20 new=0 [total=912]
+  Batch @1880 (1881/4221)... chk=20 new=2 [total=914]
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980... FAILED (skipped, one-by-one)
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040 (2041/4221)... chk=20 new=5 [total=919]
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080... FAILED (skipped, one-by-one)
+  Batch @2100 (2101/4221)... chk=20 new=3 [total=922]
+  Batch @2120 (2121/4221)... chk=20 new=2 [total=924]
+  Batch @2140 (2141/4221)... chk=20 new=4 [total=928]
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220 (2221/4221)... chk=20 new=2 [total=930]
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280... FAILED (skipped, one-by-one)
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320 (2321/4221)... chk=20 new=3 [total=933]
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360 (2361/4221)... chk=20 new=0 [total=933]
+  Batch @2380 (2381/4221)... chk=20 new=1 [total=934]
+  Batch @2400 (2401/4221)... chk=20 new=3 [total=937]
+  Batch @2420 (2421/4221)... chk=20 new=1 [total=938]
+  Batch @2440 (2441/4221)... chk=20 new=3 [total=941]
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500 (2501/4221)... chk=20 new=2 [total=943]
+  Batch @2520 (2521/4221)... chk=20 new=3 [total=946]
+  Batch @2540... FAILED (skipped, one-by-one)
+  Batch @2560 (2561/4221)... chk=20 new=4 [total=950]
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600 (2601/4221)... chk=20 new=6 [total=956]
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640 (2641/4221)... chk=20 new=2 [total=958]
+  Batch @2660... FAILED (skipped, one-by-one)
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700 (2701/4221)... chk=20 new=5 [total=963]
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740 (2741/4221)... chk=20 new=4 [total=967]
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780 (2781/4221)... chk=20 new=1 [total=968]
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820 (2821/4221)... chk=20 new=3 [total=971]
+  Batch @2840 (2841/4221)... chk=20 new=6 [total=977]
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920... FAILED (skipped, one-by-one)
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980... FAILED (skipped, one-by-one)
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040 (3041/4221)... chk=20 new=0 [total=977]
+  Batch @3060 (3061/4221)... chk=20 new=2 [total=979]
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100... FAILED (skipped, one-by-one)
+  Batch @3120 (3121/4221)... chk=20 new=6 [total=985]
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220... FAILED (skipped, one-by-one)
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280 (3281/4221)... chk=20 new=4 [total=989]
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340 (3341/4221)... chk=20 new=4 [total=993]
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400 (3401/4221)... chk=20 new=4 [total=997]
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440 (3441/4221)... chk=20 new=4 [total=1001]
+  Batch @3460 (3461/4221)... chk=20 new=4 [total=1005]
+  Batch @3480 (3481/4221)... chk=20 new=5 [total=1010]
+  Batch @3500 (3501/4221)... chk=20 new=7 [total=1017]
+  Batch @3520... FAILED (skipped, one-by-one)
+  Batch @3540 (3541/4221)... chk=20 new=4 [total=1021]
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600... FAILED (skipped, one-by-one)
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700 (3701/4221)... chk=20 new=5 [total=1026]
+  Batch @3720 (3721/4221)... chk=20 new=5 [total=1031]
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780 (3781/4221)... chk=20 new=2 [total=1033]
+  Batch @3800... FAILED (skipped, one-by-one)
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860 (3861/4221)... chk=20 new=6 [total=1039]
+  Batch @3880 (3881/4221)... chk=20 new=3 [total=1042]
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960... FAILED (skipped, one-by-one)
+  Batch @3980... FAILED (skipped, one-by-one)
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020 (4021/4221)... chk=20 new=4 [total=1046]
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080 (4081/4221)... chk=20 new=3 [total=1049]
+  Batch @4100... FAILED (skipped, one-by-one)
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140 (4141/4221)... chk=20 new=8 [total=1057]
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180 (4181/4221)... chk=20 new=5 [total=1062]
+  Batch @4200 (4201/4221)... chk=20 new=3 [total=1065]
+  Batch @4220 (4221/4221)... chk=1 new=0 [total=1065]
+  Downloading 2014... done (7.3 MB)
+  [2014] 4579 accidents in file
+  [2014] Pending: 4579
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20... FAILED (skipped, one-by-one)
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60 (61/4579)... chk=20 new=9 [total=1074]
+  Batch @80... FAILED (skipped, one-by-one)
+  Batch @100 (101/4579)... chk=20 new=7 [total=1081]
+  Batch @120 (121/4579)... chk=20 new=5 [total=1086]
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160... FAILED (skipped, one-by-one)
+  Batch @180... FAILED (skipped, one-by-one)
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240... FAILED (skipped, one-by-one)
+  Batch @260... FAILED (skipped, one-by-one)
+  Batch @280 (281/4579)... chk=20 new=5 [total=1091]
+  Batch @300 (301/4579)... chk=20 new=8 [total=1099]
+  Batch @320 (321/4579)... chk=20 new=9 [total=1108]
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360 (361/4579)... chk=20 new=6 [total=1114]
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400 (401/4579)... chk=20 new=3 [total=1117]
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460 (461/4579)... chk=20 new=1 [total=1118]
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520... FAILED (skipped, one-by-one)
+  Batch @540 (541/4579)... chk=20 new=3 [total=1121]
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580 (581/4579)... chk=20 new=5 [total=1126]
+  Batch @600 (601/4579)... chk=20 new=7 [total=1133]
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640 (641/4579)... chk=20 new=4 [total=1137]
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760... FAILED (skipped, one-by-one)
+  Batch @780... FAILED (skipped, one-by-one)
+  Batch @800 (801/4579)... chk=20 new=8 [total=1145]
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840 (841/4579)... chk=20 new=5 [total=1150]
+  Batch @860... FAILED (skipped, one-by-one)
+  Batch @880 (881/4579)... chk=20 new=3 [total=1153]
+  Batch @900... FAILED (skipped, one-by-one)
+  Batch @920 (921/4579)... chk=20 new=2 [total=1155]
+  Batch @940 (941/4579)... chk=20 new=4 [total=1159]
+  Batch @960 (961/4579)... chk=20 new=8 [total=1167]
+  Batch @980... FAILED (skipped, one-by-one)
+  Batch @1000 (1001/4579)... chk=20 new=7 [total=1174]
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060 (1061/4579)... chk=20 new=4 [total=1178]
+  Batch @1080 (1081/4579)... chk=20 new=5 [total=1183]
+  Batch @1100 (1101/4579)... chk=20 new=2 [total=1185]
+  Batch @1120... FAILED (skipped, one-by-one)
+  Batch @1140 (1141/4579)... chk=20 new=1 [total=1186]
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180... FAILED (skipped, one-by-one)
+  Batch @1200 (1201/4579)... chk=20 new=4 [total=1190]
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240 (1241/4579)... chk=20 new=1 [total=1191]
+  Batch @1260... FAILED (skipped, one-by-one)
+  Batch @1280... FAILED (skipped, one-by-one)
+  Batch @1300 (1301/4579)... chk=20 new=2 [total=1193]
+  Batch @1320 (1321/4579)... chk=20 new=8 [total=1201]
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380... FAILED (skipped, one-by-one)
+  Batch @1400... FAILED (skipped, one-by-one)
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440... FAILED (skipped, one-by-one)
+  Batch @1460 (1461/4579)... chk=20 new=1 [total=1202]
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500 (1501/4579)... chk=20 new=4 [total=1206]
+  Batch @1520 (1521/4579)... chk=20 new=7 [total=1213]
+  Batch @1540... FAILED (skipped, one-by-one)
+  Batch @1560 (1561/4579)... chk=20 new=2 [total=1215]
+  Batch @1580... FAILED (skipped, one-by-one)
+  Batch @1600... FAILED (skipped, one-by-one)
+  Batch @1620... FAILED (skipped, one-by-one)
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660 (1661/4579)... chk=20 new=3 [total=1218]
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720 (1721/4579)... chk=20 new=4 [total=1222]
+  Batch @1740 (1741/4579)... chk=20 new=3 [total=1225]
+  Batch @1760 (1761/4579)... chk=20 new=2 [total=1227]
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820 (1821/4579)... chk=20 new=0 [total=1227]
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860 (1861/4579)... chk=20 new=5 [total=1232]
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980 (1981/4579)... chk=20 new=3 [total=1235]
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040 (2041/4579)... chk=20 new=8 [total=1243]
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080... FAILED (skipped, one-by-one)
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140 (2141/4579)... chk=20 new=4 [total=1247]
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220 (2221/4579)... chk=20 new=4 [total=1251]
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280 (2281/4579)... chk=20 new=3 [total=1254]
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320 (2321/4579)... chk=20 new=4 [total=1258]
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360 (2361/4579)... chk=20 new=2 [total=1260]
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400 (2401/4579)... chk=20 new=6 [total=1266]
+  Batch @2420 (2421/4579)... chk=20 new=3 [total=1269]
+  Batch @2440 (2441/4579)... chk=20 new=3 [total=1272]
+  Batch @2460 (2461/4579)... chk=20 new=5 [total=1277]
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520 (2521/4579)... chk=20 new=5 [total=1282]
+  Batch @2540 (2541/4579)... chk=20 new=4 [total=1286]
+  Batch @2560 (2561/4579)... chk=20 new=1 [total=1287]
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600... FAILED (skipped, one-by-one)
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660... FAILED (skipped, one-by-one)
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700... FAILED (skipped, one-by-one)
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740... FAILED (skipped, one-by-one)
+  Batch @2760 (2761/4579)... chk=20 new=4 [total=1291]
+  Batch @2780... FAILED (skipped, one-by-one)
+  Batch @2800 (2801/4579)... chk=20 new=3 [total=1294]
+  Batch @2820 (2821/4579)... chk=20 new=6 [total=1300]
+  Batch @2840 (2841/4579)... chk=20 new=4 [total=1304]
+  Batch @2860 (2861/4579)... chk=20 new=3 [total=1307]
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920... FAILED (skipped, one-by-one)
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980... FAILED (skipped, one-by-one)
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020 (3021/4579)... chk=20 new=2 [total=1309]
+  Batch @3040 (3041/4579)... chk=20 new=1 [total=1310]
+  Batch @3060... FAILED (skipped, one-by-one)
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100... FAILED (skipped, one-by-one)
+  Batch @3120 (3121/4579)... chk=20 new=1 [total=1311]
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160 (3161/4579)... chk=20 new=0 [total=1311]
+  Batch @3180 (3181/4579)... chk=20 new=5 [total=1316]
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220 (3221/4579)... chk=20 new=4 [total=1320]
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260 (3261/4579)... chk=20 new=7 [total=1327]
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340 (3341/4579)... chk=20 new=5 [total=1332]
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420 (3421/4579)... chk=20 new=2 [total=1334]
+  Batch @3440 (3441/4579)... chk=20 new=2 [total=1336]
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480 (3481/4579)... chk=20 new=4 [total=1340]
+  Batch @3500 (3501/4579)... chk=20 new=1 [total=1341]
+  Batch @3520 (3521/4579)... chk=20 new=4 [total=1345]
+  Batch @3540 (3541/4579)... chk=20 new=6 [total=1351]
+  Batch @3560 (3561/4579)... chk=20 new=4 [total=1355]
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600 (3601/4579)... chk=20 new=7 [total=1362]
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680 (3681/4579)... chk=20 new=8 [total=1370]
+  Batch @3700... FAILED (skipped, one-by-one)
+  Batch @3720 (3721/4579)... chk=20 new=6 [total=1376]
+  Batch @3740 (3741/4579)... chk=20 new=10 [total=1386]
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800 (3801/4579)... chk=20 new=5 [total=1391]
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900 (3901/4579)... chk=20 new=7 [total=1398]
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960 (3961/4579)... chk=20 new=0 [total=1398]
+  Batch @3980... FAILED (skipped, one-by-one)
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020 (4021/4579)... chk=20 new=5 [total=1403]
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100... FAILED (skipped, one-by-one)
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140 (4141/4579)... chk=20 new=5 [total=1408]
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180 (4181/4579)... chk=20 new=5 [total=1413]
+  Batch @4200... FAILED (skipped, one-by-one)
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240... FAILED (skipped, one-by-one)
+  Batch @4260 (4261/4579)... chk=20 new=4 [total=1417]
+  Batch @4280 (4281/4579)... chk=20 new=4 [total=1421]
+  Batch @4300... FAILED (skipped, one-by-one)
+  Batch @4320 (4321/4579)... chk=20 new=7 [total=1428]
+  Batch @4340... FAILED (skipped, one-by-one)
+  Batch @4360 (4361/4579)... chk=20 new=6 [total=1434]
+  Batch @4380... FAILED (skipped, one-by-one)
+  Batch @4400 (4401/4579)... chk=20 new=7 [total=1441]
+  Batch @4420... FAILED (skipped, one-by-one)
+  Batch @4440... FAILED (skipped, one-by-one)
+  Batch @4460 (4461/4579)... chk=20 new=4 [total=1445]
+  Batch @4480... FAILED (skipped, one-by-one)
+  Batch @4500 (4501/4579)... chk=20 new=9 [total=1454]
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540... FAILED (skipped, one-by-one)
+  Batch @4560 (4561/4579)... chk=19 new=6 [total=1460]
+  Downloading 2015... done (7.4 MB)
+  [2015] 4484 accidents in file
+  [2015] Pending: 4484
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20... FAILED (skipped, one-by-one)
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60 (61/4484)... chk=20 new=5 [total=1465]
+  Batch @80 (81/4484)... chk=20 new=2 [total=1467]
+  Batch @100 (101/4484)... chk=20 new=6 [total=1473]
+  Batch @120... FAILED (skipped, one-by-one)
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160... FAILED (skipped, one-by-one)
+  Batch @180... FAILED (skipped, one-by-one)
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240... FAILED (skipped, one-by-one)
+  Batch @260... FAILED (skipped, one-by-one)
+  Batch @280 (281/4484)... chk=20 new=3 [total=1476]
+  Batch @300 (301/4484)... chk=20 new=4 [total=1480]
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340 (341/4484)... chk=20 new=9 [total=1489]
+  Batch @360... FAILED (skipped, one-by-one)
+  Batch @380 (381/4484)... chk=20 new=4 [total=1493]
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420 (421/4484)... chk=20 new=8 [total=1501]
+  Batch @440 (441/4484)... chk=20 new=4 [total=1505]
+  Batch @460 (461/4484)... chk=20 new=7 [total=1512]
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500 (501/4484)... chk=20 new=6 [total=1518]
+  Batch @520... FAILED (skipped, one-by-one)
+  Batch @540 (541/4484)... chk=20 new=2 [total=1520]
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580... FAILED (skipped, one-by-one)
+  Batch @600... FAILED (skipped, one-by-one)
+  Batch @620 (621/4484)... chk=20 new=4 [total=1524]
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760 (761/4484)... chk=20 new=5 [total=1529]
+  Batch @780... FAILED (skipped, one-by-one)
+  Batch @800... FAILED (skipped, one-by-one)
+  Batch @820 (821/4484)... chk=20 new=5 [total=1534]
+  Batch @840... FAILED (skipped, one-by-one)
+  Batch @860... FAILED (skipped, one-by-one)
+  Batch @880 (881/4484)... chk=20 new=3 [total=1537]
+  Batch @900... FAILED (skipped, one-by-one)
+  Batch @920 (921/4484)... chk=20 new=5 [total=1542]
+  Batch @940 (941/4484)... chk=20 new=5 [total=1547]
+  Batch @960 (961/4484)... chk=20 new=4 [total=1551]
+  Batch @980... FAILED (skipped, one-by-one)
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020 (1021/4484)... chk=20 new=7 [total=1558]
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060... FAILED (skipped, one-by-one)
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100... FAILED (skipped, one-by-one)
+  Batch @1120 (1121/4484)... chk=20 new=2 [total=1560]
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180 (1181/4484)... chk=20 new=3 [total=1563]
+  Batch @1200... FAILED (skipped, one-by-one)
+  Batch @1220 (1221/4484)... chk=20 new=1 [total=1564]
+  Batch @1240 (1241/4484)... chk=20 new=6 [total=1570]
+  Batch @1260... FAILED (skipped, one-by-one)
+  Batch @1280 (1281/4484)... chk=20 new=1 [total=1571]
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320 (1321/4484)... chk=20 new=7 [total=1578]
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380 (1381/4484)... chk=20 new=0 [total=1578]
+  Batch @1400... FAILED (skipped, one-by-one)
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440... FAILED (skipped, one-by-one)
+  Batch @1460 (1461/4484)... chk=20 new=4 [total=1582]
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540... FAILED (skipped, one-by-one)
+  Batch @1560 (1561/4484)... chk=20 new=2 [total=1584]
+  Batch @1580... FAILED (skipped, one-by-one)
+  Batch @1600... FAILED (skipped, one-by-one)
+  Batch @1620... FAILED (skipped, one-by-one)
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680 (1681/4484)... chk=20 new=1 [total=1585]
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720 (1721/4484)... chk=20 new=7 [total=1592]
+  Batch @1740 (1741/4484)... chk=20 new=1 [total=1593]
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800 (1801/4484)... chk=20 new=6 [total=1599]
+  Batch @1820... FAILED (skipped, one-by-one)
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860 (1861/4484)... chk=20 new=5 [total=1604]
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920 (1921/4484)... chk=20 new=1 [total=1605]
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980... FAILED (skipped, one-by-one)
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020 (2021/4484)... chk=20 new=4 [total=1609]
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060 (2061/4484)... chk=20 new=5 [total=1614]
+  Batch @2080 (2081/4484)... chk=20 new=4 [total=1618]
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120 (2121/4484)... chk=20 new=4 [total=1622]
+  Batch @2140 (2141/4484)... chk=20 new=5 [total=1627]
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180 (2181/4484)... chk=20 new=5 [total=1632]
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280 (2281/4484)... chk=20 new=3 [total=1635]
+  Batch @2300 (2301/4484)... chk=20 new=2 [total=1637]
+  Batch @2320 (2321/4484)... chk=20 new=3 [total=1640]
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360 (2361/4484)... chk=20 new=3 [total=1643]
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400... FAILED (skipped, one-by-one)
+  Batch @2420... FAILED (skipped, one-by-one)
+  Batch @2440 (2441/4484)... chk=20 new=2 [total=1645]
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520 (2521/4484)... chk=20 new=5 [total=1650]
+  Batch @2540 (2541/4484)... chk=20 new=5 [total=1655]
+  Batch @2560... FAILED (skipped, one-by-one)
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600... FAILED (skipped, one-by-one)
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640 (2641/4484)... chk=20 new=3 [total=1658]
+  Batch @2660 (2661/4484)... chk=20 new=7 [total=1665]
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700 (2701/4484)... chk=20 new=3 [total=1668]
+  Batch @2720 (2721/4484)... chk=20 new=2 [total=1670]
+  Batch @2740... FAILED (skipped, one-by-one)
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780 (2781/4484)... chk=20 new=5 [total=1675]
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820... FAILED (skipped, one-by-one)
+  Batch @2840 (2841/4484)... chk=20 new=1 [total=1676]
+  Batch @2860 (2861/4484)... chk=20 new=1 [total=1677]
+  Batch @2880 (2881/4484)... chk=20 new=5 [total=1682]
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920... FAILED (skipped, one-by-one)
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980 (2981/4484)... chk=20 new=6 [total=1688]
+  Batch @3000 (3001/4484)... chk=20 new=8 [total=1696]
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040 (3041/4484)... chk=20 new=3 [total=1699]
+  Batch @3060 (3061/4484)... chk=20 new=1 [total=1700]
+  Batch @3080 (3081/4484)... chk=20 new=3 [total=1703]
+  Batch @3100 (3101/4484)... chk=20 new=4 [total=1707]
+  Batch @3120 (3121/4484)... chk=20 new=6 [total=1713]
+  Batch @3140 (3141/4484)... chk=20 new=6 [total=1719]
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220... FAILED (skipped, one-by-one)
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260 (3261/4484)... chk=20 new=9 [total=1728]
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320 (3321/4484)... chk=20 new=3 [total=1731]
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440... FAILED (skipped, one-by-one)
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480... FAILED (skipped, one-by-one)
+  Batch @3500... FAILED (skipped, one-by-one)
+  Batch @3520 (3521/4484)... chk=20 new=5 [total=1736]
+  Batch @3540 (3541/4484)... chk=20 new=6 [total=1742]
+  Batch @3560 (3561/4484)... chk=20 new=0 [total=1742]
+  Batch @3580 (3581/4484)... chk=20 new=7 [total=1749]
+  Batch @3600... FAILED (skipped, one-by-one)
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680 (3681/4484)... chk=20 new=3 [total=1752]
+  Batch @3700 (3701/4484)... chk=20 new=2 [total=1754]
+  Batch @3720... FAILED (skipped, one-by-one)
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800 (3801/4484)... chk=20 new=3 [total=1757]
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840 (3841/4484)... chk=20 new=7 [total=1764]
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880 (3881/4484)... chk=20 new=4 [total=1768]
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960 (3961/4484)... chk=20 new=3 [total=1771]
+  Batch @3980 (3981/4484)... chk=20 new=3 [total=1774]
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020 (4021/4484)... chk=20 new=4 [total=1778]
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060 (4061/4484)... chk=20 new=5 [total=1783]
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100 (4101/4484)... chk=20 new=5 [total=1788]
+  Batch @4120 (4121/4484)... chk=20 new=7 [total=1795]
+  Batch @4140... FAILED (skipped, one-by-one)
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180 (4181/4484)... chk=20 new=4 [total=1799]
+  Batch @4200... FAILED (skipped, one-by-one)
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240 (4241/4484)... chk=20 new=2 [total=1801]
+  Batch @4260 (4261/4484)... chk=20 new=5 [total=1806]
+  Batch @4280... FAILED (skipped, one-by-one)
+  Batch @4300 (4301/4484)... chk=20 new=5 [total=1811]
+  Batch @4320... FAILED (skipped, one-by-one)
+  Batch @4340 (4341/4484)... chk=20 new=5 [total=1816]
+  Batch @4360... FAILED (skipped, one-by-one)
+  Batch @4380 (4381/4484)... chk=20 new=6 [total=1822]
+  Batch @4400 (4401/4484)... chk=20 new=8 [total=1830]
+  Batch @4420 (4421/4484)... chk=20 new=10 [total=1840]
+  Batch @4440 (4441/4484)... chk=20 new=9 [total=1849]
+  Batch @4460 (4461/4484)... chk=20 new=6 [total=1855]
+  Batch @4480 (4481/4484)... chk=4 new=2 [total=1857]
+  Downloading 2016... done (7.9 MB)
+  [2016] 4640 accidents in file
+  [2016] Pending: 4640
+  Batch @0 (1/4640)... chk=20 new=1 [total=1858]
+  Batch @20 (21/4640)... chk=20 new=4 [total=1862]
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80... FAILED (skipped, one-by-one)
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120 (121/4640)... chk=20 new=6 [total=1868]
+  Batch @140 (141/4640)... chk=20 new=2 [total=1870]
+  Batch @160 (161/4640)... chk=20 new=6 [total=1876]
+  Batch @180... FAILED (skipped, one-by-one)
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220 (221/4640)... chk=20 new=2 [total=1878]
+  Batch @240 (241/4640)... chk=20 new=11 [total=1889]
+  Batch @260... FAILED (skipped, one-by-one)
+  Batch @280... FAILED (skipped, one-by-one)
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360 (361/4640)... chk=20 new=6 [total=1895]
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520... FAILED (skipped, one-by-one)
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560 (561/4640)... chk=20 new=3 [total=1898]
+  Batch @580... FAILED (skipped, one-by-one)
+  Batch @600 (601/4640)... chk=20 new=7 [total=1905]
+  Batch @620 (621/4640)... chk=20 new=6 [total=1911]
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660 (661/4640)... chk=20 new=6 [total=1917]
+  Batch @680 (681/4640)... chk=20 new=5 [total=1922]
+  Batch @700 (701/4640)... chk=20 new=5 [total=1927]
+  Batch @720 (721/4640)... chk=20 new=8 [total=1935]
+  Batch @740 (741/4640)... chk=20 new=7 [total=1942]
+  Batch @760 (761/4640)... chk=20 new=5 [total=1947]
+  Batch @780... FAILED (skipped, one-by-one)
+  Batch @800 (801/4640)... chk=20 new=7 [total=1954]
+  Batch @820 (821/4640)... chk=20 new=2 [total=1956]
+  Batch @840... FAILED (skipped, one-by-one)
+  Batch @860... FAILED (skipped, one-by-one)
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900 (901/4640)... chk=20 new=5 [total=1961]
+  Batch @920... FAILED (skipped, one-by-one)
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960... FAILED (skipped, one-by-one)
+  Batch @980 (981/4640)... chk=20 new=4 [total=1965]
+  Batch @1000 (1001/4640)... chk=20 new=7 [total=1972]
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040 (1041/4640)... chk=20 new=4 [total=1976]
+  Batch @1060 (1061/4640)... chk=20 new=7 [total=1983]
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100... FAILED (skipped, one-by-one)
+  Batch @1120 (1121/4640)... chk=20 new=6 [total=1989]
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180... FAILED (skipped, one-by-one)
+  Batch @1200 (1201/4640)... chk=20 new=4 [total=1993]
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240 (1241/4640)... chk=20 new=3 [total=1996]
+  Batch @1260 (1261/4640)... chk=20 new=6 [total=2002]
+  Batch @1280 (1281/4640)... chk=20 new=4 [total=2006]
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320 (1321/4640)... chk=20 new=7 [total=2013]
+  Batch @1340 (1341/4640)... chk=20 new=5 [total=2018]
+  Batch @1360 (1361/4640)... chk=20 new=8 [total=2026]
+  Batch @1380 (1381/4640)... chk=20 new=3 [total=2029]
+  Batch @1400 (1401/4640)... chk=20 new=2 [total=2031]
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440... FAILED (skipped, one-by-one)
+  Batch @1460 (1461/4640)... chk=20 new=6 [total=2037]
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520 (1521/4640)... chk=20 new=3 [total=2040]
+  Batch @1540... FAILED (skipped, one-by-one)
+  Batch @1560 (1561/4640)... chk=20 new=4 [total=2044]
+  Batch @1580 (1581/4640)... chk=20 new=2 [total=2046]
+  Batch @1600... FAILED (skipped, one-by-one)
+  Batch @1620... FAILED (skipped, one-by-one)
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660 (1661/4640)... chk=20 new=4 [total=2050]
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720 (1721/4640)... chk=20 new=1 [total=2051]
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780 (1781/4640)... chk=20 new=4 [total=2055]
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820 (1821/4640)... chk=20 new=5 [total=2060]
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860... FAILED (skipped, one-by-one)
+  Batch @1880 (1881/4640)... chk=20 new=0 [total=2060]
+  Batch @1900 (1901/4640)... chk=20 new=2 [total=2062]
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980... FAILED (skipped, one-by-one)
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080 (2081/4640)... chk=20 new=5 [total=2067]
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140... FAILED (skipped, one-by-one)
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220 (2221/4640)... chk=20 new=2 [total=2069]
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260 (2261/4640)... chk=20 new=2 [total=2071]
+  Batch @2280 (2281/4640)... chk=20 new=3 [total=2074]
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320... FAILED (skipped, one-by-one)
+  Batch @2340 (2341/4640)... chk=20 new=3 [total=2077]
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400... FAILED (skipped, one-by-one)
+  Batch @2420 (2421/4640)... chk=20 new=4 [total=2081]
+  Batch @2440... FAILED (skipped, one-by-one)
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520... FAILED (skipped, one-by-one)
+  Batch @2540... FAILED (skipped, one-by-one)
+  Batch @2560... FAILED (skipped, one-by-one)
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600 (2601/4640)... chk=20 new=7 [total=2088]
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660 (2661/4640)... chk=20 new=1 [total=2089]
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700 (2701/4640)... chk=20 new=2 [total=2091]
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740 (2741/4640)... chk=20 new=4 [total=2095]
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780... FAILED (skipped, one-by-one)
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820... FAILED (skipped, one-by-one)
+  Batch @2840 (2841/4640)... chk=20 new=2 [total=2097]
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920... FAILED (skipped, one-by-one)
+  Batch @2940 (2941/4640)... chk=20 new=4 [total=2101]
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980 (2981/4640)... chk=20 new=2 [total=2103]
+  Batch @3000 (3001/4640)... chk=20 new=2 [total=2105]
+  Batch @3020 (3021/4640)... chk=20 new=5 [total=2110]
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060... FAILED (skipped, one-by-one)
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100... FAILED (skipped, one-by-one)
+  Batch @3120... FAILED (skipped, one-by-one)
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220... FAILED (skipped, one-by-one)
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300 (3301/4640)... chk=20 new=4 [total=2114]
+  Batch @3320 (3321/4640)... chk=20 new=0 [total=2114]
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440... FAILED (skipped, one-by-one)
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480... FAILED (skipped, one-by-one)
+  Batch @3500... FAILED (skipped, one-by-one)
+  Batch @3520 (3521/4640)... chk=20 new=6 [total=2120]
+  Batch @3540... FAILED (skipped, one-by-one)
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580 (3581/4640)... chk=20 new=5 [total=2125]
+  Batch @3600... FAILED (skipped, one-by-one)
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700 (3701/4640)... chk=20 new=1 [total=2126]
+  Batch @3720... FAILED (skipped, one-by-one)
+  Batch @3740 (3741/4640)... chk=20 new=5 [total=2131]
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800... FAILED (skipped, one-by-one)
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960... FAILED (skipped, one-by-one)
+  Batch @3980 (3981/4640)... chk=20 new=6 [total=2137]
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100... FAILED (skipped, one-by-one)
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140... FAILED (skipped, one-by-one)
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180 (4181/4640)... chk=20 new=6 [total=2143]
+  Batch @4200... FAILED (skipped, one-by-one)
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240... FAILED (skipped, one-by-one)
+  Batch @4260 (4261/4640)... chk=20 new=5 [total=2148]
+  Batch @4280 (4281/4640)... chk=20 new=4 [total=2152]
+  Batch @4300... FAILED (skipped, one-by-one)
+  Batch @4320 (4321/4640)... chk=20 new=6 [total=2158]
+  Batch @4340... FAILED (skipped, one-by-one)
+  Batch @4360... FAILED (skipped, one-by-one)
+  Batch @4380... FAILED (skipped, one-by-one)
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420 (4421/4640)... chk=20 new=3 [total=2161]
+  Batch @4440 (4441/4640)... chk=20 new=5 [total=2166]
+  Batch @4460... FAILED (skipped, one-by-one)
+  Batch @4480... FAILED (skipped, one-by-one)
+  Batch @4500... FAILED (skipped, one-by-one)
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540... FAILED (skipped, one-by-one)
+  Batch @4560 (4561/4640)... chk=20 new=7 [total=2173]
+  Batch @4580... FAILED (skipped, one-by-one)
+  Batch @4600... FAILED (skipped, one-by-one)
+  Batch @4620... FAILED (skipped, one-by-one)
+  Downloading 2017... done (8.2 MB)
+  [2017] 4626 accidents in file
+  [2017] Pending: 4626
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20... FAILED (skipped, one-by-one)
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80... FAILED (skipped, one-by-one)
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120 (121/4626)... chk=20 new=6 [total=2179]
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160... FAILED (skipped, one-by-one)
+  Batch @180... FAILED (skipped, one-by-one)
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240... FAILED (skipped, one-by-one)
+  Batch @260... FAILED (skipped, one-by-one)
+  Batch @280... FAILED (skipped, one-by-one)
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360 (361/4626)... chk=20 new=4 [total=2183]
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520... FAILED (skipped, one-by-one)
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580... FAILED (skipped, one-by-one)
+  Batch @600... FAILED (skipped, one-by-one)
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760... FAILED (skipped, one-by-one)
+  Batch @780 (781/4626)... chk=20 new=6 [total=2189]
+  Batch @800... FAILED (skipped, one-by-one)
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840... FAILED (skipped, one-by-one)
+  Batch @860... FAILED (skipped, one-by-one)
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900... FAILED (skipped, one-by-one)
+  Batch @920... FAILED (skipped, one-by-one)
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960... FAILED (skipped, one-by-one)
+  Batch @980... FAILED (skipped, one-by-one)
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060... FAILED (skipped, one-by-one)
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100... FAILED (skipped, one-by-one)
+  Batch @1120... FAILED (skipped, one-by-one)
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180... FAILED (skipped, one-by-one)
+  Batch @1200... FAILED (skipped, one-by-one)
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240... FAILED (skipped, one-by-one)
+  Batch @1260... FAILED (skipped, one-by-one)
+  Batch @1280... FAILED (skipped, one-by-one)
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380... FAILED (skipped, one-by-one)
+  Batch @1400... FAILED (skipped, one-by-one)
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440... FAILED (skipped, one-by-one)
+  Batch @1460... FAILED (skipped, one-by-one)
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540... FAILED (skipped, one-by-one)
+  Batch @1560... FAILED (skipped, one-by-one)
+  Batch @1580... FAILED (skipped, one-by-one)
+  Batch @1600... FAILED (skipped, one-by-one)
+  Batch @1620 (1621/4626)... chk=20 new=10 [total=2199]
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720... FAILED (skipped, one-by-one)
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820... FAILED (skipped, one-by-one)
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860... FAILED (skipped, one-by-one)
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980... FAILED (skipped, one-by-one)
+  Batch @2000 (2001/4626)... chk=20 new=3 [total=2202]
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080... FAILED (skipped, one-by-one)
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140... FAILED (skipped, one-by-one)
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280... FAILED (skipped, one-by-one)
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320... FAILED (skipped, one-by-one)
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400... FAILED (skipped, one-by-one)
+  Batch @2420 (2421/4626)... chk=20 new=1 [total=2203]
+  Batch @2440 (2441/4626)... chk=20 new=3 [total=2206]
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520... FAILED (skipped, one-by-one)
+  Batch @2540... FAILED (skipped, one-by-one)
+  Batch @2560... FAILED (skipped, one-by-one)
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600... FAILED (skipped, one-by-one)
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660... FAILED (skipped, one-by-one)
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700... FAILED (skipped, one-by-one)
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740... FAILED (skipped, one-by-one)
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780... FAILED (skipped, one-by-one)
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820... FAILED (skipped, one-by-one)
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920 (2921/4626)... chk=20 new=4 [total=2210]
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980... FAILED (skipped, one-by-one)
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060... FAILED (skipped, one-by-one)
+  Batch @3080 (3081/4626)... chk=20 new=3 [total=2213]
+  Batch @3100 (3101/4626)... chk=20 new=3 [total=2216]
+  Batch @3120... FAILED (skipped, one-by-one)
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160 (3161/4626)... chk=20 new=3 [total=2219]
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220... FAILED (skipped, one-by-one)
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360 (3361/4626)... chk=20 new=6 [total=2225]
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440 (3441/4626)... chk=20 new=4 [total=2229]
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480... FAILED (skipped, one-by-one)
+  Batch @3500 (3501/4626)... chk=20 new=4 [total=2233]
+  Batch @3520... FAILED (skipped, one-by-one)
+  Batch @3540... FAILED (skipped, one-by-one)
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600 (3601/4626)... chk=20 new=10 [total=2243]
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660 (3661/4626)... chk=20 new=3 [total=2246]
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700... FAILED (skipped, one-by-one)
+  Batch @3720... FAILED (skipped, one-by-one)
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780 (3781/4626)... chk=20 new=6 [total=2252]
+  Batch @3800... FAILED (skipped, one-by-one)
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860 (3861/4626)... chk=20 new=9 [total=2261]
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960... FAILED (skipped, one-by-one)
+  Batch @3980... FAILED (skipped, one-by-one)
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100... FAILED (skipped, one-by-one)
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140... FAILED (skipped, one-by-one)
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180... FAILED (skipped, one-by-one)
+  Batch @4200... FAILED (skipped, one-by-one)
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240 (4241/4626)... chk=20 new=2 [total=2263]
+  Batch @4260... FAILED (skipped, one-by-one)
+  Batch @4280 (4281/4626)... chk=20 new=9 [total=2272]
+  Batch @4300... FAILED (skipped, one-by-one)
+  Batch @4320... FAILED (skipped, one-by-one)
+  Batch @4340... FAILED (skipped, one-by-one)
+  Batch @4360... FAILED (skipped, one-by-one)
+  Batch @4380 (4381/4626)... chk=20 new=7 [total=2279]
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420... FAILED (skipped, one-by-one)
+  Batch @4440... FAILED (skipped, one-by-one)
+  Batch @4460... FAILED (skipped, one-by-one)
+  Batch @4480... FAILED (skipped, one-by-one)
+  Batch @4500... FAILED (skipped, one-by-one)
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540 (4541/4626)... chk=20 new=10 [total=2289]
+  Batch @4560... FAILED (skipped, one-by-one)
+  Batch @4580... FAILED (skipped, one-by-one)
+  Batch @4600 (4601/4626)... chk=20 new=8 [total=2297]
+  Batch @4620 (4621/4626)... chk=6 new=1 [total=2298]
+  Downloading 2018... done (9 MB)
+  [2018] 5098 accidents in file
+  [2018] Pending: 5098
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20 (21/5098)... chk=20 new=11 [total=2309]
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80... FAILED (skipped, one-by-one)
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120 (121/5098)... chk=20 new=5 [total=2314]
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160... FAILED (skipped, one-by-one)
+  Batch @180... FAILED (skipped, one-by-one)
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240 (241/5098)... chk=20 new=7 [total=2321]
+  Batch @260 (261/5098)... chk=20 new=6 [total=2327]
+  Batch @280... FAILED (skipped, one-by-one)
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360... FAILED (skipped, one-by-one)
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480 (481/5098)... chk=20 new=2 [total=2329]
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520 (521/5098)... chk=20 new=4 [total=2333]
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580... FAILED (skipped, one-by-one)
+  Batch @600 (601/5098)... chk=20 new=9 [total=2342]
+  Batch @620 (621/5098)... chk=20 new=7 [total=2349]
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680 (681/5098)... chk=20 new=5 [total=2354]
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760... FAILED (skipped, one-by-one)
+  Batch @780... FAILED (skipped, one-by-one)
+  Batch @800... FAILED (skipped, one-by-one)
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840... FAILED (skipped, one-by-one)
+  Batch @860 (861/5098)... chk=20 new=7 [total=2361]
+  Batch @880 (881/5098)... chk=20 new=5 [total=2366]
+  Batch @900... FAILED (skipped, one-by-one)
+  Batch @920 (921/5098)... chk=20 new=6 [total=2372]
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960 (961/5098)... chk=20 new=5 [total=2377]
+  Batch @980... FAILED (skipped, one-by-one)
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060... FAILED (skipped, one-by-one)
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100... FAILED (skipped, one-by-one)
+  Batch @1120 (1121/5098)... chk=20 new=5 [total=2382]
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180... FAILED (skipped, one-by-one)
+  Batch @1200... FAILED (skipped, one-by-one)
+  Batch @1220 (1221/5098)... chk=20 new=5 [total=2387]
+  Batch @1240... FAILED (skipped, one-by-one)
+  Batch @1260... FAILED (skipped, one-by-one)
+  Batch @1280... FAILED (skipped, one-by-one)
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380... FAILED (skipped, one-by-one)
+  Batch @1400 (1401/5098)... chk=20 new=4 [total=2391]
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440 (1441/5098)... chk=20 new=5 [total=2396]
+  Batch @1460... FAILED (skipped, one-by-one)
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540... FAILED (skipped, one-by-one)
+  Batch @1560... FAILED (skipped, one-by-one)
+  Batch @1580... FAILED (skipped, one-by-one)
+  Batch @1600... FAILED (skipped, one-by-one)
+  Batch @1620... FAILED (skipped, one-by-one)
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660 (1661/5098)... chk=20 new=5 [total=2401]
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720 (1721/5098)... chk=20 new=6 [total=2407]
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820... FAILED (skipped, one-by-one)
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860... FAILED (skipped, one-by-one)
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980... FAILED (skipped, one-by-one)
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080... FAILED (skipped, one-by-one)
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140... FAILED (skipped, one-by-one)
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280... FAILED (skipped, one-by-one)
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320 (2321/5098)... chk=20 new=5 [total=2412]
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400... FAILED (skipped, one-by-one)
+  Batch @2420... FAILED (skipped, one-by-one)
+  Batch @2440... FAILED (skipped, one-by-one)
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480 (2481/5098)... chk=20 new=2 [total=2414]
+  Batch @2500 (2501/5098)... chk=20 new=2 [total=2416]
+  Batch @2520... FAILED (skipped, one-by-one)
+  Batch @2540... FAILED (skipped, one-by-one)
+  Batch @2560... FAILED (skipped, one-by-one)
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600... FAILED (skipped, one-by-one)
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660... FAILED (skipped, one-by-one)
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700... FAILED (skipped, one-by-one)
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740 (2741/5098)... chk=20 new=5 [total=2421]
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780 (2781/5098)... chk=20 new=1 [total=2422]
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820... FAILED (skipped, one-by-one)
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920... FAILED (skipped, one-by-one)
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980... FAILED (skipped, one-by-one)
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060... FAILED (skipped, one-by-one)
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100... FAILED (skipped, one-by-one)
+  Batch @3120 (3121/5098)... chk=20 new=6 [total=2428]
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220... FAILED (skipped, one-by-one)
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280 (3281/5098)... chk=20 new=4 [total=2432]
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380 (3381/5098)... chk=20 new=1 [total=2433]
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440... FAILED (skipped, one-by-one)
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480 (3481/5098)... chk=20 new=3 [total=2436]
+  Batch @3500 (3501/5098)... chk=20 new=4 [total=2440]
+  Batch @3520... FAILED (skipped, one-by-one)
+  Batch @3540... FAILED (skipped, one-by-one)
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600 (3601/5098)... chk=20 new=1 [total=2441]
+  Batch @3620 (3621/5098)... chk=20 new=4 [total=2445]
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700... FAILED (skipped, one-by-one)
+  Batch @3720... FAILED (skipped, one-by-one)
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760 (3761/5098)... chk=20 new=3 [total=2448]
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800... FAILED (skipped, one-by-one)
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880 (3881/5098)... chk=20 new=8 [total=2456]
+  Batch @3900 (3901/5098)... chk=20 new=5 [total=2461]
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940 (3941/5098)... chk=20 new=4 [total=2465]
+  Batch @3960... FAILED (skipped, one-by-one)
+  Batch @3980 (3981/5098)... chk=20 new=7 [total=2472]
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080 (4081/5098)... chk=20 new=7 [total=2479]
+  Batch @4100 (4101/5098)... chk=20 new=6 [total=2485]
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140... FAILED (skipped, one-by-one)
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180 (4181/5098)... chk=20 new=5 [total=2490]
+  Batch @4200 (4201/5098)... chk=20 new=5 [total=2495]
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240... FAILED (skipped, one-by-one)
+  Batch @4260 (4261/5098)... chk=20 new=0 [total=2495]
+  Batch @4280... FAILED (skipped, one-by-one)
+  Batch @4300 (4301/5098)... chk=20 new=5 [total=2500]
+  Batch @4320... FAILED (skipped, one-by-one)
+  Batch @4340... FAILED (skipped, one-by-one)
+  Batch @4360... FAILED (skipped, one-by-one)
+  Batch @4380... FAILED (skipped, one-by-one)
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420... FAILED (skipped, one-by-one)
+  Batch @4440... FAILED (skipped, one-by-one)
+  Batch @4460... FAILED (skipped, one-by-one)
+  Batch @4480... FAILED (skipped, one-by-one)
+  Batch @4500 (4501/5098)... chk=20 new=5 [total=2505]
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540 (4541/5098)... chk=20 new=6 [total=2511]
+  Batch @4560 (4561/5098)... chk=20 new=4 [total=2515]
+  Batch @4580 (4581/5098)... chk=20 new=10 [total=2525]
+  Batch @4600 (4601/5098)... chk=20 new=5 [total=2530]
+  Batch @4620 (4621/5098)... chk=20 new=7 [total=2537]
+  Batch @4640 (4641/5098)... chk=20 new=3 [total=2540]
+  Batch @4660 (4661/5098)... chk=20 new=7 [total=2547]
+  Batch @4680 (4681/5098)... chk=20 new=1 [total=2548]
+  Batch @4700... FAILED (skipped, one-by-one)
+  Batch @4720... FAILED (skipped, one-by-one)
+  Batch @4740... FAILED (skipped, one-by-one)
+  Batch @4760 (4761/5098)... chk=20 new=6 [total=2554]
+  Batch @4780 (4781/5098)... chk=20 new=7 [total=2561]
+  Batch @4800... FAILED (skipped, one-by-one)
+  Batch @4820 (4821/5098)... chk=20 new=10 [total=2571]
+  Batch @4840 (4841/5098)... chk=20 new=9 [total=2580]
+  Batch @4860... FAILED (skipped, one-by-one)
+  Batch @4880 (4881/5098)... chk=20 new=8 [total=2588]
+  Batch @4900... FAILED (skipped, one-by-one)
+  Batch @4920... FAILED (skipped, one-by-one)
+  Batch @4940 (4941/5098)... chk=20 new=7 [total=2595]
+  Batch @4960 (4961/5098)... chk=20 new=6 [total=2601]
+  Batch @4980 (4981/5098)... chk=20 new=7 [total=2608]
+  Batch @5000... FAILED (skipped, one-by-one)
+  Batch @5020 (5021/5098)... chk=20 new=9 [total=2617]
+  Batch @5040... FAILED (skipped, one-by-one)
+  Batch @5060... FAILED (skipped, one-by-one)
+  Batch @5080 (5081/5098)... chk=18 new=4 [total=2621]
+  Downloading 2019... done (8.9 MB)
+  [2019] 5112 accidents in file
+  [2019] Pending: 5112
+  Batch @0 (1/5112)... chk=20 new=8 [total=2629]
+  Batch @20 (21/5112)... chk=20 new=8 [total=2637]
+  Batch @40 (41/5112)... chk=20 new=8 [total=2645]
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80... FAILED (skipped, one-by-one)
+  Batch @100 (101/5112)... chk=20 new=9 [total=2654]
+  Batch @120... FAILED (skipped, one-by-one)
+  Batch @140 (141/5112)... chk=20 new=9 [total=2663]
+  Batch @160... FAILED (skipped, one-by-one)
+  Batch @180... FAILED (skipped, one-by-one)
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240 (241/5112)... chk=20 new=4 [total=2667]
+  Batch @260 (261/5112)... chk=20 new=3 [total=2670]
+  Batch @280... FAILED (skipped, one-by-one)
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320 (321/5112)... chk=20 new=5 [total=2675]
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360 (361/5112)... chk=20 new=2 [total=2677]
+  Batch @380 (381/5112)... chk=20 new=8 [total=2685]
+  Batch @400 (401/5112)... chk=20 new=7 [total=2692]
+  Batch @420 (421/5112)... chk=20 new=5 [total=2697]
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460 (461/5112)... chk=20 new=12 [total=2709]
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520... FAILED (skipped, one-by-one)
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580... FAILED (skipped, one-by-one)
+  Batch @600... FAILED (skipped, one-by-one)
+  Batch @620 (621/5112)... chk=20 new=8 [total=2717]
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660 (661/5112)... chk=20 new=8 [total=2725]
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700 (701/5112)... chk=20 new=6 [total=2731]
+  Batch @720 (721/5112)... chk=20 new=7 [total=2738]
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760 (761/5112)... chk=20 new=6 [total=2744]
+  Batch @780 (781/5112)... chk=20 new=8 [total=2752]
+  Batch @800 (801/5112)... chk=20 new=7 [total=2759]
+  Batch @820 (821/5112)... chk=20 new=2 [total=2761]
+  Batch @840 (841/5112)... chk=20 new=3 [total=2764]
+  Batch @860... FAILED (skipped, one-by-one)
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900 (901/5112)... chk=20 new=8 [total=2772]
+  Batch @920 (921/5112)... chk=20 new=3 [total=2775]
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960 (961/5112)... chk=20 new=5 [total=2780]
+  Batch @980 (981/5112)... chk=20 new=4 [total=2784]
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020 (1021/5112)... chk=20 new=5 [total=2789]
+  Batch @1040 (1041/5112)... chk=20 new=2 [total=2791]
+  Batch @1060 (1061/5112)... chk=20 new=5 [total=2796]
+  Batch @1080 (1081/5112)... chk=20 new=4 [total=2800]
+  Batch @1100... FAILED (skipped, one-by-one)
+  Batch @1120 (1121/5112)... chk=20 new=8 [total=2808]
+  Batch @1140 (1141/5112)... chk=20 new=4 [total=2812]
+  Batch @1160 (1161/5112)... chk=20 new=6 [total=2818]
+  Batch @1180... FAILED (skipped, one-by-one)
+  Batch @1200 (1201/5112)... chk=20 new=2 [total=2820]
+  Batch @1220 (1221/5112)... chk=20 new=6 [total=2826]
+  Batch @1240... FAILED (skipped, one-by-one)
+  Batch @1260... FAILED (skipped, one-by-one)
+  Batch @1280 (1281/5112)... chk=20 new=6 [total=2832]
+  Batch @1300 (1301/5112)... chk=20 new=2 [total=2834]
+  Batch @1320 (1321/5112)... chk=20 new=4 [total=2838]
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380... FAILED (skipped, one-by-one)
+  Batch @1400 (1401/5112)... chk=20 new=5 [total=2843]
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440 (1441/5112)... chk=20 new=5 [total=2848]
+  Batch @1460 (1461/5112)... chk=20 new=7 [total=2855]
+  Batch @1480 (1481/5112)... chk=20 new=3 [total=2858]
+  Batch @1500 (1501/5112)... chk=20 new=5 [total=2863]
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540 (1541/5112)... chk=20 new=4 [total=2867]
+  Batch @1560 (1561/5112)... chk=20 new=9 [total=2876]
+  Batch @1580 (1581/5112)... chk=20 new=3 [total=2879]
+  Batch @1600 (1601/5112)... chk=20 new=4 [total=2883]
+  Batch @1620... FAILED (skipped, one-by-one)
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700 (1701/5112)... chk=20 new=2 [total=2885]
+  Batch @1720 (1721/5112)... chk=20 new=4 [total=2889]
+  Batch @1740 (1741/5112)... chk=20 new=3 [total=2892]
+  Batch @1760 (1761/5112)... chk=20 new=5 [total=2897]
+  Batch @1780 (1781/5112)... chk=20 new=4 [total=2901]
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820 (1821/5112)... chk=20 new=3 [total=2904]
+  Batch @1840 (1841/5112)... chk=20 new=4 [total=2908]
+  Batch @1860... FAILED (skipped, one-by-one)
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920 (1921/5112)... chk=20 new=3 [total=2911]
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980 (1981/5112)... chk=20 new=3 [total=2914]
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060 (2061/5112)... chk=20 new=3 [total=2917]
+  Batch @2080... FAILED (skipped, one-by-one)
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140 (2141/5112)... chk=20 new=2 [total=2919]
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180 (2181/5112)... chk=20 new=2 [total=2921]
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280 (2281/5112)... chk=20 new=6 [total=2927]
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320... FAILED (skipped, one-by-one)
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400 (2401/5112)... chk=20 new=3 [total=2930]
+  Batch @2420... FAILED (skipped, one-by-one)
+  Batch @2440 (2441/5112)... chk=20 new=4 [total=2934]
+  Batch @2460 (2461/5112)... chk=20 new=1 [total=2935]
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520 (2521/5112)... chk=20 new=4 [total=2939]
+  Batch @2540 (2541/5112)... chk=20 new=5 [total=2944]
+  Batch @2560 (2561/5112)... chk=20 new=0 [total=2944]
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600 (2601/5112)... chk=20 new=3 [total=2947]
+  Batch @2620 (2621/5112)... chk=20 new=0 [total=2947]
+  Batch @2640 (2641/5112)... chk=20 new=4 [total=2951]
+  Batch @2660 (2661/5112)... chk=20 new=8 [total=2959]
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700 (2701/5112)... chk=20 new=3 [total=2962]
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740... FAILED (skipped, one-by-one)
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780 (2781/5112)... chk=20 new=3 [total=2965]
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820 (2821/5112)... chk=20 new=3 [total=2968]
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860 (2861/5112)... chk=20 new=4 [total=2972]
+  Batch @2880 (2881/5112)... chk=20 new=2 [total=2974]
+  Batch @2900 (2901/5112)... chk=20 new=2 [total=2976]
+  Batch @2920 (2921/5112)... chk=20 new=4 [total=2980]
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980 (2981/5112)... chk=20 new=5 [total=2985]
+  Batch @3000 (3001/5112)... chk=20 new=2 [total=2987]
+  Batch @3020 (3021/5112)... chk=20 new=3 [total=2990]
+  Batch @3040 (3041/5112)... chk=20 new=1 [total=2991]
+  Batch @3060 (3061/5112)... chk=20 new=4 [total=2995]
+  Batch @3080 (3081/5112)... chk=20 new=5 [total=3000]
+  Batch @3100... FAILED (skipped, one-by-one)
+  Batch @3120 (3121/5112)... chk=20 new=5 [total=3005]
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200 (3201/5112)... chk=20 new=7 [total=3012]
+  Batch @3220 (3221/5112)... chk=20 new=3 [total=3015]
+  Batch @3240 (3241/5112)... chk=20 new=7 [total=3022]
+  Batch @3260 (3261/5112)... chk=20 new=5 [total=3027]
+  Batch @3280 (3281/5112)... chk=20 new=2 [total=3029]
+  Batch @3300 (3301/5112)... chk=20 new=10 [total=3039]
+  Batch @3320 (3321/5112)... chk=20 new=4 [total=3043]
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440 (3441/5112)... chk=20 new=2 [total=3045]
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480 (3481/5112)... chk=20 new=8 [total=3053]
+  Batch @3500... FAILED (skipped, one-by-one)
+  Batch @3520 (3521/5112)... chk=20 new=4 [total=3057]
+  Batch @3540... FAILED (skipped, one-by-one)
+  Batch @3560 (3561/5112)... chk=20 new=7 [total=3064]
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600 (3601/5112)... chk=20 new=5 [total=3069]
+  Batch @3620 (3621/5112)... chk=20 new=4 [total=3073]
+  Batch @3640 (3641/5112)... chk=20 new=4 [total=3077]
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700 (3701/5112)... chk=20 new=2 [total=3079]
+  Batch @3720 (3721/5112)... chk=20 new=4 [total=3083]
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800 (3801/5112)... chk=20 new=6 [total=3089]
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840 (3841/5112)... chk=20 new=4 [total=3093]
+  Batch @3860 (3861/5112)... chk=20 new=1 [total=3094]
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920 (3921/5112)... chk=20 new=5 [total=3099]
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960 (3961/5112)... chk=20 new=2 [total=3101]
+  Batch @3980... FAILED (skipped, one-by-one)
+  Batch @4000 (4001/5112)... chk=20 new=2 [total=3103]
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040 (4041/5112)... chk=20 new=1 [total=3104]
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080 (4081/5112)... chk=20 new=3 [total=3107]
+  Batch @4100 (4101/5112)... chk=20 new=5 [total=3112]
+  Batch @4120 (4121/5112)... chk=20 new=5 [total=3117]
+  Batch @4140... FAILED (skipped, one-by-one)
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180 (4181/5112)... chk=20 new=2 [total=3119]
+  Batch @4200... FAILED (skipped, one-by-one)
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240 (4241/5112)... chk=20 new=3 [total=3122]
+  Batch @4260 (4261/5112)... chk=20 new=5 [total=3127]
+  Batch @4280... FAILED (skipped, one-by-one)
+  Batch @4300... FAILED (skipped, one-by-one)
+  Batch @4320... FAILED (skipped, one-by-one)
+  Batch @4340... FAILED (skipped, one-by-one)
+  Batch @4360 (4361/5112)... chk=20 new=2 [total=3129]
+  Batch @4380 (4381/5112)... chk=20 new=6 [total=3135]
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420... FAILED (skipped, one-by-one)
+  Batch @4440... FAILED (skipped, one-by-one)
+  Batch @4460... FAILED (skipped, one-by-one)
+  Batch @4480 (4481/5112)... chk=20 new=3 [total=3138]
+  Batch @4500... FAILED (skipped, one-by-one)
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540 (4541/5112)... chk=20 new=5 [total=3143]
+  Batch @4560... FAILED (skipped, one-by-one)
+  Batch @4580 (4581/5112)... chk=20 new=7 [total=3150]
+  Batch @4600 (4601/5112)... chk=20 new=7 [total=3157]
+  Batch @4620 (4621/5112)... chk=20 new=4 [total=3161]
+  Batch @4640 (4641/5112)... chk=20 new=4 [total=3165]
+  Batch @4660 (4661/5112)... chk=20 new=4 [total=3169]
+  Batch @4680 (4681/5112)... chk=20 new=6 [total=3175]
+  Batch @4700 (4701/5112)... chk=20 new=3 [total=3178]
+  Batch @4720... FAILED (skipped, one-by-one)
+  Batch @4740... FAILED (skipped, one-by-one)
+  Batch @4760 (4761/5112)... chk=20 new=4 [total=3182]
+  Batch @4780... FAILED (skipped, one-by-one)
+  Batch @4800... FAILED (skipped, one-by-one)
+  Batch @4820 (4821/5112)... chk=20 new=4 [total=3186]
+  Batch @4840... FAILED (skipped, one-by-one)
+  Batch @4860 (4861/5112)... chk=20 new=4 [total=3190]
+  Batch @4880... FAILED (skipped, one-by-one)
+  Batch @4900... FAILED (skipped, one-by-one)
+  Batch @4920... FAILED (skipped, one-by-one)
+  Batch @4940 (4941/5112)... chk=20 new=7 [total=3197]
+  Batch @4960 (4961/5112)... chk=20 new=3 [total=3200]
+  Batch @4980 (4981/5112)... chk=20 new=5 [total=3205]
+  Batch @5000... FAILED (skipped, one-by-one)
+  Batch @5020 (5021/5112)... chk=20 new=4 [total=3209]
+  Batch @5040... FAILED (skipped, one-by-one)
+  Batch @5060... FAILED (skipped, one-by-one)
+  Batch @5080... FAILED (skipped, one-by-one)
+  Batch @5100... FAILED (skipped, one-by-one)
+  Using cached 2020 (7.8 MB)
+  [2020] 4477 accidents in file
+  [2020] Pending: 4477
+  Batch @0 (1/4477)... chk=20 new=0 [total=3209]
+  Batch @20 (21/4477)... chk=20 new=3 [total=3212]
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60 (61/4477)... chk=20 new=6 [total=3218]
+  Batch @80 (81/4477)... chk=20 new=7 [total=3225]
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120 (121/4477)... chk=20 new=6 [total=3231]
+  Batch @140 (141/4477)... chk=20 new=7 [total=3238]
+  Batch @160 (161/4477)... chk=20 new=5 [total=3243]
+  Batch @180... FAILED (skipped, one-by-one)
+  Batch @200 (201/4477)... chk=20 new=6 [total=3249]
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240 (241/4477)... chk=20 new=9 [total=3258]
+  Batch @260 (261/4477)... chk=20 new=2 [total=3260]
+  Batch @280 (281/4477)... chk=20 new=2 [total=3262]
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340 (341/4477)... chk=20 new=5 [total=3267]
+  Batch @360 (361/4477)... chk=20 new=9 [total=3276]
+  Batch @380 (381/4477)... chk=20 new=7 [total=3283]
+  Batch @400 (401/4477)... chk=20 new=5 [total=3288]
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520... FAILED (skipped, one-by-one)
+  Batch @540 (541/4477)... chk=20 new=3 [total=3291]
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580 (581/4477)... chk=20 new=8 [total=3299]
+  Batch @600... FAILED (skipped, one-by-one)
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640 (641/4477)... chk=20 new=3 [total=3302]
+  Batch @660 (661/4477)... chk=20 new=3 [total=3305]
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700 (701/4477)... chk=20 new=2 [total=3307]
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760 (761/4477)... chk=20 new=7 [total=3314]
+  Batch @780... FAILED (skipped, one-by-one)
+  Batch @800... FAILED (skipped, one-by-one)
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840 (841/4477)... chk=20 new=6 [total=3320]
+  Batch @860 (861/4477)... chk=20 new=5 [total=3325]
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900 (901/4477)... chk=20 new=3 [total=3328]
+  Batch @920 (921/4477)... chk=20 new=2 [total=3330]
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960 (961/4477)... chk=20 new=0 [total=3330]
+  Batch @980 (981/4477)... chk=20 new=3 [total=3333]
+  Batch @1000 (1001/4477)... chk=20 new=1 [total=3334]
+  Batch @1020 (1021/4477)... chk=20 new=1 [total=3335]
+  Batch @1040 (1041/4477)... chk=20 new=2 [total=3337]
+  Batch @1060 (1061/4477)... chk=20 new=1 [total=3338]
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100... FAILED (skipped, one-by-one)
+  Batch @1120 (1121/4477)... chk=20 new=2 [total=3340]
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180... FAILED (skipped, one-by-one)
+  Batch @1200... FAILED (skipped, one-by-one)
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240 (1241/4477)... chk=20 new=2 [total=3342]
+  Batch @1260 (1261/4477)... chk=20 new=4 [total=3346]
+  Batch @1280 (1281/4477)... chk=20 new=2 [total=3348]
+  Batch @1300 (1301/4477)... chk=20 new=2 [total=3350]
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340 (1341/4477)... chk=20 new=1 [total=3351]
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380 (1381/4477)... chk=20 new=3 [total=3354]
+  Batch @1400... FAILED (skipped, one-by-one)
+  Batch @1420 (1421/4477)... chk=20 new=4 [total=3358]
+  Batch @1440 (1441/4477)... chk=20 new=3 [total=3361]
+  Batch @1460... FAILED (skipped, one-by-one)
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540... FAILED (skipped, one-by-one)
+  Batch @1560 (1561/4477)... chk=20 new=3 [total=3364]
+  Batch @1580... FAILED (skipped, one-by-one)
+  Batch @1600 (1601/4477)... chk=20 new=1 [total=3365]
+  Batch @1620 (1621/4477)... chk=20 new=3 [total=3368]
+  Batch @1640 (1641/4477)... chk=20 new=3 [total=3371]
+  Batch @1660 (1661/4477)... chk=20 new=1 [total=3372]
+  Batch @1680 (1681/4477)... chk=20 new=3 [total=3375]
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720... FAILED (skipped, one-by-one)
+  Batch @1740 (1741/4477)... chk=20 new=3 [total=3378]
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800 (1801/4477)... chk=20 new=2 [total=3380]
+  Batch @1820 (1821/4477)... chk=20 new=1 [total=3381]
+  Batch @1840 (1841/4477)... chk=20 new=0 [total=3381]
+  Batch @1860... FAILED (skipped, one-by-one)
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940 (1941/4477)... chk=20 new=1 [total=3382]
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980 (1981/4477)... chk=20 new=1 [total=3383]
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060 (2061/4477)... chk=20 new=2 [total=3385]
+  Batch @2080 (2081/4477)... chk=20 new=1 [total=3386]
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120 (2121/4477)... chk=20 new=3 [total=3389]
+  Batch @2140... FAILED (skipped, one-by-one)
+  Batch @2160 (2161/4477)... chk=20 new=1 [total=3390]
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200 (2201/4477)... chk=20 new=3 [total=3393]
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260 (2261/4477)... chk=20 new=2 [total=3395]
+  Batch @2280... FAILED (skipped, one-by-one)
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320... FAILED (skipped, one-by-one)
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400 (2401/4477)... chk=20 new=1 [total=3396]
+  Batch @2420... FAILED (skipped, one-by-one)
+  Batch @2440 (2441/4477)... chk=20 new=3 [total=3399]
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500 (2501/4477)... chk=20 new=2 [total=3401]
+  Batch @2520... FAILED (skipped, one-by-one)
+  Batch @2540 (2541/4477)... chk=20 new=0 [total=3401]
+  Batch @2560 (2561/4477)... chk=20 new=4 [total=3405]
+  Batch @2580 (2581/4477)... chk=20 new=0 [total=3405]
+  Batch @2600 (2601/4477)... chk=20 new=2 [total=3407]
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660 (2661/4477)... chk=20 new=2 [total=3409]
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700... FAILED (skipped, one-by-one)
+  Batch @2720 (2721/4477)... chk=20 new=2 [total=3411]
+  Batch @2740 (2741/4477)... chk=20 new=2 [total=3413]
+  Batch @2760 (2761/4477)... chk=20 new=0 [total=3413]
+  Batch @2780 (2781/4477)... chk=20 new=2 [total=3415]
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820 (2821/4477)... chk=20 new=1 [total=3416]
+  Batch @2840 (2841/4477)... chk=20 new=3 [total=3419]
+  Batch @2860 (2861/4477)... chk=20 new=0 [total=3419]
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920 (2921/4477)... chk=20 new=2 [total=3421]
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960 (2961/4477)... chk=20 new=3 [total=3424]
+  Batch @2980 (2981/4477)... chk=20 new=4 [total=3428]
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020 (3021/4477)... chk=20 new=0 [total=3428]
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060 (3061/4477)... chk=20 new=1 [total=3429]
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100... FAILED (skipped, one-by-one)
+  Batch @3120... FAILED (skipped, one-by-one)
+  Batch @3140 (3141/4477)... chk=20 new=0 [total=3429]
+  Batch @3160 (3161/4477)... chk=20 new=2 [total=3431]
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220 (3221/4477)... chk=20 new=3 [total=3434]
+  Batch @3240 (3241/4477)... chk=20 new=4 [total=3438]
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360 (3361/4477)... chk=20 new=1 [total=3439]
+  Batch @3380 (3381/4477)... chk=20 new=5 [total=3444]
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420 (3421/4477)... chk=20 new=2 [total=3446]
+  Batch @3440... FAILED (skipped, one-by-one)
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480... FAILED (skipped, one-by-one)
+  Batch @3500 (3501/4477)... chk=20 new=3 [total=3449]
+  Batch @3520 (3521/4477)... chk=20 new=2 [total=3451]
+  Batch @3540 (3541/4477)... chk=20 new=6 [total=3457]
+  Batch @3560 (3561/4477)... chk=20 new=5 [total=3462]
+  Batch @3580 (3581/4477)... chk=20 new=4 [total=3466]
+  Batch @3600... FAILED (skipped, one-by-one)
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640 (3641/4477)... chk=20 new=3 [total=3469]
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680 (3681/4477)... chk=20 new=8 [total=3477]
+  Batch @3700 (3701/4477)... chk=20 new=7 [total=3484]
+  Batch @3720 (3721/4477)... chk=20 new=5 [total=3489]
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760 (3761/4477)... chk=20 new=6 [total=3495]
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800 (3801/4477)... chk=20 new=3 [total=3498]
+  Batch @3820 (3821/4477)... chk=20 new=4 [total=3502]
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900 (3901/4477)... chk=20 new=4 [total=3506]
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940 (3941/4477)... chk=20 new=3 [total=3509]
+  Batch @3960 (3961/4477)... chk=20 new=8 [total=3517]
+  Batch @3980... FAILED (skipped, one-by-one)
+  Batch @4000 (4001/4477)... chk=20 new=3 [total=3520]
+  Batch @4020 (4021/4477)... chk=20 new=0 [total=3520]
+  Batch @4040 (4041/4477)... chk=20 new=1 [total=3521]
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100 (4101/4477)... chk=20 new=5 [total=3526]
+  Batch @4120 (4121/4477)... chk=20 new=5 [total=3531]
+  Batch @4140 (4141/4477)... chk=20 new=4 [total=3535]
+  Batch @4160 (4161/4477)... chk=20 new=2 [total=3537]
+  Batch @4180... FAILED (skipped, one-by-one)
+  Batch @4200... FAILED (skipped, one-by-one)
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240... FAILED (skipped, one-by-one)
+  Batch @4260... FAILED (skipped, one-by-one)
+  Batch @4280 (4281/4477)... chk=20 new=4 [total=3541]
+  Batch @4300... FAILED (skipped, one-by-one)
+  Batch @4320... FAILED (skipped, one-by-one)
+  Batch @4340... FAILED (skipped, one-by-one)
+  Batch @4360... FAILED (skipped, one-by-one)
+  Batch @4380... FAILED (skipped, one-by-one)
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420 (4421/4477)... chk=20 new=5 [total=3546]
+  Batch @4440... FAILED (skipped, one-by-one)
+  Batch @4460... FAILED (skipped, one-by-one)
+  Downloading 2021... done (8.6 MB)
+  [2021] 5094 accidents in file
+  [2021] Pending: 5094
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20... FAILED (skipped, one-by-one)
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60 (61/5094)... chk=20 new=6 [total=3552]
+  Batch @80 (81/5094)... chk=20 new=0 [total=3552]
+  Batch @100 (101/5094)... chk=20 new=4 [total=3556]
+  Batch @120 (121/5094)... chk=20 new=9 [total=3565]
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160... FAILED (skipped, one-by-one)
+  Batch @180 (181/5094)... chk=20 new=5 [total=3570]
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240 (241/5094)... chk=20 new=2 [total=3572]
+  Batch @260 (261/5094)... chk=20 new=8 [total=3580]
+  Batch @280 (281/5094)... chk=20 new=4 [total=3584]
+  Batch @300 (301/5094)... chk=20 new=3 [total=3587]
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360... FAILED (skipped, one-by-one)
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480... FAILED (skipped, one-by-one)
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520 (521/5094)... chk=20 new=7 [total=3594]
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560 (561/5094)... chk=20 new=2 [total=3596]
+  Batch @580 (581/5094)... chk=20 new=2 [total=3598]
+  Batch @600... FAILED (skipped, one-by-one)
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760 (761/5094)... chk=20 new=6 [total=3604]
+  Batch @780... FAILED (skipped, one-by-one)
+  Batch @800 (801/5094)... chk=20 new=8 [total=3612]
+  Batch @820 (821/5094)... chk=20 new=4 [total=3616]
+  Batch @840... FAILED (skipped, one-by-one)
+  Batch @860 (861/5094)... chk=20 new=6 [total=3622]
+  Batch @880 (881/5094)... chk=20 new=3 [total=3625]
+  Batch @900 (901/5094)... chk=20 new=6 [total=3631]
+  Batch @920 (921/5094)... chk=20 new=4 [total=3635]
+  Batch @940 (941/5094)... chk=20 new=7 [total=3642]
+  Batch @960 (961/5094)... chk=20 new=4 [total=3646]
+  Batch @980 (981/5094)... chk=20 new=1 [total=3647]
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020 (1021/5094)... chk=20 new=5 [total=3652]
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060 (1061/5094)... chk=20 new=5 [total=3657]
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100 (1101/5094)... chk=20 new=4 [total=3661]
+  Batch @1120... FAILED (skipped, one-by-one)
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180 (1181/5094)... chk=20 new=4 [total=3665]
+  Batch @1200 (1201/5094)... chk=20 new=5 [total=3670]
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240 (1241/5094)... chk=20 new=3 [total=3673]
+  Batch @1260... FAILED (skipped, one-by-one)
+  Batch @1280 (1281/5094)... chk=20 new=2 [total=3675]
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380... FAILED (skipped, one-by-one)
+  Batch @1400... FAILED (skipped, one-by-one)
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440... FAILED (skipped, one-by-one)
+  Batch @1460... FAILED (skipped, one-by-one)
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540 (1541/5094)... chk=20 new=2 [total=3677]
+  Batch @1560... FAILED (skipped, one-by-one)
+  Batch @1580 (1581/5094)... chk=20 new=5 [total=3682]
+  Batch @1600 (1601/5094)... chk=20 new=3 [total=3685]
+  Batch @1620 (1621/5094)... chk=20 new=5 [total=3690]
+  Batch @1640 (1641/5094)... chk=20 new=5 [total=3695]
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680 (1681/5094)... chk=20 new=3 [total=3698]
+  Batch @1700 (1701/5094)... chk=20 new=2 [total=3700]
+  Batch @1720 (1721/5094)... chk=20 new=4 [total=3704]
+  Batch @1740 (1741/5094)... chk=20 new=5 [total=3709]
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820 (1821/5094)... chk=20 new=6 [total=3715]
+  Batch @1840 (1841/5094)... chk=20 new=3 [total=3718]
+  Batch @1860 (1861/5094)... chk=20 new=3 [total=3721]
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960 (1961/5094)... chk=20 new=0 [total=3721]
+  Batch @1980 (1981/5094)... chk=20 new=2 [total=3723]
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020 (2021/5094)... chk=20 new=2 [total=3725]
+  Batch @2040 (2041/5094)... chk=20 new=3 [total=3728]
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080... FAILED (skipped, one-by-one)
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140... FAILED (skipped, one-by-one)
+  Batch @2160 (2161/5094)... chk=20 new=3 [total=3731]
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280 (2281/5094)... chk=20 new=3 [total=3734]
+  Batch @2300 (2301/5094)... chk=20 new=1 [total=3735]
+  Batch @2320 (2321/5094)... chk=20 new=3 [total=3738]
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360 (2361/5094)... chk=20 new=3 [total=3741]
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400... FAILED (skipped, one-by-one)
+  Batch @2420... FAILED (skipped, one-by-one)
+  Batch @2440... FAILED (skipped, one-by-one)
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480 (2481/5094)... chk=20 new=2 [total=3743]
+  Batch @2500 (2501/5094)... chk=20 new=4 [total=3747]
+  Batch @2520... FAILED (skipped, one-by-one)
+  Batch @2540 (2541/5094)... chk=20 new=4 [total=3751]
+  Batch @2560... FAILED (skipped, one-by-one)
+  Batch @2580 (2581/5094)... chk=20 new=7 [total=3758]
+  Batch @2600... FAILED (skipped, one-by-one)
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640 (2641/5094)... chk=20 new=3 [total=3761]
+  Batch @2660... FAILED (skipped, one-by-one)
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700... FAILED (skipped, one-by-one)
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740 (2741/5094)... chk=20 new=2 [total=3763]
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780... FAILED (skipped, one-by-one)
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820... FAILED (skipped, one-by-one)
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920 (2921/5094)... chk=20 new=8 [total=3771]
+  Batch @2940 (2941/5094)... chk=20 new=2 [total=3773]
+  Batch @2960 (2961/5094)... chk=20 new=2 [total=3775]
+  Batch @2980... FAILED (skipped, one-by-one)
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040 (3041/5094)... chk=20 new=5 [total=3780]
+  Batch @3060... FAILED (skipped, one-by-one)
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100 (3101/5094)... chk=20 new=1 [total=3781]
+  Batch @3120... FAILED (skipped, one-by-one)
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160 (3161/5094)... chk=20 new=0 [total=3781]
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200 (3201/5094)... chk=20 new=2 [total=3783]
+  Batch @3220... FAILED (skipped, one-by-one)
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300 (3301/5094)... chk=20 new=4 [total=3787]
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380 (3381/5094)... chk=20 new=8 [total=3795]
+  Batch @3400 (3401/5094)... chk=20 new=7 [total=3802]
+  Batch @3420 (3421/5094)... chk=20 new=3 [total=3805]
+  Batch @3440... FAILED (skipped, one-by-one)
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480... FAILED (skipped, one-by-one)
+  Batch @3500 (3501/5094)... chk=20 new=2 [total=3807]
+  Batch @3520 (3521/5094)... chk=20 new=3 [total=3810]
+  Batch @3540 (3541/5094)... chk=20 new=5 [total=3815]
+  Batch @3560 (3561/5094)... chk=20 new=4 [total=3819]
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600... FAILED (skipped, one-by-one)
+  Batch @3620 (3621/5094)... chk=20 new=6 [total=3825]
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680 (3681/5094)... chk=20 new=7 [total=3832]
+  Batch @3700... FAILED (skipped, one-by-one)
+  Batch @3720... FAILED (skipped, one-by-one)
+  Batch @3740 (3741/5094)... chk=20 new=2 [total=3834]
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780 (3781/5094)... chk=20 new=5 [total=3839]
+  Batch @3800... FAILED (skipped, one-by-one)
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920 (3921/5094)... chk=20 new=6 [total=3845]
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960... FAILED (skipped, one-by-one)
+  Batch @3980 (3981/5094)... chk=20 new=4 [total=3849]
+  Batch @4000 (4001/5094)... chk=20 new=4 [total=3853]
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100 (4101/5094)... chk=20 new=6 [total=3859]
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140 (4141/5094)... chk=20 new=6 [total=3865]
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180... FAILED (skipped, one-by-one)
+  Batch @4200 (4201/5094)... chk=20 new=6 [total=3871]
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240 (4241/5094)... chk=20 new=5 [total=3876]
+  Batch @4260... FAILED (skipped, one-by-one)
+  Batch @4280... FAILED (skipped, one-by-one)
+  Batch @4300... FAILED (skipped, one-by-one)
+  Batch @4320 (4321/5094)... chk=20 new=7 [total=3883]
+  Batch @4340 (4341/5094)... chk=20 new=8 [total=3891]
+  Batch @4360 (4361/5094)... chk=20 new=5 [total=3896]
+  Batch @4380... FAILED (skipped, one-by-one)
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420 (4421/5094)... chk=20 new=5 [total=3901]
+  Batch @4440... FAILED (skipped, one-by-one)
+  Batch @4460 (4461/5094)... chk=20 new=4 [total=3905]
+  Batch @4480... FAILED (skipped, one-by-one)
+  Batch @4500... FAILED (skipped, one-by-one)
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540... FAILED (skipped, one-by-one)
+  Batch @4560 (4561/5094)... chk=20 new=3 [total=3908]
+  Batch @4580... FAILED (skipped, one-by-one)
+  Batch @4600... FAILED (skipped, one-by-one)
+  Batch @4620... FAILED (skipped, one-by-one)
+  Batch @4640 (4641/5094)... chk=20 new=6 [total=3914]
+  Batch @4660... FAILED (skipped, one-by-one)
+  Batch @4680 (4681/5094)... chk=20 new=10 [total=3924]
+  Batch @4700... FAILED (skipped, one-by-one)
+  Batch @4720 (4721/5094)... chk=20 new=10 [total=3934]
+  Batch @4740... FAILED (skipped, one-by-one)
+  Batch @4760 (4761/5094)... chk=20 new=1 [total=3935]
+  Batch @4780 (4781/5094)... chk=20 new=2 [total=3937]
+  Batch @4800... FAILED (skipped, one-by-one)
+  Batch @4820... FAILED (skipped, one-by-one)
+  Batch @4840 (4841/5094)... chk=20 new=8 [total=3945]
+  Batch @4860 (4861/5094)... chk=20 new=4 [total=3949]
+  Batch @4880... FAILED (skipped, one-by-one)
+  Batch @4900... FAILED (skipped, one-by-one)
+  Batch @4920... FAILED (skipped, one-by-one)
+  Batch @4940 (4941/5094)... chk=20 new=8 [total=3957]
+  Batch @4960 (4961/5094)... chk=20 new=7 [total=3964]
+  Batch @4980 (4981/5094)... chk=20 new=8 [total=3972]
+  Batch @5000 (5001/5094)... chk=20 new=7 [total=3979]
+  Batch @5020... FAILED (skipped, one-by-one)
+  Batch @5040... FAILED (skipped, one-by-one)
+  Batch @5060... FAILED (skipped, one-by-one)
+  Batch @5080... FAILED (skipped, one-by-one)
+  Downloading 2022... done (9.5 MB)
+  [2022] 5736 accidents in file
+  [2022] Pending: 5736
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20 (21/5736)... chk=20 new=6 [total=3985]
+  Batch @40 (41/5736)... chk=20 new=8 [total=3993]
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80... FAILED (skipped, one-by-one)
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120 (121/5736)... chk=20 new=5 [total=3998]
+  Batch @140 (141/5736)... chk=20 new=8 [total=4006]
+  Batch @160 (161/5736)... chk=20 new=8 [total=4014]
+  Batch @180 (181/5736)... chk=20 new=7 [total=4021]
+  Batch @200 (201/5736)... chk=20 new=6 [total=4027]
+  Batch @220 (221/5736)... chk=20 new=6 [total=4033]
+  Batch @240... FAILED (skipped, one-by-one)
+  Batch @260 (261/5736)... chk=20 new=11 [total=4044]
+  Batch @280... FAILED (skipped, one-by-one)
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360 (361/5736)... chk=20 new=7 [total=4051]
+  Batch @380 (381/5736)... chk=20 new=7 [total=4058]
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420 (421/5736)... chk=20 new=1 [total=4059]
+  Batch @440 (441/5736)... chk=20 new=6 [total=4065]
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480 (481/5736)... chk=20 new=4 [total=4069]
+  Batch @500 (501/5736)... chk=20 new=8 [total=4077]
+  Batch @520 (521/5736)... chk=20 new=4 [total=4081]
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560 (561/5736)... chk=20 new=5 [total=4086]
+  Batch @580... FAILED (skipped, one-by-one)
+  Batch @600 (601/5736)... chk=20 new=0 [total=4086]
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680 (681/5736)... chk=20 new=5 [total=4091]
+  Batch @700 (701/5736)... chk=20 new=1 [total=4092]
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740 (741/5736)... chk=20 new=0 [total=4092]
+  Batch @760... FAILED (skipped, one-by-one)
+  Batch @780 (781/5736)... chk=20 new=3 [total=4095]
+  Batch @800 (801/5736)... chk=20 new=2 [total=4097]
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840 (841/5736)... chk=20 new=5 [total=4102]
+  Batch @860... FAILED (skipped, one-by-one)
+  Batch @880 (881/5736)... chk=20 new=5 [total=4107]
+  Batch @900 (901/5736)... chk=20 new=2 [total=4109]
+  Batch @920 (921/5736)... chk=20 new=5 [total=4114]
+  Batch @940 (941/5736)... chk=20 new=1 [total=4115]
+  Batch @960 (961/5736)... chk=20 new=3 [total=4118]
+  Batch @980 (981/5736)... chk=20 new=5 [total=4123]
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060 (1061/5736)... chk=20 new=6 [total=4129]
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100... FAILED (skipped, one-by-one)
+  Batch @1120... FAILED (skipped, one-by-one)
+  Batch @1140 (1141/5736)... chk=20 new=3 [total=4132]
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180 (1181/5736)... chk=20 new=5 [total=4137]
+  Batch @1200... FAILED (skipped, one-by-one)
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240... FAILED (skipped, one-by-one)
+  Batch @1260 (1261/5736)... chk=20 new=2 [total=4139]
+  Batch @1280... FAILED (skipped, one-by-one)
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320 (1321/5736)... chk=20 new=4 [total=4143]
+  Batch @1340 (1341/5736)... chk=20 new=6 [total=4149]
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380 (1381/5736)... chk=20 new=3 [total=4152]
+  Batch @1400... FAILED (skipped, one-by-one)
+  Batch @1420 (1421/5736)... chk=20 new=7 [total=4159]
+  Batch @1440... FAILED (skipped, one-by-one)
+  Batch @1460... FAILED (skipped, one-by-one)
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500 (1501/5736)... chk=20 new=7 [total=4166]
+  Batch @1520 (1521/5736)... chk=20 new=6 [total=4172]
+  Batch @1540 (1541/5736)... chk=20 new=4 [total=4176]
+  Batch @1560 (1561/5736)... chk=20 new=5 [total=4181]
+  Batch @1580... FAILED (skipped, one-by-one)
+  Batch @1600 (1601/5736)... chk=20 new=4 [total=4185]
+  Batch @1620 (1621/5736)... chk=20 new=3 [total=4188]
+  Batch @1640 (1641/5736)... chk=20 new=3 [total=4191]
+  Batch @1660 (1661/5736)... chk=20 new=4 [total=4195]
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700 (1701/5736)... chk=20 new=3 [total=4198]
+  Batch @1720... FAILED (skipped, one-by-one)
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820... FAILED (skipped, one-by-one)
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860... FAILED (skipped, one-by-one)
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960 (1961/5736)... chk=20 new=3 [total=4201]
+  Batch @1980 (1981/5736)... chk=20 new=3 [total=4204]
+  Batch @2000 (2001/5736)... chk=20 new=4 [total=4208]
+  Batch @2020 (2021/5736)... chk=20 new=3 [total=4211]
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080... FAILED (skipped, one-by-one)
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140... FAILED (skipped, one-by-one)
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260 (2261/5736)... chk=20 new=3 [total=4214]
+  Batch @2280... FAILED (skipped, one-by-one)
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320... FAILED (skipped, one-by-one)
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400... FAILED (skipped, one-by-one)
+  Batch @2420 (2421/5736)... chk=20 new=4 [total=4218]
+  Batch @2440 (2441/5736)... chk=20 new=1 [total=4219]
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480 (2481/5736)... chk=20 new=2 [total=4221]
+  Batch @2500 (2501/5736)... chk=20 new=3 [total=4224]
+  Batch @2520... FAILED (skipped, one-by-one)
+  Batch @2540 (2541/5736)... chk=20 new=6 [total=4230]
+  Batch @2560 (2561/5736)... chk=20 new=5 [total=4235]
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600... FAILED (skipped, one-by-one)
+  Batch @2620 (2621/5736)... chk=20 new=2 [total=4237]
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660... FAILED (skipped, one-by-one)
+  Batch @2680 (2681/5736)... chk=20 new=3 [total=4240]
+  Batch @2700 (2701/5736)... chk=20 new=7 [total=4247]
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740 (2741/5736)... chk=20 new=4 [total=4251]
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780... FAILED (skipped, one-by-one)
+  Batch @2800 (2801/5736)... chk=20 new=7 [total=4258]
+  Batch @2820... FAILED (skipped, one-by-one)
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920... FAILED (skipped, one-by-one)
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980 (2981/5736)... chk=20 new=3 [total=4261]
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020 (3021/5736)... chk=20 new=5 [total=4266]
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060... FAILED (skipped, one-by-one)
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100 (3101/5736)... chk=20 new=4 [total=4270]
+  Batch @3120... FAILED (skipped, one-by-one)
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180 (3181/5736)... chk=20 new=3 [total=4273]
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220 (3221/5736)... chk=20 new=4 [total=4277]
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280 (3281/5736)... chk=20 new=3 [total=4280]
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380 (3381/5736)... chk=20 new=2 [total=4282]
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440 (3441/5736)... chk=20 new=2 [total=4284]
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480... FAILED (skipped, one-by-one)
+  Batch @3500... FAILED (skipped, one-by-one)
+  Batch @3520... FAILED (skipped, one-by-one)
+  Batch @3540... FAILED (skipped, one-by-one)
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600... FAILED (skipped, one-by-one)
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700 (3701/5736)... chk=20 new=6 [total=4290]
+  Batch @3720... FAILED (skipped, one-by-one)
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760 (3761/5736)... chk=20 new=5 [total=4295]
+  Batch @3780 (3781/5736)... chk=20 new=6 [total=4301]
+  Batch @3800 (3801/5736)... chk=20 new=4 [total=4305]
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840 (3841/5736)... chk=20 new=3 [total=4308]
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920 (3921/5736)... chk=20 new=1 [total=4309]
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960... FAILED (skipped, one-by-one)
+  Batch @3980... FAILED (skipped, one-by-one)
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100... FAILED (skipped, one-by-one)
+  Batch @4120 (4121/5736)... chk=20 new=2 [total=4311]
+  Batch @4140... FAILED (skipped, one-by-one)
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180... FAILED (skipped, one-by-one)
+  Batch @4200 (4201/5736)... chk=20 new=3 [total=4314]
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240... FAILED (skipped, one-by-one)
+  Batch @4260... FAILED (skipped, one-by-one)
+  Batch @4280... FAILED (skipped, one-by-one)
+  Batch @4300 (4301/5736)... chk=20 new=4 [total=4318]
+  Batch @4320... FAILED (skipped, one-by-one)
+  Batch @4340... FAILED (skipped, one-by-one)
+  Batch @4360... FAILED (skipped, one-by-one)
+  Batch @4380 (4381/5736)... chk=20 new=5 [total=4323]
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420... FAILED (skipped, one-by-one)
+  Batch @4440... FAILED (skipped, one-by-one)
+  Batch @4460... FAILED (skipped, one-by-one)
+  Batch @4480... FAILED (skipped, one-by-one)
+  Batch @4500 (4501/5736)... chk=20 new=4 [total=4327]
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540 (4541/5736)... chk=20 new=5 [total=4332]
+  Batch @4560 (4561/5736)... chk=20 new=5 [total=4337]
+  Batch @4580 (4581/5736)... chk=20 new=3 [total=4340]
+  Batch @4600... FAILED (skipped, one-by-one)
+  Batch @4620... FAILED (skipped, one-by-one)
+  Batch @4640... FAILED (skipped, one-by-one)
+  Batch @4660... FAILED (skipped, one-by-one)
+  Batch @4680 (4681/5736)... chk=20 new=3 [total=4343]
+  Batch @4700 (4701/5736)... chk=20 new=8 [total=4351]
+  Batch @4720... FAILED (skipped, one-by-one)
+  Batch @4740... FAILED (skipped, one-by-one)
+  Batch @4760... FAILED (skipped, one-by-one)
+  Batch @4780... FAILED (skipped, one-by-one)
+  Batch @4800 (4801/5736)... chk=20 new=4 [total=4355]
+  Batch @4820... FAILED (skipped, one-by-one)
+  Batch @4840... FAILED (skipped, one-by-one)
+  Batch @4860... FAILED (skipped, one-by-one)
+  Batch @4880... FAILED (skipped, one-by-one)
+  Batch @4900... FAILED (skipped, one-by-one)
+  Batch @4920... FAILED (skipped, one-by-one)
+  Batch @4940 (4941/5736)... chk=20 new=5 [total=4360]
+  Batch @4960... FAILED (skipped, one-by-one)
+  Batch @4980... FAILED (skipped, one-by-one)
+  Batch @5000... FAILED (skipped, one-by-one)
+  Batch @5020... FAILED (skipped, one-by-one)
+  Batch @5040... FAILED (skipped, one-by-one)
+  Batch @5060... FAILED (skipped, one-by-one)
+  Batch @5080 (5081/5736)... chk=20 new=5 [total=4365]
+  Batch @5100... FAILED (skipped, one-by-one)
+  Batch @5120... FAILED (skipped, one-by-one)
+  Batch @5140 (5141/5736)... chk=20 new=7 [total=4372]
+  Batch @5160 (5161/5736)... chk=20 new=3 [total=4375]
+  Batch @5180... FAILED (skipped, one-by-one)
+  Batch @5200 (5201/5736)... chk=20 new=7 [total=4382]
+  Batch @5220... FAILED (skipped, one-by-one)
+  Batch @5240... FAILED (skipped, one-by-one)
+  Batch @5260... FAILED (skipped, one-by-one)
+  Batch @5280... FAILED (skipped, one-by-one)
+  Batch @5300... FAILED (skipped, one-by-one)
+  Batch @5320... FAILED (skipped, one-by-one)
+  Batch @5340... FAILED (skipped, one-by-one)
+  Batch @5360... FAILED (skipped, one-by-one)
+  Batch @5380... FAILED (skipped, one-by-one)
+  Batch @5400... FAILED (skipped, one-by-one)
+  Batch @5420... FAILED (skipped, one-by-one)
+  Batch @5440 (5441/5736)... chk=20 new=7 [total=4389]
+  Batch @5460... FAILED (skipped, one-by-one)
+  Batch @5480... FAILED (skipped, one-by-one)
+  Batch @5500... FAILED (skipped, one-by-one)
+  Batch @5520... FAILED (skipped, one-by-one)
+  Batch @5540... FAILED (skipped, one-by-one)
+  Batch @5560... FAILED (skipped, one-by-one)
+  Batch @5580 (5581/5736)... chk=20 new=6 [total=4395]
+  Batch @5600... FAILED (skipped, one-by-one)
+  Batch @5620 (5621/5736)... chk=20 new=11 [total=4406]
+  Batch @5640... FAILED (skipped, one-by-one)
+  Batch @5660... FAILED (skipped, one-by-one)
+  Batch @5680 (5681/5736)... chk=20 new=6 [total=4412]
+  Batch @5700... FAILED (skipped, one-by-one)
+  Batch @5720... FAILED (skipped, one-by-one)
+  Downloading 2023... done (9.3 MB)
+  [2023] 5489 accidents in file
+  [2023] Pending: 5489
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20... FAILED (skipped, one-by-one)
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60... FAILED (skipped, one-by-one)
+  Batch @80 (81/5489)... chk=20 new=12 [total=4424]
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120... FAILED (skipped, one-by-one)
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160... FAILED (skipped, one-by-one)
+  Batch @180 (181/5489)... chk=20 new=5 [total=4429]
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220 (221/5489)... chk=20 new=4 [total=4433]
+  Batch @240... FAILED (skipped, one-by-one)
+  Batch @260... FAILED (skipped, one-by-one)
+  Batch @280... FAILED (skipped, one-by-one)
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340 (341/5489)... chk=20 new=5 [total=4438]
+  Batch @360 (361/5489)... chk=20 new=3 [total=4441]
+  Batch @380 (381/5489)... chk=20 new=9 [total=4450]
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460 (461/5489)... chk=20 new=6 [total=4456]
+  Batch @480 (481/5489)... chk=20 new=9 [total=4465]
+  Batch @500 (501/5489)... chk=20 new=10 [total=4475]
+  Batch @520... FAILED (skipped, one-by-one)
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580 (581/5489)... chk=20 new=7 [total=4482]
+  Batch @600... FAILED (skipped, one-by-one)
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760... FAILED (skipped, one-by-one)
+  Batch @780 (781/5489)... chk=20 new=4 [total=4486]
+  Batch @800... FAILED (skipped, one-by-one)
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840... FAILED (skipped, one-by-one)
+  Batch @860... FAILED (skipped, one-by-one)
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900... FAILED (skipped, one-by-one)
+  Batch @920... FAILED (skipped, one-by-one)
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960... FAILED (skipped, one-by-one)
+  Batch @980... FAILED (skipped, one-by-one)
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060 (1061/5489)... chk=20 new=1 [total=4487]
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100 (1101/5489)... chk=20 new=4 [total=4491]
+  Batch @1120... FAILED (skipped, one-by-one)
+  Batch @1140 (1141/5489)... chk=20 new=0 [total=4491]
+  Batch @1160 (1161/5489)... chk=20 new=6 [total=4497]
+  Batch @1180... FAILED (skipped, one-by-one)
+  Batch @1200... FAILED (skipped, one-by-one)
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240 (1241/5489)... chk=20 new=4 [total=4501]
+  Batch @1260... FAILED (skipped, one-by-one)
+  Batch @1280... FAILED (skipped, one-by-one)
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320 (1321/5489)... chk=20 new=3 [total=4504]
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380... FAILED (skipped, one-by-one)
+  Batch @1400 (1401/5489)... chk=20 new=3 [total=4507]
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440... FAILED (skipped, one-by-one)
+  Batch @1460 (1461/5489)... chk=20 new=4 [total=4511]
+  Batch @1480 (1481/5489)... chk=20 new=5 [total=4516]
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540... FAILED (skipped, one-by-one)
+  Batch @1560... FAILED (skipped, one-by-one)
+  Batch @1580... FAILED (skipped, one-by-one)
+  Batch @1600 (1601/5489)... chk=20 new=6 [total=4522]
+  Batch @1620... FAILED (skipped, one-by-one)
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720 (1721/5489)... chk=20 new=5 [total=4527]
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780 (1781/5489)... chk=20 new=3 [total=4530]
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820... FAILED (skipped, one-by-one)
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860... FAILED (skipped, one-by-one)
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980... FAILED (skipped, one-by-one)
+  Batch @2000 (2001/5489)... chk=20 new=4 [total=4534]
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060 (2061/5489)... chk=20 new=7 [total=4541]
+  Batch @2080... FAILED (skipped, one-by-one)
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140 (2141/5489)... chk=20 new=0 [total=4541]
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280... FAILED (skipped, one-by-one)
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320... FAILED (skipped, one-by-one)
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380 (2381/5489)... chk=20 new=2 [total=4543]
+  Batch @2400... FAILED (skipped, one-by-one)
+  Batch @2420 (2421/5489)... chk=20 new=4 [total=4547]
+  Batch @2440 (2441/5489)... chk=20 new=2 [total=4549]
+  Batch @2460 (2461/5489)... chk=20 new=5 [total=4554]
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500 (2501/5489)... chk=20 new=2 [total=4556]
+  Batch @2520... FAILED (skipped, one-by-one)
+  Batch @2540... FAILED (skipped, one-by-one)
+  Batch @2560... FAILED (skipped, one-by-one)
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600... FAILED (skipped, one-by-one)
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640 (2641/5489)... chk=20 new=3 [total=4559]
+  Batch @2660... FAILED (skipped, one-by-one)
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700... FAILED (skipped, one-by-one)
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740... FAILED (skipped, one-by-one)
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780... FAILED (skipped, one-by-one)
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820... FAILED (skipped, one-by-one)
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920... FAILED (skipped, one-by-one)
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980... FAILED (skipped, one-by-one)
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040 (3041/5489)... chk=20 new=4 [total=4563]
+  Batch @3060... FAILED (skipped, one-by-one)
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100... FAILED (skipped, one-by-one)
+  Batch @3120... FAILED (skipped, one-by-one)
+  Batch @3140 (3141/5489)... chk=20 new=4 [total=4567]
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220 (3221/5489)... chk=20 new=5 [total=4572]
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440... FAILED (skipped, one-by-one)
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480... FAILED (skipped, one-by-one)
+  Batch @3500... FAILED (skipped, one-by-one)
+  Batch @3520 (3521/5489)... chk=20 new=4 [total=4576]
+  Batch @3540... FAILED (skipped, one-by-one)
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600... FAILED (skipped, one-by-one)
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680 (3681/5489)... chk=20 new=7 [total=4583]
+  Batch @3700... FAILED (skipped, one-by-one)
+  Batch @3720... FAILED (skipped, one-by-one)
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800... FAILED (skipped, one-by-one)
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880 (3881/5489)... chk=20 new=5 [total=4588]
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960 (3961/5489)... chk=20 new=4 [total=4592]
+  Batch @3980... FAILED (skipped, one-by-one)
+  Batch @4000 (4001/5489)... chk=20 new=6 [total=4598]
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040... FAILED (skipped, one-by-one)
+  Batch @4060 (4061/5489)... chk=20 new=2 [total=4600]
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100... FAILED (skipped, one-by-one)
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140... FAILED (skipped, one-by-one)
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180... FAILED (skipped, one-by-one)
+  Batch @4200 (4201/5489)... chk=20 new=6 [total=4606]
+  Batch @4220 (4221/5489)... chk=20 new=1 [total=4607]
+  Batch @4240... FAILED (skipped, one-by-one)
+  Batch @4260... FAILED (skipped, one-by-one)
+  Batch @4280... FAILED (skipped, one-by-one)
+  Batch @4300... FAILED (skipped, one-by-one)
+  Batch @4320 (4321/5489)... chk=20 new=1 [total=4608]
+  Batch @4340... FAILED (skipped, one-by-one)
+  Batch @4360... FAILED (skipped, one-by-one)
+  Batch @4380... FAILED (skipped, one-by-one)
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420 (4421/5489)... chk=20 new=5 [total=4613]
+  Batch @4440 (4441/5489)... chk=20 new=2 [total=4615]
+  Batch @4460... FAILED (skipped, one-by-one)
+  Batch @4480... FAILED (skipped, one-by-one)
+  Batch @4500... FAILED (skipped, one-by-one)
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540... FAILED (skipped, one-by-one)
+  Batch @4560 (4561/5489)... chk=20 new=3 [total=4618]
+  Batch @4580... FAILED (skipped, one-by-one)
+  Batch @4600... FAILED (skipped, one-by-one)
+  Batch @4620... FAILED (skipped, one-by-one)
+  Batch @4640... FAILED (skipped, one-by-one)
+  Batch @4660... FAILED (skipped, one-by-one)
+  Batch @4680... FAILED (skipped, one-by-one)
+  Batch @4700... FAILED (skipped, one-by-one)
+  Batch @4720... FAILED (skipped, one-by-one)
+  Batch @4740... FAILED (skipped, one-by-one)
+  Batch @4760... FAILED (skipped, one-by-one)
+  Batch @4780 (4781/5489)... chk=20 new=8 [total=4626]
+  Batch @4800 (4801/5489)... chk=20 new=7 [total=4633]
+  Batch @4820... FAILED (skipped, one-by-one)
+  Batch @4840... FAILED (skipped, one-by-one)
+  Batch @4860... FAILED (skipped, one-by-one)
+  Batch @4880... FAILED (skipped, one-by-one)
+  Batch @4900... FAILED (skipped, one-by-one)
+  Batch @4920... FAILED (skipped, one-by-one)
+  Batch @4940... FAILED (skipped, one-by-one)
+  Batch @4960 (4961/5489)... chk=20 new=5 [total=4638]
+  Batch @4980 (4981/5489)... chk=20 new=4 [total=4642]
+  Batch @5000... FAILED (skipped, one-by-one)
+  Batch @5020 (5021/5489)... chk=20 new=9 [total=4651]
+  Batch @5040... FAILED (skipped, one-by-one)
+  Batch @5060 (5061/5489)... chk=20 new=6 [total=4657]
+  Batch @5080... FAILED (skipped, one-by-one)
+  Batch @5100 (5101/5489)... chk=20 new=8 [total=4665]
+  Batch @5120... FAILED (skipped, one-by-one)
+  Batch @5140... FAILED (skipped, one-by-one)
+  Batch @5160... FAILED (skipped, one-by-one)
+  Batch @5180... FAILED (skipped, one-by-one)
+  Batch @5200... FAILED (skipped, one-by-one)
+  Batch @5220... FAILED (skipped, one-by-one)
+  Batch @5240... FAILED (skipped, one-by-one)
+  Batch @5260... FAILED (skipped, one-by-one)
+  Batch @5280... FAILED (skipped, one-by-one)
+  Batch @5300... FAILED (skipped, one-by-one)
+  Batch @5320... FAILED (skipped, one-by-one)
+  Batch @5340 (5341/5489)... chk=20 new=4 [total=4669]
+  Batch @5360... FAILED (skipped, one-by-one)
+  Batch @5380... FAILED (skipped, one-by-one)
+  Batch @5400... FAILED (skipped, one-by-one)
+  Batch @5420... FAILED (skipped, one-by-one)
+  Batch @5440... FAILED (skipped, one-by-one)
+  Batch @5460... FAILED (skipped, one-by-one)
+  Batch @5480 (5481/5489)... chk=9 new=3 [total=4672]
+  Downloading 2024... done (9.3 MB)
+  [2024] 5425 accidents in file
+  [2024] Pending: 5425
+  Batch @0... FAILED (skipped, one-by-one)
+  Batch @20 (21/5425)... chk=20 new=9 [total=4681]
+  Batch @40... FAILED (skipped, one-by-one)
+  Batch @60 (61/5425)... chk=20 new=4 [total=4685]
+  Batch @80... FAILED (skipped, one-by-one)
+  Batch @100... FAILED (skipped, one-by-one)
+  Batch @120... FAILED (skipped, one-by-one)
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160 (161/5425)... chk=20 new=9 [total=4694]
+  Batch @180... FAILED (skipped, one-by-one)
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220... FAILED (skipped, one-by-one)
+  Batch @240... FAILED (skipped, one-by-one)
+  Batch @260... FAILED (skipped, one-by-one)
+  Batch @280 (281/5425)... chk=20 new=6 [total=4700]
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320... FAILED (skipped, one-by-one)
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360... FAILED (skipped, one-by-one)
+  Batch @380... FAILED (skipped, one-by-one)
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440... FAILED (skipped, one-by-one)
+  Batch @460... FAILED (skipped, one-by-one)
+  Batch @480 (481/5425)... chk=20 new=9 [total=4709]
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520... FAILED (skipped, one-by-one)
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580 (581/5425)... chk=20 new=6 [total=4715]
+  Batch @600... FAILED (skipped, one-by-one)
+  Batch @620... FAILED (skipped, one-by-one)
+  Batch @640... FAILED (skipped, one-by-one)
+  Batch @660... FAILED (skipped, one-by-one)
+  Batch @680... FAILED (skipped, one-by-one)
+  Batch @700 (701/5425)... chk=20 new=8 [total=4723]
+  Batch @720... FAILED (skipped, one-by-one)
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760... FAILED (skipped, one-by-one)
+  Batch @780... FAILED (skipped, one-by-one)
+  Batch @800... FAILED (skipped, one-by-one)
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840... FAILED (skipped, one-by-one)
+  Batch @860 (861/5425)... chk=20 new=5 [total=4728]
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900... FAILED (skipped, one-by-one)
+  Batch @920 (921/5425)... chk=20 new=5 [total=4733]
+  Batch @940... FAILED (skipped, one-by-one)
+  Batch @960... FAILED (skipped, one-by-one)
+  Batch @980 (981/5425)... chk=20 new=7 [total=4740]
+  Batch @1000 (1001/5425)... chk=20 new=8 [total=4748]
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060... FAILED (skipped, one-by-one)
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100... FAILED (skipped, one-by-one)
+  Batch @1120... FAILED (skipped, one-by-one)
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180... FAILED (skipped, one-by-one)
+  Batch @1200 (1201/5425)... chk=20 new=4 [total=4752]
+  Batch @1220 (1221/5425)... chk=20 new=3 [total=4755]
+  Batch @1240... FAILED (skipped, one-by-one)
+  Batch @1260... FAILED (skipped, one-by-one)
+  Batch @1280... FAILED (skipped, one-by-one)
+  Batch @1300... FAILED (skipped, one-by-one)
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380... FAILED (skipped, one-by-one)
+  Batch @1400... FAILED (skipped, one-by-one)
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440 (1441/5425)... chk=20 new=7 [total=4762]
+  Batch @1460... FAILED (skipped, one-by-one)
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540... FAILED (skipped, one-by-one)
+  Batch @1560 (1561/5425)... chk=20 new=1 [total=4763]
+  Batch @1580... FAILED (skipped, one-by-one)
+  Batch @1600 (1601/5425)... chk=20 new=4 [total=4767]
+  Batch @1620... FAILED (skipped, one-by-one)
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720 (1721/5425)... chk=20 new=5 [total=4772]
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800... FAILED (skipped, one-by-one)
+  Batch @1820 (1821/5425)... chk=20 new=8 [total=4780]
+  Batch @1840... FAILED (skipped, one-by-one)
+  Batch @1860... FAILED (skipped, one-by-one)
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900... FAILED (skipped, one-by-one)
+  Batch @1920 (1921/5425)... chk=20 new=3 [total=4783]
+  Batch @1940... FAILED (skipped, one-by-one)
+  Batch @1960 (1961/5425)... chk=20 new=5 [total=4788]
+  Batch @1980 (1981/5425)... chk=20 new=7 [total=4795]
+  Batch @2000 (2001/5425)... chk=20 new=5 [total=4800]
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040... FAILED (skipped, one-by-one)
+  Batch @2060... FAILED (skipped, one-by-one)
+  Batch @2080 (2081/5425)... chk=20 new=4 [total=4804]
+  Batch @2100... FAILED (skipped, one-by-one)
+  Batch @2120... FAILED (skipped, one-by-one)
+  Batch @2140... FAILED (skipped, one-by-one)
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180 (2181/5425)... chk=20 new=4 [total=4808]
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280... FAILED (skipped, one-by-one)
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320... FAILED (skipped, one-by-one)
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380... FAILED (skipped, one-by-one)
+  Batch @2400... FAILED (skipped, one-by-one)
+  Batch @2420... FAILED (skipped, one-by-one)
+  Batch @2440... FAILED (skipped, one-by-one)
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480... FAILED (skipped, one-by-one)
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520 (2521/5425)... chk=20 new=5 [total=4813]
+  Batch @2540... FAILED (skipped, one-by-one)
+  Batch @2560... FAILED (skipped, one-by-one)
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600 (2601/5425)... chk=20 new=5 [total=4818]
+  Batch @2620... FAILED (skipped, one-by-one)
+  Batch @2640... FAILED (skipped, one-by-one)
+  Batch @2660... FAILED (skipped, one-by-one)
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700 (2701/5425)... chk=20 new=6 [total=4824]
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740... FAILED (skipped, one-by-one)
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780... FAILED (skipped, one-by-one)
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820... FAILED (skipped, one-by-one)
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920... FAILED (skipped, one-by-one)
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960 (2961/5425)... chk=20 new=5 [total=4829]
+  Batch @2980... FAILED (skipped, one-by-one)
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060 (3061/5425)... chk=20 new=5 [total=4834]
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100... FAILED (skipped, one-by-one)
+  Batch @3120 (3121/5425)... chk=20 new=7 [total=4841]
+  Batch @3140... FAILED (skipped, one-by-one)
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180... FAILED (skipped, one-by-one)
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220... FAILED (skipped, one-by-one)
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260... FAILED (skipped, one-by-one)
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380... FAILED (skipped, one-by-one)
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440 (3441/5425)... chk=20 new=9 [total=4850]
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480 (3481/5425)... chk=20 new=3 [total=4853]
+  Batch @3500... FAILED (skipped, one-by-one)
+  Batch @3520... FAILED (skipped, one-by-one)
+  Batch @3540... FAILED (skipped, one-by-one)
+  Batch @3560... FAILED (skipped, one-by-one)
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600 (3601/5425)... chk=20 new=9 [total=4862]
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680 (3681/5425)... chk=20 new=6 [total=4868]
+  Batch @3700 (3701/5425)... chk=20 new=4 [total=4872]
+  Batch @3720 (3721/5425)... chk=20 new=7 [total=4879]
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800... FAILED (skipped, one-by-one)
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860... FAILED (skipped, one-by-one)
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900... FAILED (skipped, one-by-one)
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960... FAILED (skipped, one-by-one)
+  Batch @3980... FAILED (skipped, one-by-one)
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040 (4041/5425)... chk=20 new=6 [total=4885]
+  Batch @4060... FAILED (skipped, one-by-one)
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100 (4101/5425)... chk=20 new=5 [total=4890]
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140... FAILED (skipped, one-by-one)
+  Batch @4160... FAILED (skipped, one-by-one)
+  Batch @4180... FAILED (skipped, one-by-one)
+  Batch @4200 (4201/5425)... chk=20 new=8 [total=4898]
+  Batch @4220... FAILED (skipped, one-by-one)
+  Batch @4240... FAILED (skipped, one-by-one)
+  Batch @4260... FAILED (skipped, one-by-one)
+  Batch @4280... FAILED (skipped, one-by-one)
+  Batch @4300... FAILED (skipped, one-by-one)
+  Batch @4320... FAILED (skipped, one-by-one)
+  Batch @4340... FAILED (skipped, one-by-one)
+  Batch @4360 (4361/5425)... chk=20 new=7 [total=4905]
+  Batch @4380... FAILED (skipped, one-by-one)
+  Batch @4400... FAILED (skipped, one-by-one)
+  Batch @4420... FAILED (skipped, one-by-one)
+  Batch @4440... FAILED (skipped, one-by-one)
+  Batch @4460... FAILED (skipped, one-by-one)
+  Batch @4480 (4481/5425)... chk=20 new=9 [total=4914]
+  Batch @4500... FAILED (skipped, one-by-one)
+  Batch @4520... FAILED (skipped, one-by-one)
+  Batch @4540... FAILED (skipped, one-by-one)
+  Batch @4560... FAILED (skipped, one-by-one)
+  Batch @4580... FAILED (skipped, one-by-one)
+  Batch @4600 (4601/5425)... chk=20 new=6 [total=4920]
+  Batch @4620... FAILED (skipped, one-by-one)
+  Batch @4640... FAILED (skipped, one-by-one)
+  Batch @4660... FAILED (skipped, one-by-one)
+  Batch @4680 (4681/5425)... chk=20 new=7 [total=4927]
+  Batch @4700... FAILED (skipped, one-by-one)
+  Batch @4720... FAILED (skipped, one-by-one)
+  Batch @4740... FAILED (skipped, one-by-one)
+  Batch @4760... FAILED (skipped, one-by-one)
+  Batch @4780... FAILED (skipped, one-by-one)
+  Batch @4800... FAILED (skipped, one-by-one)
+  Batch @4820 (4821/5425)... chk=20 new=8 [total=4935]
+  Batch @4840... FAILED (skipped, one-by-one)
+  Batch @4860... FAILED (skipped, one-by-one)
+  Batch @4880... FAILED (skipped, one-by-one)
+  Batch @4900... FAILED (skipped, one-by-one)
+  Batch @4920 (4921/5425)... chk=20 new=5 [total=4940]
+  Batch @4940... FAILED (skipped, one-by-one)
+  Batch @4960... FAILED (skipped, one-by-one)
+  Batch @4980... FAILED (skipped, one-by-one)
+  Batch @5000... FAILED (skipped, one-by-one)
+  Batch @5020 (5021/5425)... chk=20 new=6 [total=4946]
+  Batch @5040... FAILED (skipped, one-by-one)
+  Batch @5060... FAILED (skipped, one-by-one)
+  Batch @5080... FAILED (skipped, one-by-one)
+  Batch @5100... FAILED (skipped, one-by-one)
+  Batch @5120 (5121/5425)... chk=20 new=8 [total=4954]
+  Batch @5140... FAILED (skipped, one-by-one)
+  Batch @5160 (5161/5425)... chk=20 new=3 [total=4957]
+  Batch @5180 (5181/5425)... chk=20 new=6 [total=4963]
+  Batch @5200 (5201/5425)... chk=20 new=8 [total=4971]
+  Batch @5220... FAILED (skipped, one-by-one)
+  Batch @5240... FAILED (skipped, one-by-one)
+  Batch @5260... FAILED (skipped, one-by-one)
+  Batch @5280... FAILED (skipped, one-by-one)
+  Batch @5300... FAILED (skipped, one-by-one)
+  Batch @5320... FAILED (skipped, one-by-one)
+  Batch @5340... FAILED (skipped, one-by-one)
+  Batch @5360... FAILED (skipped, one-by-one)
+  Batch @5380... FAILED (skipped, one-by-one)
+  Batch @5400... FAILED (skipped, one-by-one)
+  Batch @5420 (5421/5425)... chk=5 new=3 [total=4974]
+  Downloading 2025... done (6.8 MB)
+  [2025] 4329 accidents in file
+  [2025] Pending: 4329
+  Batch @0 (1/4329)... chk=20 new=5 [total=4979]
+  Batch @20 (21/4329)... chk=20 new=2 [total=4981]
+  Batch @40 (41/4329)... chk=20 new=7 [total=4988]
+  Batch @60 (61/4329)... chk=20 new=5 [total=4993]
+  Batch @80 (81/4329)... chk=20 new=8 [total=5001]
+  Batch @100 (101/4329)... chk=20 new=6 [total=5007]
+  Batch @120 (121/4329)... chk=20 new=3 [total=5010]
+  Batch @140... FAILED (skipped, one-by-one)
+  Batch @160 (161/4329)... chk=20 new=5 [total=5015]
+  Batch @180 (181/4329)... chk=20 new=3 [total=5018]
+  Batch @200... FAILED (skipped, one-by-one)
+  Batch @220 (221/4329)... chk=20 new=9 [total=5027]
+  Batch @240... FAILED (skipped, one-by-one)
+  Batch @260 (261/4329)... chk=20 new=6 [total=5033]
+  Batch @280... FAILED (skipped, one-by-one)
+  Batch @300... FAILED (skipped, one-by-one)
+  Batch @320 (321/4329)... chk=20 new=10 [total=5043]
+  Batch @340... FAILED (skipped, one-by-one)
+  Batch @360 (361/4329)... chk=20 new=6 [total=5049]
+  Batch @380 (381/4329)... chk=20 new=1 [total=5050]
+  Batch @400... FAILED (skipped, one-by-one)
+  Batch @420... FAILED (skipped, one-by-one)
+  Batch @440 (441/4329)... chk=20 new=4 [total=5054]
+  Batch @460 (461/4329)... chk=20 new=3 [total=5057]
+  Batch @480 (481/4329)... chk=20 new=2 [total=5059]
+  Batch @500... FAILED (skipped, one-by-one)
+  Batch @520 (521/4329)... chk=20 new=5 [total=5064]
+  Batch @540... FAILED (skipped, one-by-one)
+  Batch @560... FAILED (skipped, one-by-one)
+  Batch @580... FAILED (skipped, one-by-one)
+  Batch @600... FAILED (skipped, one-by-one)
+  Batch @620 (621/4329)... chk=20 new=5 [total=5069]
+  Batch @640 (641/4329)... chk=20 new=6 [total=5075]
+  Batch @660 (661/4329)... chk=20 new=4 [total=5079]
+  Batch @680 (681/4329)... chk=20 new=3 [total=5082]
+  Batch @700... FAILED (skipped, one-by-one)
+  Batch @720 (721/4329)... chk=20 new=7 [total=5089]
+  Batch @740... FAILED (skipped, one-by-one)
+  Batch @760 (761/4329)... chk=20 new=9 [total=5098]
+  Batch @780 (781/4329)... chk=20 new=3 [total=5101]
+  Batch @800... FAILED (skipped, one-by-one)
+  Batch @820... FAILED (skipped, one-by-one)
+  Batch @840 (841/4329)... chk=20 new=9 [total=5110]
+  Batch @860 (861/4329)... chk=20 new=7 [total=5117]
+  Batch @880... FAILED (skipped, one-by-one)
+  Batch @900 (901/4329)... chk=20 new=5 [total=5122]
+  Batch @920 (921/4329)... chk=20 new=8 [total=5130]
+  Batch @940 (941/4329)... chk=20 new=6 [total=5136]
+  Batch @960 (961/4329)... chk=20 new=7 [total=5143]
+  Batch @980 (981/4329)... chk=20 new=7 [total=5150]
+  Batch @1000... FAILED (skipped, one-by-one)
+  Batch @1020... FAILED (skipped, one-by-one)
+  Batch @1040... FAILED (skipped, one-by-one)
+  Batch @1060 (1061/4329)... chk=20 new=4 [total=5154]
+  Batch @1080... FAILED (skipped, one-by-one)
+  Batch @1100... FAILED (skipped, one-by-one)
+  Batch @1120 (1121/4329)... chk=20 new=3 [total=5157]
+  Batch @1140... FAILED (skipped, one-by-one)
+  Batch @1160... FAILED (skipped, one-by-one)
+  Batch @1180 (1181/4329)... chk=20 new=8 [total=5165]
+  Batch @1200 (1201/4329)... chk=20 new=2 [total=5167]
+  Batch @1220... FAILED (skipped, one-by-one)
+  Batch @1240... FAILED (skipped, one-by-one)
+  Batch @1260... FAILED (skipped, one-by-one)
+  Batch @1280... FAILED (skipped, one-by-one)
+  Batch @1300 (1301/4329)... chk=20 new=1 [total=5168]
+  Batch @1320... FAILED (skipped, one-by-one)
+  Batch @1340... FAILED (skipped, one-by-one)
+  Batch @1360... FAILED (skipped, one-by-one)
+  Batch @1380 (1381/4329)... chk=20 new=4 [total=5172]
+  Batch @1400... FAILED (skipped, one-by-one)
+  Batch @1420... FAILED (skipped, one-by-one)
+  Batch @1440... FAILED (skipped, one-by-one)
+  Batch @1460... FAILED (skipped, one-by-one)
+  Batch @1480... FAILED (skipped, one-by-one)
+  Batch @1500... FAILED (skipped, one-by-one)
+  Batch @1520... FAILED (skipped, one-by-one)
+  Batch @1540... FAILED (skipped, one-by-one)
+  Batch @1560 (1561/4329)... chk=20 new=3 [total=5175]
+  Batch @1580 (1581/4329)... chk=20 new=5 [total=5180]
+  Batch @1600 (1601/4329)... chk=20 new=5 [total=5185]
+  Batch @1620... FAILED (skipped, one-by-one)
+  Batch @1640... FAILED (skipped, one-by-one)
+  Batch @1660... FAILED (skipped, one-by-one)
+  Batch @1680... FAILED (skipped, one-by-one)
+  Batch @1700... FAILED (skipped, one-by-one)
+  Batch @1720 (1721/4329)... chk=20 new=3 [total=5188]
+  Batch @1740... FAILED (skipped, one-by-one)
+  Batch @1760... FAILED (skipped, one-by-one)
+  Batch @1780... FAILED (skipped, one-by-one)
+  Batch @1800 (1801/4329)... chk=20 new=6 [total=5194]
+  Batch @1820... FAILED (skipped, one-by-one)
+  Batch @1840 (1841/4329)... chk=20 new=3 [total=5197]
+  Batch @1860 (1861/4329)... chk=20 new=6 [total=5203]
+  Batch @1880... FAILED (skipped, one-by-one)
+  Batch @1900 (1901/4329)... chk=20 new=6 [total=5209]
+  Batch @1920... FAILED (skipped, one-by-one)
+  Batch @1940 (1941/4329)... chk=20 new=3 [total=5212]
+  Batch @1960... FAILED (skipped, one-by-one)
+  Batch @1980 (1981/4329)... chk=20 new=5 [total=5217]
+  Batch @2000... FAILED (skipped, one-by-one)
+  Batch @2020... FAILED (skipped, one-by-one)
+  Batch @2040 (2041/4329)... chk=20 new=2 [total=5219]
+  Batch @2060 (2061/4329)... chk=20 new=4 [total=5223]
+  Batch @2080... FAILED (skipped, one-by-one)
+  Batch @2100 (2101/4329)... chk=20 new=3 [total=5226]
+  Batch @2120 (2121/4329)... chk=20 new=5 [total=5231]
+  Batch @2140 (2141/4329)... chk=20 new=7 [total=5238]
+  Batch @2160... FAILED (skipped, one-by-one)
+  Batch @2180... FAILED (skipped, one-by-one)
+  Batch @2200... FAILED (skipped, one-by-one)
+  Batch @2220... FAILED (skipped, one-by-one)
+  Batch @2240... FAILED (skipped, one-by-one)
+  Batch @2260... FAILED (skipped, one-by-one)
+  Batch @2280... FAILED (skipped, one-by-one)
+  Batch @2300... FAILED (skipped, one-by-one)
+  Batch @2320... FAILED (skipped, one-by-one)
+  Batch @2340... FAILED (skipped, one-by-one)
+  Batch @2360... FAILED (skipped, one-by-one)
+  Batch @2380 (2381/4329)... chk=20 new=7 [total=5245]
+  Batch @2400 (2401/4329)... chk=20 new=5 [total=5250]
+  Batch @2420 (2421/4329)... chk=20 new=7 [total=5257]
+  Batch @2440... FAILED (skipped, one-by-one)
+  Batch @2460... FAILED (skipped, one-by-one)
+  Batch @2480 (2481/4329)... chk=20 new=6 [total=5263]
+  Batch @2500... FAILED (skipped, one-by-one)
+  Batch @2520 (2521/4329)... chk=20 new=11 [total=5274]
+  Batch @2540 (2541/4329)... chk=20 new=8 [total=5282]
+  Batch @2560... FAILED (skipped, one-by-one)
+  Batch @2580... FAILED (skipped, one-by-one)
+  Batch @2600 (2601/4329)... chk=20 new=4 [total=5286]
+  Batch @2620 (2621/4329)... chk=20 new=7 [total=5293]
+  Batch @2640 (2641/4329)... chk=20 new=6 [total=5299]
+  Batch @2660... FAILED (skipped, one-by-one)
+  Batch @2680... FAILED (skipped, one-by-one)
+  Batch @2700... FAILED (skipped, one-by-one)
+  Batch @2720... FAILED (skipped, one-by-one)
+  Batch @2740 (2741/4329)... chk=20 new=8 [total=5307]
+  Batch @2760... FAILED (skipped, one-by-one)
+  Batch @2780 (2781/4329)... chk=20 new=8 [total=5315]
+  Batch @2800... FAILED (skipped, one-by-one)
+  Batch @2820... FAILED (skipped, one-by-one)
+  Batch @2840... FAILED (skipped, one-by-one)
+  Batch @2860... FAILED (skipped, one-by-one)
+  Batch @2880... FAILED (skipped, one-by-one)
+  Batch @2900... FAILED (skipped, one-by-one)
+  Batch @2920 (2921/4329)... chk=20 new=9 [total=5324]
+  Batch @2940... FAILED (skipped, one-by-one)
+  Batch @2960... FAILED (skipped, one-by-one)
+  Batch @2980... FAILED (skipped, one-by-one)
+  Batch @3000... FAILED (skipped, one-by-one)
+  Batch @3020... FAILED (skipped, one-by-one)
+  Batch @3040... FAILED (skipped, one-by-one)
+  Batch @3060... FAILED (skipped, one-by-one)
+  Batch @3080... FAILED (skipped, one-by-one)
+  Batch @3100 (3101/4329)... chk=20 new=7 [total=5331]
+  Batch @3120... FAILED (skipped, one-by-one)
+  Batch @3140 (3141/4329)... chk=20 new=2 [total=5333]
+  Batch @3160... FAILED (skipped, one-by-one)
+  Batch @3180 (3181/4329)... chk=20 new=5 [total=5338]
+  Batch @3200... FAILED (skipped, one-by-one)
+  Batch @3220... FAILED (skipped, one-by-one)
+  Batch @3240... FAILED (skipped, one-by-one)
+  Batch @3260 (3261/4329)... chk=20 new=2 [total=5340]
+  Batch @3280... FAILED (skipped, one-by-one)
+  Batch @3300... FAILED (skipped, one-by-one)
+  Batch @3320... FAILED (skipped, one-by-one)
+  Batch @3340... FAILED (skipped, one-by-one)
+  Batch @3360... FAILED (skipped, one-by-one)
+  Batch @3380 (3381/4329)... chk=20 new=5 [total=5345]
+  Batch @3400... FAILED (skipped, one-by-one)
+  Batch @3420... FAILED (skipped, one-by-one)
+  Batch @3440... FAILED (skipped, one-by-one)
+  Batch @3460... FAILED (skipped, one-by-one)
+  Batch @3480... FAILED (skipped, one-by-one)
+  Batch @3500... FAILED (skipped, one-by-one)
+  Batch @3520... FAILED (skipped, one-by-one)
+  Batch @3540... FAILED (skipped, one-by-one)
+  Batch @3560 (3561/4329)... chk=20 new=12 [total=5357]
+  Batch @3580... FAILED (skipped, one-by-one)
+  Batch @3600 (3601/4329)... chk=20 new=6 [total=5363]
+  Batch @3620... FAILED (skipped, one-by-one)
+  Batch @3640... FAILED (skipped, one-by-one)
+  Batch @3660... FAILED (skipped, one-by-one)
+  Batch @3680... FAILED (skipped, one-by-one)
+  Batch @3700... FAILED (skipped, one-by-one)
+  Batch @3720... FAILED (skipped, one-by-one)
+  Batch @3740... FAILED (skipped, one-by-one)
+  Batch @3760... FAILED (skipped, one-by-one)
+  Batch @3780... FAILED (skipped, one-by-one)
+  Batch @3800... FAILED (skipped, one-by-one)
+  Batch @3820... FAILED (skipped, one-by-one)
+  Batch @3840... FAILED (skipped, one-by-one)
+  Batch @3860 (3861/4329)... chk=20 new=4 [total=5367]
+  Batch @3880... FAILED (skipped, one-by-one)
+  Batch @3900 (3901/4329)... chk=20 new=6 [total=5373]
+  Batch @3920... FAILED (skipped, one-by-one)
+  Batch @3940... FAILED (skipped, one-by-one)
+  Batch @3960... FAILED (skipped, one-by-one)
+  Batch @3980... FAILED (skipped, one-by-one)
+  Batch @4000... FAILED (skipped, one-by-one)
+  Batch @4020... FAILED (skipped, one-by-one)
+  Batch @4040 (4041/4329)... chk=20 new=7 [total=5380]
+  Batch @4060 (4061/4329)... chk=20 new=10 [total=5390]
+  Batch @4080... FAILED (skipped, one-by-one)
+  Batch @4100 (4101/4329)... chk=20 new=9 [total=5399]
+  Batch @4120... FAILED (skipped, one-by-one)
+  Batch @4140 (4141/4329)... chk=20 new=8 [total=5407]
+  Batch @4160 (4161/4329)... chk=20 new=4 [total=5411]
+  Batch @4180... FAILED (skipped, one-by-one)
+  Batch @4200... FAILED (skipped, one-by-one)
+  Batch @4220 (4221/4329)... chk=20 new=8 [total=5419]
+  Batch @4240... FAILED (skipped, one-by-one)
+  Batch @4260... FAILED (skipped, one-by-one)
+  Batch @4280... FAILED (skipped, one-by-one)
+  Batch @4300... FAILED (skipped, one-by-one)
+  Batch @4320... FAILED (skipped, one-by-one)
+
+[Done] ASN collection complete
+  Checked: 27077  Created: 5419
+Done!

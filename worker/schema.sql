@@ -57,7 +57,12 @@ CREATE TABLE IF NOT EXISTS events (
   pilot_briefing_sentence TEXT,
   confidence_score REAL DEFAULT 0.8,
   created_at TEXT DEFAULT (datetime('now')),
-  updated_at TEXT DEFAULT (datetime('now'))
+  updated_at TEXT DEFAULT (datetime('now')),
+  event_time TEXT,
+  metar_source TEXT,
+  flight_conditions TEXT,
+  destination_iata TEXT,
+  destination_icao TEXT
 );
 
 CREATE TABLE IF NOT EXISTS event_tags (

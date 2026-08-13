@@ -86,7 +86,7 @@ async function upsertItem(db: D1Database, source: Source, url: string, title: st
   return false;
 }
 
-async function fetchSource(source: Source, maxDetailFetches: number, priorityHosts: Set<string>): Promise<{ source: Source; statusCode: number; title: string; links: { url: string; title: string; category: string; severity: string; detailStatus: number; detailText: string }[] }> {
+async function fetchSource(db: D1Database, source: Source, maxDetailFetches: number, priorityHosts: Set<string>): Promise<{ source: Source; statusCode: number; title: string; links: { url: string; title: string; category: string; severity: string; detailStatus: number; detailText: string }[] }> {
   const res = await fetch(source.url, { headers: { "User-Agent": "OpsBriefing/0.1" }, signal: AbortSignal.timeout(12000), redirect: "follow" });
   const html = await res.text();
   const rawLinks = extractEventLinks(html, source);
@@ -97,6 +97,10 @@ async function fetchSource(source: Source, maxDetailFetches: number, priorityHos
 
   const enriched = [];
   for (const link of rawLinks.slice(0, detailLimit)) {
+    // Skip already processed URLs to optimize
+    const processed = await db.prepare("SELECT id FROM ops_intel_items WHERE source_url = ?").bind(link.url).first();
+    if (processed) continue;
+
     try {
       const dr = await fetch(link.url, { headers: { "User-Agent": "OpsBriefing/0.1" }, signal: AbortSignal.timeout(12000), redirect: "follow" });
       const dt = extractMainText(await dr.text());
@@ -121,7 +125,14 @@ export async function collectOnce(db: D1Database, env?: Env): Promise<Record<str
   const seenUrls = new Set<string>();
 
   try {
-    const results = await Promise.allSettled(SOURCES.map(s => fetchSource(s, maxDetailFetches, priorityHosts)));
+    // Priority hosts mapping to identify which sources to fetch first or more deeply
+    const sortedSources = [...SOURCES].sort((a, b) => {
+      const aPriority = [...priorityHosts].some(h => a.url.includes(h)) ? 1 : 0;
+      const bPriority = [...priorityHosts].some(h => b.url.includes(h)) ? 1 : 0;
+      return bPriority - aPriority;
+    });
+
+    const results = await Promise.allSettled(sortedSources.map(s => fetchSource(db, s, maxDetailFetches, priorityHosts)));
     for (const result of results) {
       if (result.status === "rejected") continue;
       const { source, statusCode, title, links } = result.value;

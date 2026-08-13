@@ -131,3 +131,163 @@ export async function enrichWithLLM(
 
   return { processed: results.length, updated, errors, error_samples: errorSamples };
 }
+
+// ── events.summary → 구조화 위협 파라미터 추출 (TSB/NTSB 자유텍스트용) ──────────
+
+export type EventThreats = {
+  flight_phase: string;          // TAKEOFF | CLIMB | CRUISE | DESCENT | APPROACH | LANDING | TAXI | GROUND | UNKNOWN
+  system_affected: string;       // e.g. ENGINE_FUEL_SYSTEM, LANDING_GEAR, AVIONICS, "" if none
+  failure_component: string;     // short free text, "" if none
+  emergency_declared: boolean;
+  emergency_level: string;       // NONE | PAN_PAN | MAYDAY
+  crew_action: string;           // short phrase, e.g. "rejected takeoff", "diverted"
+  outcome: string;               // short phrase, e.g. "safe return, no injuries"
+  contributing_factors: string[]; // up to 5 short phrases
+  operational_lesson: string;    // one sentence, what pilots should watch for
+  time_since_takeoff_bucket: string; // IMMEDIATE(<5min) | EARLY(5-30min) | MID_FLIGHT(30min-2hr) | LATE(>2hr) | NOT_APPLICABLE | UNKNOWN
+  time_since_takeoff_minutes: number | null; // explicit minutes if stated in text, else null
+  confidence: number;
+};
+
+const EMPTY_THREATS: EventThreats = {
+  flight_phase: "", system_affected: "", failure_component: "",
+  emergency_declared: false, emergency_level: "NONE",
+  crew_action: "", outcome: "", contributing_factors: [],
+  operational_lesson: "",
+  time_since_takeoff_bucket: "UNKNOWN", time_since_takeoff_minutes: null,
+  confidence: 0,
+};
+
+export async function extractEventThreats(ai: Ai, summary: string): Promise<EventThreats | null> {
+  const text = summary.slice(0, 2000);
+  const prompt = `You are an aviation safety analyst extracting structured threat data from an occurrence report for pilot pre-flight briefings. Respond with ONLY valid JSON, no markdown, no explanation.
+
+REPORT TEXT:
+${text}
+
+Respond with exactly this JSON structure:
+{
+  "flight_phase": "<one of: TAKEOFF | CLIMB | CRUISE | DESCENT | APPROACH | LANDING | TAXI | GROUND | UNKNOWN>",
+  "system_affected": "<short uppercase tag, e.g. ENGINE_FUEL_SYSTEM, LANDING_GEAR, AVIONICS, WEATHER, ATC_COORDINATION, or empty string if not a system issue>",
+  "failure_component": "<short phrase naming the specific failed part or nothing, else empty string>",
+  "emergency_declared": <true or false>,
+  "emergency_level": "<one of: NONE | PAN_PAN | MAYDAY>",
+  "crew_action": "<short phrase describing what the crew did, max 80 chars>",
+  "outcome": "<short phrase describing the result, max 80 chars>",
+  "contributing_factors": ["<short phrase>", "... up to 5 items, empty array if none stated"],
+  "operational_lesson": "<one concise sentence for pilots, max 150 chars>",
+  "time_since_takeoff_bucket": "<how long after takeoff the event occurred — one of: IMMEDIATE (during takeoff roll or under 5 min after airborne) | EARLY (5-30 min after takeoff, e.g. still climbing) | MID_FLIGHT (30 min to 2 hours after takeoff, e.g. cruise) | LATE (more than 2 hours after takeoff) | NOT_APPLICABLE (event happened on ground/taxi, not related to a takeoff) | UNKNOWN (text does not indicate timing relative to takeoff)>",
+  "time_since_takeoff_minutes": <integer minutes after takeoff if the text states or clearly implies a specific/approximate duration (e.g. "shortly after takeoff" = 3, "20 minutes into the flight" = 20), else null>,
+  "confidence": <0.0 to 1.0, how confident you are the extraction is accurate>
+}`;
+
+  try {
+    const response = await (ai as any).run("@cf/meta/llama-3.1-8b-instruct-fp8", {
+      messages: [
+        { role: "system", content: "You are an aviation safety analyst. Always respond with valid JSON only." },
+        { role: "user", content: prompt },
+      ],
+      max_tokens: 400,
+      temperature: 0.1,
+    }) as { response?: string };
+
+    const raw = (response?.response ?? "").trim();
+    const jsonStr = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+    const parsed = JSON.parse(jsonStr);
+
+    const PHASES = ["TAKEOFF", "CLIMB", "CRUISE", "DESCENT", "APPROACH", "LANDING", "TAXI", "GROUND", "UNKNOWN"];
+    const EMLEVELS = ["NONE", "PAN_PAN", "MAYDAY"];
+    const TSTO_BUCKETS = ["IMMEDIATE", "EARLY", "MID_FLIGHT", "LATE", "NOT_APPLICABLE", "UNKNOWN"];
+
+    const minutesRaw = parsed.time_since_takeoff_minutes;
+    const minutes = (minutesRaw === null || minutesRaw === undefined || minutesRaw === "")
+      ? null
+      : Math.max(0, Math.round(Number(minutesRaw)));
+
+    return {
+      flight_phase: PHASES.includes(String(parsed.flight_phase ?? "").toUpperCase()) ? String(parsed.flight_phase).toUpperCase() : "UNKNOWN",
+      system_affected: String(parsed.system_affected ?? "").toUpperCase().slice(0, 60),
+      failure_component: String(parsed.failure_component ?? "").slice(0, 120),
+      emergency_declared: Boolean(parsed.emergency_declared),
+      emergency_level: EMLEVELS.includes(String(parsed.emergency_level ?? "").toUpperCase()) ? String(parsed.emergency_level).toUpperCase() : "NONE",
+      crew_action: String(parsed.crew_action ?? "").slice(0, 100),
+      outcome: String(parsed.outcome ?? "").slice(0, 100),
+      contributing_factors: Array.isArray(parsed.contributing_factors) ? parsed.contributing_factors.map((f: unknown) => String(f).slice(0, 100)).slice(0, 5) : [],
+      operational_lesson: String(parsed.operational_lesson ?? "").slice(0, 200),
+      time_since_takeoff_bucket: TSTO_BUCKETS.includes(String(parsed.time_since_takeoff_bucket ?? "").toUpperCase()) ? String(parsed.time_since_takeoff_bucket).toUpperCase() : "UNKNOWN",
+      time_since_takeoff_minutes: (Number.isFinite(minutes as number)) ? minutes : null,
+      confidence: Math.max(0, Math.min(1, Number(parsed.confidence ?? 0.5))),
+    };
+  } catch (e) {
+    console.error("[extractEventThreats error]", String(e));
+    return null;
+  }
+}
+
+/**
+ * events 테이블 중 아직 위협 추출이 안 된 레코드(contributing_factors가 비어있는 '[]')를 일괄 처리.
+ * flight_phase는 기존 값이 있으면 덮어쓰지 않음(TSB/NTSB 원본 필드 우선).
+ */
+export async function enrichEventsWithThreats(
+  ai: Ai,
+  db: D1Database,
+  limit = 20,
+): Promise<{ processed: number; updated: number; errors: number; error_samples?: string[] }> {
+  const { results } = await db.prepare(
+    `SELECT id, summary, flight_phase
+     FROM events
+     WHERE (contributing_factors IS NULL OR contributing_factors = '[]')
+       AND summary IS NOT NULL AND summary != ''
+     ORDER BY event_date DESC
+     LIMIT ?`
+  ).bind(limit).all<{ id: string; summary: string; flight_phase: string | null }>();
+
+  let updated = 0, errors = 0;
+  const errorSamples: string[] = [];
+
+  for (const row of results) {
+    const result = await extractEventThreats(ai, row.summary);
+    if (!result) {
+      errors++;
+      if (errorSamples.length < 3) errorSamples.push(row.id);
+      continue;
+    }
+
+    const now = new Date().toISOString();
+    const keepExistingPhase = row.flight_phase && row.flight_phase.trim() !== "";
+    const tags = [
+      result.system_affected,
+      result.emergency_declared ? `EMERGENCY_${result.emergency_level}` : "",
+      `TIME_SINCE_TAKEOFF_${result.time_since_takeoff_bucket}`,
+      result.time_since_takeoff_minutes !== null ? `TSTO_MINUTES_${result.time_since_takeoff_minutes}` : "",
+    ].filter(Boolean);
+
+    await db.prepare(
+      `UPDATE events SET
+         flight_phase = ?,
+         contributing_factors = ?,
+         operational_lessons = ?,
+         pilot_briefing_sentence = ?,
+         confidence_score = ?,
+         updated_at = ?
+       WHERE id = ?`
+    ).bind(
+      keepExistingPhase ? row.flight_phase : result.flight_phase,
+      JSON.stringify(result.contributing_factors),
+      JSON.stringify([result.operational_lesson].filter(Boolean)),
+      [result.crew_action, result.outcome].filter(Boolean).join(" — ") || null,
+      result.confidence,
+      now,
+      row.id
+    ).run();
+
+    for (const tag of tags) {
+      await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(row.id, "llm_threat", tag).run();
+    }
+
+    updated++;
+    await new Promise(r => setTimeout(r, 50));
+  }
+
+  return { processed: results.length, updated, errors, error_samples: errorSamples };
+}

@@ -46,7 +46,7 @@ function Import-TsbCsv {
 }
 
 function CleanStr {
-    param($val, $maxLen = 800)
+    param($val, $maxLen = 0)
     if ($val -eq $null) { return "" }
     $s = $val.ToString().Trim()
     if ($s.StartsWith('"') -and $s.EndsWith('"') -and $s.Length -ge 2) {
@@ -56,7 +56,7 @@ function CleanStr {
     $s = [System.Text.RegularExpressions.Regex]::Replace($s, '[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '')
     # Normalize quotes to avoid JSON breakage
     $s = $s.Replace('"', "'")
-    if ($s.Length -gt $maxLen) { $s = $s.Substring(0, $maxLen) }
+    if ($maxLen -gt 0 -and $s.Length -gt $maxLen) { $s = $s.Substring(0, $maxLen) }
     return $s
 }
 
@@ -148,7 +148,7 @@ foreach ($occ in $occRows) {
         occClass      = CleanStr $occ.OccClassID_DisplayEng 30
         country       = CleanStr $occ.CountryID_DisplayEng 50
         province      = CleanStr $occ.ProvinceID_DisplayEng 50
-        summary       = CleanStr $occ.Summary 800
+        summary       = CleanStr $occ.Summary 0
         commonName    = CleanStr $occ.CommonName 200
         fatalCount    = $fatalCount
         seriousCount  = $seriousCount

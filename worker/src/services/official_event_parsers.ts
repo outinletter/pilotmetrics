@@ -1,5 +1,6 @@
 import { unzipSync } from "fflate";
 import { airportUtcOffset } from "../data/airport_hazards";
+import { EventRow } from "../types";
 
 const NTSB_CAROL_URL = "https://data.ntsb.gov/carol-main-public/api/Query/FileExport";
 const FAA_TRANSPORT_URL = "https://www.faa.gov/lessonslearned/transportairplane/accidents/transport-airplane-lessons-learned-library";
@@ -330,6 +331,70 @@ function airportForLocation(city: string, state: string, country: string, narrat
   return ["",""];
 }
 
+export interface UnifiedEventRecord {
+  id: string;
+  source_name: string;
+  source_url: string;
+  event_date: string;
+  event_time?: string | null;
+  operation_type?: string | null;
+  airport_iata?: string | null;
+  airport_icao?: string | null;
+  destination_iata?: string | null;
+  destination_icao?: string | null;
+  runway?: string | null;
+  approach_type?: string | null;
+  flight_conditions?: string | null;
+  flight_phase?: string | null;
+  aircraft_type?: string | null;
+  aircraft_category?: string | null;
+  operator?: string | null;
+  weather_summary?: string | null;
+  metar_source?: string | null;
+  event_type?: string | null;
+  severity: number;
+  core_event?: string | null;
+  lesson_keyword?: string | null;
+  summary: string;
+  tags: string[];
+  pilot_briefing_sentence?: string | null;
+  confidence_score?: number | null;
+}
+
+async function upsertEventRecord(db: D1Database, rec: UnifiedEventRecord): Promise<boolean> {
+  const now = new Date().toISOString();
+  let existing = await db.prepare("SELECT * FROM events WHERE event_date = ? AND (airport_icao = ? AND airport_icao != '' OR airport_iata = ? AND airport_iata != '')")
+    .bind(rec.event_date, rec.airport_icao || "---", rec.airport_iata || "---")
+    .first<EventRow>();
+
+  if (!existing) {
+    existing = await db.prepare("SELECT * FROM events WHERE id = ?").bind(rec.id).first<EventRow>();
+  }
+
+  if (existing) {
+    const sources = new Set((existing.source_name || "").split(" / "));
+    sources.add(rec.source_name);
+    const urls = new Set((existing.source_url || "").split(" , "));
+    urls.add(rec.source_url);
+
+    await db.prepare(`UPDATE events SET source_name=?, source_url=?, event_time=COALESCE(event_time,?), operation_type=COALESCE(operation_type,?), airport_iata=COALESCE(airport_iata,?), airport_icao=COALESCE(airport_icao,?), destination_iata=COALESCE(destination_iata,?), destination_icao=COALESCE(destination_icao,?), runway=COALESCE(runway,?), approach_type=COALESCE(approach_type,?), flight_conditions=COALESCE(flight_conditions,?), flight_phase=COALESCE(flight_phase,?), aircraft_type=COALESCE(aircraft_type,?), aircraft_category=COALESCE(aircraft_category,?), operator=COALESCE(operator,?), weather_summary=COALESCE(weather_summary,?), metar_source=COALESCE(metar_source,?), event_type=COALESCE(event_type,?), severity=MAX(COALESCE(severity,0),?), updated_at=? WHERE id=?`)
+      .bind(Array.from(sources).join(" / "), Array.from(urls).join(" , "), rec.event_time || null, rec.operation_type || null, rec.airport_iata || null, rec.airport_icao || null, rec.destination_iata || null, rec.destination_icao || null, rec.runway || null, rec.approach_type || null, rec.flight_conditions || null, rec.flight_phase || null, rec.aircraft_type || null, rec.aircraft_category || null, rec.operator || null, rec.weather_summary || null, rec.metar_source || null, rec.event_type || null, rec.severity, now, existing.id).run();
+
+    for (const tag of rec.tags) {
+      await db.prepare("INSERT OR IGNORE INTO event_tags (event_id, tag_type, tag_value) VALUES (?, 'risk', ?)").bind(existing.id, tag).run();
+    }
+    return false;
+  }
+
+  await db.prepare(`INSERT INTO events (id,source_name,source_url,event_date,event_time,operation_type,airport_iata,airport_icao,destination_iata,destination_icao,runway,approach_type,flight_conditions,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,metar_source,event_type,severity,core_event,lesson_keyword,summary,pilot_briefing_sentence,confidence_score,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .bind(rec.id, rec.source_name, rec.source_url, rec.event_date, rec.event_time || null, rec.operation_type || null, rec.airport_iata || null, rec.airport_icao || null, rec.destination_iata || null, rec.destination_icao || null, rec.runway || null, rec.approach_type || null, rec.flight_conditions || null, rec.flight_phase || null, rec.aircraft_type || null, rec.aircraft_category || null, rec.operator || null, rec.weather_summary || null, rec.metar_source || null, rec.event_type || null, rec.severity, rec.core_event || null, rec.lesson_keyword || null, rec.summary, rec.pilot_briefing_sentence || null, rec.confidence_score || 0.5, now, now).run();
+
+  for (const tag of rec.tags) {
+    await db.prepare("INSERT OR IGNORE INTO event_tags (event_id, tag_type, tag_value) VALUES (?, 'risk', ?)").bind(rec.id, tag).run();
+  }
+  return true;
+}
+
 function cleanText(text: string): string {
   return text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -376,20 +441,35 @@ async function upsertOfficialItem(db: D1Database, params: { sourceName: string; 
 }
 
 async function upsertFaaEvent(db: D1Database, row: { eventDate: Date; dateText: string; url: string; operator: string; flight: string; city: string; state: string; country: string; make: string; model: string }): Promise<boolean> {
-  const [airportIata, airportIcao] = airportForLocation(row.city, row.state, row.country);
+  const context = `${row.operator} ${row.flight} ${row.make} ${row.model}`;
+  const [airportIata, airportIcao] = airportForLocation(row.city, row.state, row.country, context);
   const rawId = `FAA-LL-${row.dateText.replace(/\//g, "-")}-${row.operator}-${row.flight}`.toUpperCase();
   const eventId = rawId.replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, "");
-  const existing = await db.prepare("SELECT id FROM events WHERE id = ?").bind(eventId).first<{ id: string }>();
   const makeModel = `${row.make} ${row.model}`.trim();
-  const now = new Date().toISOString();
-  const tags = ["FAA","OFFICIAL_LESSON","PART_121_135_RELEVANT"];
-  if (!existing) {
-    await db.prepare("INSERT INTO events (id,source_name,source_url,event_date,operation_type,airport_iata,airport_icao,runway,approach_type,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
-      .bind(eventId,"FAA Transport Airplane Lessons Learned",row.url,row.eventDate.toISOString().slice(0,10),"Part 121 / Part 135 official lesson candidate",airportIata,airportIcao,"",airportIcao ? "VISUAL" : "ENROUTE",airportIcao ? "APPROACH" : "CRUISE",makeModel,"JET",row.operator,`${row.city}, ${row.state || row.country}`.replace(/, $/,""),"FAA LESSONS LEARNED CASE",3,`${row.operator} ${row.flight} official lesson`,"Official FAA Lesson",`FAA Lessons Learned case for ${row.operator} flight ${row.flight} near ${row.city}, ${row.state || row.country} on ${row.dateText}.`,JSON.stringify([]),JSON.stringify([]),`Review FAA lesson for ${row.city || "the destination"} before approach or enroute decision gates.`,0.7,now,now).run();
-    for (const tag of tags) await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId,"risk",tag).run();
-    return true;
-  }
-  return false;
+
+  return await upsertEventRecord(db, {
+    id: eventId,
+    source_name: "FAA Transport Airplane Lessons Learned",
+    source_url: row.url,
+    event_date: row.eventDate.toISOString().slice(0, 10),
+    operation_type: "Part 121 / Part 135 official lesson candidate",
+    airport_iata: airportIata,
+    airport_icao: airportIcao,
+    approach_type: airportIcao ? "VISUAL" : "ENROUTE",
+    flight_phase: airportIcao ? "APPROACH" : "CRUISE",
+    aircraft_type: makeModel,
+    aircraft_category: "JET",
+    operator: row.operator,
+    weather_summary: `${row.city}, ${row.state || row.country}`.replace(/, $/,""),
+    event_type: "FAA LESSONS LEARNED CASE",
+    severity: 3,
+    core_event: `${row.operator} ${row.flight} official lesson`,
+    lesson_keyword: "Official FAA Lesson",
+    summary: `FAA Lessons Learned case for ${row.operator} flight ${row.flight} near ${row.city}, ${row.state || row.country} on ${row.dateText}.`,
+    tags: ["FAA", "OFFICIAL_LESSON", "PART_121_135_RELEVANT"],
+    pilot_briefing_sentence: `Review FAA lesson for ${row.city || "the destination"} before approach or enroute decision gates.`,
+    confidence_score: 0.7
+  });
 }
 
 async function parseFaaTransportLibrary(db: D1Database, yearsBack: number): Promise<Record<string, unknown>> {
@@ -501,122 +581,82 @@ async function parseNtsbCarol(db: D1Database, yearsBack: number): Promise<Record
 }
 
 async function upsertNtsbCase(db: D1Database, ntsbNum: string, c: Record<string, unknown>, vehicles: Record<string, unknown>[]): Promise<boolean> {
-    const eventId = `NTSB-${ntsbNum}`.toUpperCase().replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, "");
-    const existing = await db.prepare("SELECT id FROM events WHERE id = ?").bind(eventId).first<{ id: string }>();
-    if (!existing) {
-      const eventDateRaw = String(c.cm_eventDate ?? "");
-      const eventDate = eventDateRaw.slice(0, 10);
-      // 시각 추출 (cm_eventDate: "2024-03-15T14:30:00Z")
-      const eventTimeUtc = eventDateRaw.length >= 16 ? eventDateRaw.slice(11, 16) : "";
+  const eventDateRaw = String(c.cm_eventDate ?? "");
+  const eventDate = eventDateRaw.slice(0, 10);
+  const eventTimeUtc = eventDateRaw.length >= 16 ? eventDateRaw.slice(11, 16) : "";
 
-      const city = String(c.cm_city ?? "");
-      const state = String(c.cm_state ?? "");
-      const country = String(c.cm_country ?? "");
-      const highestInjury = String(c.cm_highestInjury ?? "").toUpperCase();
-      const fatal = Number(c.cm_fatalInjuryCount ?? 0);
+  const city = String(c.cm_city ?? "");
+  const state = String(c.cm_state ?? "");
+  const country = String(c.cm_country ?? "");
+  const highestInjury = String(c.cm_highestInjury ?? "").toUpperCase();
+  const fatal = Number(c.cm_fatalInjuryCount ?? 0);
 
-      const makeModel = vehicles.map(v => `${v.cm_make ?? v.make ?? ""} ${v.cm_model ?? v.model ?? ""}`.trim()).find(Boolean) ?? "";
-      const operator = vehicles.map(v => String(v.operatorName ?? v.registeredOwner ?? "")).find(Boolean) ?? "";
+  const makeModel = vehicles.map(v => `${v.cm_make ?? v.make ?? ""} ${v.cm_model ?? v.model ?? ""}`.trim()).find(Boolean) ?? "";
+  const operator = vehicles.map(v => String(v.operatorName ?? v.registeredOwner ?? "")).find(Boolean) ?? "";
 
-      // 비행단계 + SOE 이벤트 분류
-      const flightPhase = vehicles.flatMap(v =>
-        (v.cm_events as Record<string, unknown>[] ?? []).map(e => NTSB_PHASE_MAP[String(e.cicttPhaseSOEGroup ?? "").toLowerCase()] ?? "")
-      ).find(Boolean) ?? "";
-      const soeGroups = vehicles.flatMap(v =>
-        (v.cm_events as Record<string, unknown>[] ?? []).flatMap(e => [
-          String(e.cm_tier1Name ?? ""), String(e.cm_tier2Name ?? ""), String(e.cicttEventSOEGroup ?? "")
-        ])
-      ).filter(Boolean);
+  const flightPhase = vehicles.flatMap(v =>
+    (v.cm_events as Record<string, unknown>[] ?? []).map(e => NTSB_PHASE_MAP[String(e.cicttPhaseSOEGroup ?? "").toLowerCase()] ?? "")
+  ).find(Boolean) ?? "";
+  const soeGroups = vehicles.flatMap(v =>
+    (v.cm_events as Record<string, unknown>[] ?? []).flatMap(e => [
+      String(e.cm_tier1Name ?? ""), String(e.cm_tier2Name ?? ""), String(e.cicttEventSOEGroup ?? "")
+    ])
+  ).filter(Boolean);
 
-      // 피해 규모 (vehicles[].DamageLevel)
-      const damageLevel = vehicles.map(v => String(v.DamageLevel ?? v.damageLevel ?? "")).find(s => s && s !== "None") ?? "";
+  const damageLevel = vehicles.map(v => String(v.DamageLevel ?? v.damageLevel ?? "")).find(s => s && s !== "None") ?? "";
+  const flightOperationType = vehicles.map(v => String(v.flightOperationType ?? "")).find(Boolean) ?? "";
+  const flightScheduledType = vehicles.map(v => String(v.flightScheduledType ?? "")).find(Boolean) ?? "";
+  const secondPilotPresent = vehicles.some(v => v.secondPilotPresent === true || v.secondPilotPresent === "true" || v.secondPilotPresent === 1);
+  const siteCondition = String(c.accidentSiteCondition ?? "");
+  const narrative = String(c.prelimNarrative ?? c.cm_probableCause ?? "").trim();
+  const autoSummary = narrative || `NTSB case ${ntsbNum} near ${city || "unspecified"}${state ? `, ${state}` : ""}. Highest injury: ${highestInjury || "unknown"}.${damageLevel ? ` Aircraft damage: ${damageLevel}.` : ""}${siteCondition ? ` Conditions: ${siteCondition}.` : ""}${eventTimeUtc ? ` Event time: ${eventTimeUtc}Z.` : ""}`;
+  const severity = fatal > 0 ? 5 : highestInjury.includes("SERIOUS") ? 4 : highestInjury.includes("MINOR") ? 3 : 2;
 
-      // 운항 정보
-      const flightOperationType = vehicles.map(v => String(v.flightOperationType ?? "")).find(Boolean) ?? "";
-      const flightScheduledType = vehicles.map(v => String(v.flightScheduledType ?? "")).find(Boolean) ?? "";
-      const secondPilotPresent = vehicles.some(v => v.secondPilotPresent === true || v.secondPilotPresent === "true" || v.secondPilotPresent === 1);
+  const aptRaw = String(c.airportId ?? c.cm_apt ?? c.cm_aptId ?? c.cm_airport ?? "").trim().toUpperCase();
+  let airportIata = "", airportIcao = "";
+  if (/^[A-Z]{4}$/.test(aptRaw)) { airportIcao = aptRaw; }
+  else if (/^[A-Z]{3}$/.test(aptRaw)) { airportIata = aptRaw; }
+  else {
+    const aptNameHint = String(c.airportName ?? c.cm_airportName ?? aptRaw ?? "");
+    [airportIata, airportIcao] = airportForLocation(city, state, country, `${narrative} ${aptNameHint}`, "");
+  }
 
-      // 기상 조건 (VMC/IMC)
-      const siteCondition = String(c.accidentSiteCondition ?? "");
+  const operationType = ["Part 121 air transport (NTSB CAROL)", flightScheduledType === "SCHD" ? "scheduled" : flightScheduledType === "NSCH" ? "non-scheduled" : "", flightOperationType].filter(Boolean).join(" · ");
+  const eventId = `NTSB-${ntsbNum}`.toUpperCase().replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, "");
 
-      // 풍부한 서술 텍스트 우선 사용
-      const narrative = String(c.prelimNarrative ?? c.cm_probableCause ?? "").trim();
+  const tags = ["NTSB", "carol_case", "official_report_candidate", ...(fatal > 0 ? ["FATAL"] : []), ...(damageLevel === "Destroyed" ? ["AIRCRAFT_DESTROYED"] : damageLevel === "Substantial" ? ["SUBSTANTIAL_DAMAGE"] : []), ...(siteCondition === "IMC" ? ["IMC"] : siteCondition === "VMC" ? ["VMC"] : []), ...(secondPilotPresent ? [] : ["SINGLE_PILOT"])];
 
-      // 위치 기반 요약
-      const locationStr = [city, state, country].filter(Boolean).join(", ");
+  if (eventTimeUtc) {
+    const utcHour = parseInt(eventTimeUtc.slice(0, 2));
+    const eventAt = eventDateRaw ? new Date(eventDateRaw) : undefined;
+    const offset = airportIcao ? airportUtcOffset(airportIcao, eventAt) : 0;
+    const localHour = ((utcHour + offset) % 24 + 24) % 24;
+    tags.push(localHour >= 22 || localHour < 6 ? "NIGHT_EVENT" : "DAY_EVENT");
+  }
 
-      // 자동 요약 생성
-      const autoSummary = narrative ||
-        `NTSB case ${ntsbNum} near ${city || "unspecified"}${state ? `, ${state}` : ""}. Highest injury: ${highestInjury || "unknown"}.${damageLevel ? ` Aircraft damage: ${damageLevel}.` : ""}${siteCondition ? ` Conditions: ${siteCondition}.` : ""}${eventTimeUtc ? ` Event time: ${eventTimeUtc}Z.` : ""}`;
-
-      const severity = fatal > 0 ? 5 : highestInjury.includes("SERIOUS") ? 4 : highestInjury.includes("MINOR") ? 3 : 2;
-
-      // 공항코드: CAROL의 airportId/cm_apt 우선, 없으면 도시→공항 매핑
-      const aptRaw = String(c.airportId ?? c.cm_apt ?? c.cm_aptId ?? c.cm_airport ?? "").trim().toUpperCase();
-      let airportIata = "", airportIcao = "";
-      if (/^[A-Z]{4}$/.test(aptRaw)) { airportIcao = aptRaw; }
-      else if (/^[A-Z]{3}$/.test(aptRaw)) { airportIata = aptRaw; }
-      else {
-        // 다중 공항 도시 disambiguation: narrative + 공항명 텍스트에서 구체 공항 재추출
-        const aptNameHint = String(c.airportName ?? c.cm_airportName ?? aptRaw ?? "");
-        [airportIata, airportIcao] = airportForLocation(city, state, country, `${narrative} ${aptNameHint}`, "");
-      }
-
-      // 이벤트 유형: SOE > 기본값
-      const eventType = soeGroups.filter(s => s.length > 2).slice(0, 3).join(" / ") || "NTSB CASE";
-
-      // 운항 유형 레이블
-      const operationType = [
-        "Part 121 air transport (NTSB CAROL)",
-        flightScheduledType === "SCHD" ? "scheduled" : flightScheduledType === "NSCH" ? "non-scheduled" : "",
-        flightOperationType,
-      ].filter(Boolean).join(" · ");
-
-      const now = new Date().toISOString();
-      await db.prepare("INSERT INTO events (id,source_name,source_url,event_date,event_time,operation_type,airport_iata,airport_icao,runway,approach_type,flight_conditions,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
-        .bind(
-          eventId, "NTSB CAROL",
-          `https://data.ntsb.gov/carol-main-public/basic-search?NTSBNumber=${ntsbNum}`,
-          eventDate, eventTimeUtc || null, operationType,
-          airportIata, airportIcao,
-          "",
-          null,            // approach_type: ILS/RNAV/VISUAL — CAROL에서 미제공
-          siteCondition || null,  // flight_conditions: VMC/IMC
-          flightPhase, makeModel, "JET", operator,
-          null,            // weather_summary: METAR 백필 후 채워짐
-          eventType,
-          severity,
-          `NTSB ${ntsbNum}`,
-          "NTSB Case",
-          autoSummary,
-          JSON.stringify([]),
-          JSON.stringify([]),
-          `Review NTSB case ${ntsbNum} — ${eventType}. ${siteCondition ? `Conditions: ${siteCondition}.` : "CAROL summary only."}`,
-          0.5, now, now
-        ).run();
-
-      // 태그: 기본 + 상세 분류 + 조건
-      const extraTags: string[] = [
-        ...(fatal > 0 ? ["FATAL"] : []),
-        ...(damageLevel === "Destroyed" ? ["AIRCRAFT_DESTROYED"] : damageLevel === "Substantial" ? ["SUBSTANTIAL_DAMAGE"] : []),
-        ...(siteCondition === "IMC" ? ["IMC"] : siteCondition === "VMC" ? ["VMC"] : []),
-        ...(secondPilotPresent ? [] : ["SINGLE_PILOT"]),
-        ...(eventTimeUtc ? (() => {
-          const utcHour = parseInt(eventTimeUtc.slice(0, 2));
-          // 공항 ICAO로 로컬 시간 계산, 없으면 UTC 그대로
-          // AIRPORT_HAZARDS는 ICAO 키만 지원 — IATA fallback은 항상 0 반환하므로 제거
-          const eventAt = eventDateRaw ? new Date(eventDateRaw) : undefined;
-          const offset = airportIcao ? airportUtcOffset(airportIcao, eventAt) : 0;
-          const localHour = ((utcHour + offset) % 24 + 24) % 24;
-          return [localHour >= 22 || localHour < 6 ? "NIGHT_EVENT" : "DAY_EVENT"];
-        })() : []),
-      ];
-      for (const tag of ["NTSB", "carol_case", "official_report_candidate", ...extraTags]) {
-        await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId, "risk", tag).run();
-      }
-      return true;
-    }
-    return false;
+  return await upsertEventRecord(db, {
+    id: eventId,
+    source_name: "NTSB CAROL",
+    source_url: `https://data.ntsb.gov/carol-main-public/basic-search?NTSBNumber=${ntsbNum}`,
+    event_date: eventDate,
+    event_time: eventTimeUtc || null,
+    operation_type: operationType,
+    airport_iata: airportIata,
+    airport_icao: airportIcao,
+    flight_conditions: siteCondition || null,
+    flight_phase: flightPhase,
+    aircraft_type: makeModel,
+    aircraft_category: "JET",
+    operator: operator,
+    event_type: soeGroups.filter(s => s.length > 2).slice(0, 3).join(" / ") || "NTSB CASE",
+    severity: severity,
+    core_event: `NTSB ${ntsbNum}`,
+    lesson_keyword: "NTSB Case",
+    summary: autoSummary,
+    tags: tags,
+    pilot_briefing_sentence: `Review NTSB case ${ntsbNum} — ${soeGroups[0] || "Accident"}. ${siteCondition ? `Conditions: ${siteCondition}.` : "CAROL summary only."}`,
+    confidence_score: 0.5
+  });
 }
 
 async function parseAsrsReportSets(db: D1Database): Promise<Record<string, unknown>> {
@@ -797,6 +837,26 @@ async function parseRssFeed(db: D1Database, src: RssSource, cutoff: Date): Promi
 
       checked++;
       const fullUrl = link.startsWith("http") ? link : `https://${new URL(src.url).host}${link}`;
+
+      // RSS as Event candidate if from an investigation body
+      const isInvestigationBody = src.tags.some(t => ["ATSB", "TSB", "BEA", "AAIB", "EASA"].includes(t));
+      if (isInvestigationBody) {
+        const [iata, icao] = airportForLocation("", "", "", `${title} ${desc}`);
+        const eventId = `RSS-${src.tags[0]}-${fullUrl.split("/").pop()}`.toUpperCase().replace(/[^A-Z0-9-]/g, "-");
+        await upsertEventRecord(db, {
+          id: eventId,
+          source_name: src.name,
+          source_url: fullUrl,
+          event_date: d ? d.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+          airport_iata: iata,
+          airport_icao: icao,
+          summary: desc || title,
+          severity: 2,
+          tags: [...src.tags, "RSS_EVENT"],
+          event_type: "RSS Investigation Update"
+        });
+      }
+
       const isNew = await upsertOfficialItem(db, {
         sourceName: src.name, sourceUrl: fullUrl, title,
         category: "Accident / Incident", severity: "Medium",
@@ -963,69 +1023,58 @@ export interface TsbRecord {
 
 async function upsertTsbEvent(db: D1Database, rec: TsbRecord): Promise<boolean> {
   const eventId = `TSB-${rec.occNo}`.toUpperCase().replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, "");
-  const existing = await db.prepare("SELECT id FROM events WHERE id = ?").bind(eventId).first<{ id: string }>();
-  if (existing) return false;
-
   const fatal = rec.fatalCount ?? 0;
   const serious = rec.seriousCount ?? 0;
   const occUpper = (rec.occType ?? "").toUpperCase();
   const severity = fatal > 0 ? 5 : occUpper.includes("ACCIDENT") ? (serious > 0 ? 4 : 3) : 2;
 
+  const context = `${rec.summary || ""} ${rec.commonName || ""} ${rec.operator || ""} ${rec.aircraftType || ""}`;
+  let [airportIata, airportIcao] = ["", ""];
   const rawIcao = (rec.icao ?? "").trim().toUpperCase();
-  let airportIcao = "", airportIata = "";
   if (/^[A-Z]{4}$/.test(rawIcao)) {
     airportIcao = rawIcao;
   } else if (/^[A-Z]{3}$/.test(rawIcao)) {
     airportIata = rawIcao;
-    const [, icao] = airportForLocation("", "", "");
+    const [, icao] = airportForLocation("", "", "", context);
     airportIcao = icao;
   }
   if (!airportIcao && !airportIata && rec.province && rec.country) {
-    [airportIata, airportIcao] = airportForLocation("", rec.province, rec.country);
+    [airportIata, airportIcao] = airportForLocation("", rec.province, rec.country, context);
   }
 
   const year = rec.occDate.slice(0, 4);
   const sourceUrl = `https://www.tsb.gc.ca/eng/rapports-reports/aviation/${year}/index.html`;
   const summary = (rec.summary ?? rec.commonName ?? `TSB Canada occurrence ${rec.occNo}`).trim();
 
-  const tags: string[] = ["TSB_CANADA", "PART_121_135_RELEVANT"];
-  if (fatal > 0) tags.push("FATAL");
+  const tags: string[] = ["TSB_CANADA", "PART_121_135_RELEVANT", ...(fatal > 0 ? ["FATAL"] : [])];
   const dmgUpper = (rec.damageLevel ?? "").toUpperCase();
-  if (dmgUpper.includes("DESTRO")) tags.push("AIRCRAFT_DESTROYED");
-  else if (dmgUpper.includes("SUBSTANTIAL")) tags.push("SUBSTANTIAL_DAMAGE");
+  if (dmgUpper.includes("DESTRO")) tags.push("AIRCRAFT_DESTROYED"); else if (dmgUpper.includes("SUBSTANTIAL")) tags.push("SUBSTANTIAL_DAMAGE");
   const lightUpper = (rec.lightCond ?? "").toUpperCase();
-  if (lightUpper.includes("NIGHT") || lightUpper.includes("DARK")) tags.push("NIGHT_EVENT");
-  else if (lightUpper.includes("DAY") || lightUpper.includes("DAWN") || lightUpper.includes("DUSK")) tags.push("DAY_EVENT");
-  if (occUpper.includes("ACCIDENT")) tags.push("ACCIDENT"); else tags.push("INCIDENT");
+  if (lightUpper.includes("NIGHT") || lightUpper.includes("DARK")) tags.push("NIGHT_EVENT"); else if (lightUpper.includes("DAY") || lightUpper.includes("DAWN") || lightUpper.includes("DUSK")) tags.push("DAY_EVENT");
+  tags.push(occUpper.includes("ACCIDENT") ? "ACCIDENT" : "INCIDENT");
 
-  const now = new Date().toISOString();
-  await db.prepare(`INSERT INTO events (id,source_name,source_url,event_date,operation_type,airport_iata,airport_icao,runway,approach_type,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-    .bind(
-      eventId, "TSB Canada", sourceUrl,
-      rec.occDate.slice(0, 10),
-      rec.carsSubpart || rec.operationType || "Commercial aviation",
-      airportIata, airportIcao,
-      "", "",
-      rec.flightPhase ?? "",
-      rec.aircraftType ?? "",
-      "JET",
-      rec.operator ?? "",
-      [rec.province, rec.country].filter(Boolean).join(", "),
-      `${rec.occType}${rec.occClass ? ` - ${rec.occClass}` : ""}`,
-      severity,
-      `TSB ${rec.occNo}`,
-      "TSB Canada Occurrence",
-      summary,
-      JSON.stringify([]), JSON.stringify([]),
-      `Review TSB Canada occurrence ${rec.occNo} — ${rec.occType}.${rec.flightNo ? ` Flight: ${rec.flightNo}.` : ""}`,
-      0.6, now, now
-    ).run();
-
-  for (const tag of tags) {
-    await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId, "risk", tag).run();
-  }
-  return true;
+  return await upsertEventRecord(db, {
+    id: eventId, source_name: "TSB Canada", source_url: sourceUrl,
+    event_date: rec.occDate.slice(0, 10),
+    event_time: rec.occTime || null,
+    operation_type: rec.carsSubpart || rec.operationType || "Commercial aviation",
+    airport_iata: airportIata, airport_icao: airportIcao,
+    destination_iata: rec.destIcao?.length === 3 ? rec.destIcao : null,
+    destination_icao: rec.destIcao?.length === 4 ? rec.destIcao : null,
+    flight_phase: rec.flight_phase || rec.flightPhase || "",
+    aircraft_type: rec.aircraftType || "",
+    aircraft_category: "JET",
+    operator: rec.operator || "",
+    weather_summary: [rec.province, rec.country].filter(Boolean).join(", "),
+    event_type: `${rec.occType}${rec.occClass ? ` - ${rec.occClass}` : ""}`,
+    severity: severity,
+    core_event: `TSB ${rec.occNo}`,
+    lesson_keyword: "TSB Canada Occurrence",
+    summary: summary,
+    tags: tags,
+    pilot_briefing_sentence: `Review TSB Canada occurrence ${rec.occNo} — ${rec.occType}.${rec.flightNo ? ` Flight: ${rec.flightNo}.` : ""}`,
+    confidence_score: 0.6
+  });
 }
 
 export async function ingestTsbBatch(db: D1Database, records: TsbRecord[]): Promise<{ checked: number; created: number }> {
@@ -1033,6 +1082,111 @@ export async function ingestTsbBatch(db: D1Database, records: TsbRecord[]): Prom
   for (const rec of records) {
     try {
       if (await upsertTsbEvent(db, rec)) created++;
+    } catch { /* skip invalid record */ }
+  }
+  return { checked: records.length, created };
+}
+
+// ── ASN (Aviation Safety Network, via GitHub mirror) ────────────────────────
+// 원본: aviation-safety.net 스크레이핑 결과물을 재정리한 공개 GitHub 저장소에서 가져옴.
+
+export interface AsnRecord {
+  url: string;
+  date: string;              // e.g. "Wednesday 1 January 2020"
+  time?: string;              // e.g. "09:24 LT"
+  type?: string;               // aircraft type
+  owner_operator?: string;
+  registration?: string;
+  fatalities?: string;        // e.g. "Fatalities: 0 / Occupants:"
+  aircraft_damage?: string;   // None | Minor | Substantial | Destroyed | ...
+  location?: string;
+  phase?: string;             // e.g. "Landing", "En route", "Take off"
+  nature?: string;            // e.g. "Passenger - Scheduled", "Private", "Cargo"
+  departure_airport?: string; // e.g. "Mexico City-... (MEX/MMMX)"
+  destination_airport?: string;
+  narrative?: string;
+}
+
+const ASN_PHASE_MAP: Record<string, string> = {
+  "pushback / towing": "TAXI", "taxi": "TAXI", "standing": "GROUND",
+  "take off": "TAKEOFF", "initial climb": "CLIMB",
+  "en route": "CRUISE", "manoeuvring  (airshow, firefighting, ag.ops.)": "CRUISE", "combat": "CRUISE",
+  "approach": "APPROACH", "landing": "LANDING", "unknown": "UNKNOWN",
+};
+
+// 항공사/상업운항 관련성 있는 nature만 취급 (Private/Training/Military/Agricultural/Test/Survey 등 GA 제외)
+const ASN_COMMERCIAL_NATURE = new Set([
+  "passenger - scheduled", "passenger - non-scheduled/charter/air taxi", "passenger",
+  "cargo", "ferry/positioning", "executive",
+]);
+
+function parseAsnAirport(field: string | undefined): { iata: string; icao: string } {
+  if (!field) return { iata: "", icao: "" };
+  const m = field.match(/\(([A-Z]{3})\/([A-Z]{4})\)/);
+  if (m) return { iata: m[1], icao: m[2] };
+  const icaoOnly = field.match(/\(([A-Z]{4})\)/);
+  if (icaoOnly) return { iata: "", icao: icaoOnly[1] };
+  return { iata: "", icao: "" };
+}
+
+function parseAsnDate(dateStr: string): string {
+  // "Wednesday 1 January 2020" -> strip leading weekday, let Date parse the rest
+  const cleaned = dateStr.replace(/^[A-Za-z]+\s+/, "");
+  const d = new Date(cleaned);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 10);
+}
+
+async function upsertAsnEvent(db: D1Database, rec: AsnRecord): Promise<boolean> {
+  const natureKey = (rec.nature ?? "").trim().toLowerCase();
+  if (!ASN_COMMERCIAL_NATURE.has(natureKey)) return false;
+
+  const idMatch = rec.url.match(/\/(\d+)\/?$/);
+  if (!idMatch) return false;
+  const eventId = `ASN-${idMatch[1]}`;
+  const eventDate = parseAsnDate(rec.date);
+  if (!eventDate) return false;
+
+  const fatalMatch = (rec.fatalities ?? "").match(/Fatalities:\s*(\d+)/i);
+  const fatal = fatalMatch ? parseInt(fatalMatch[1], 10) : 0;
+  const dmgUpper = (rec.aircraft_damage ?? "").toUpperCase();
+  const severity = fatal > 0 ? 5 : dmgUpper.includes("DESTROY") ? 4 : dmgUpper.includes("SUBSTANTIAL") ? 3 : 2;
+
+  const dep = parseAsnAirport(rec.departure_airport);
+  const dest = parseAsnAirport(rec.destination_airport);
+  const phase = ASN_PHASE_MAP[(rec.phase ?? "").trim().toLowerCase()] ?? "";
+
+  const tags: string[] = ["ASN", "PART_121_135_RELEVANT", ...(fatal > 0 ? ["FATAL"] : []), ...(dmgUpper.includes("DESTROY") ? ["AIRCRAFT_DESTROYED"] : dmgUpper.includes("SUBSTANTIAL") ? ["SUBSTANTIAL_DAMAGE"] : [])];
+  const summary = (rec.narrative ?? "").trim() || `ASN accident ${idMatch[1]} — ${rec.type ?? "unknown aircraft"} at ${rec.location ?? "unknown location"}.`;
+  const timeStr = (rec.time ?? "").match(/^(\d{2}:\d{2})/)?.[1] ?? "";
+
+  return await upsertEventRecord(db, {
+    id: eventId, source_name: "ASN (Aviation Safety Network)", source_url: rec.url,
+    event_date: eventDate, event_time: timeStr,
+    operation_type: rec.nature ?? "",
+    airport_iata: dep.iata, airport_icao: dep.icao,
+    destination_iata: dest.iata, destination_icao: dest.icao,
+    flight_phase: phase,
+    aircraft_type: rec.type ?? "",
+    aircraft_category: "JET",
+    operator: rec.owner_operator ?? "",
+    weather_summary: rec.location ?? "",
+    event_type: `ACCIDENT - ${rec.aircraft_damage || "Unknown damage"}`,
+    severity: severity,
+    core_event: `ASN ${idMatch[1]}`,
+    lesson_keyword: "ASN Accident",
+    summary: summary.slice(0, 4000),
+    tags: tags,
+    pilot_briefing_sentence: `Review ASN accident ${idMatch[1]} — ${rec.aircraft_damage ?? "unknown damage"}.`,
+    confidence_score: 0.6
+  });
+}
+
+export async function ingestAsnBatch(db: D1Database, records: AsnRecord[]): Promise<{ checked: number; created: number }> {
+  let created = 0;
+  for (const rec of records) {
+    try {
+      if (await upsertAsnEvent(db, rec)) created++;
     } catch { /* skip invalid record */ }
   }
   return { checked: records.length, created };
@@ -1055,48 +1209,34 @@ export interface EasaRecord {
 async function upsertEasaEvent(db: D1Database, rec: EasaRecord): Promise<boolean> {
   const safe = (s: string) => s.toUpperCase().replace(/[^A-Z0-9-]+/g, "-").replace(/^-|-$/g, "");
   const eventId = `EASA-${safe(rec.accidentId)}`;
-  const existing = await db.prepare("SELECT id FROM events WHERE id = ?").bind(eventId).first<{ id: string }>();
-  if (existing) return false;
-
   const fatal = rec.fatalCount ?? 0;
   const severity = fatal > 0 ? 5 : 3;
 
-  const tags: string[] = ["EASA", "EUROPE", "ACCIDENT"];
-  if (fatal > 0) tags.push("FATAL");
+  const tags: string[] = ["EASA", "EUROPE", "ACCIDENT", ...(fatal > 0 ? ["FATAL"] : [])];
   if (rec.operationType === "CAT") tags.push("COMMERCIAL_AIR_TRANSPORT", "PART_121_135_RELEVANT");
   if (rec.operationType === "HELICOPTER") tags.push("HELICOPTER");
 
   const summary = rec.headline.trim() || `EASA fatal accident — ${rec.location}, ${rec.country}`;
   const sourceUrl = `https://www.easa.europa.eu/en/document-library/general-publications/annual-safety-review-${rec.sourceYear}`;
-  const now = new Date().toISOString();
 
-  await db.prepare(`INSERT INTO events (id,source_name,source_url,event_date,operation_type,airport_iata,airport_icao,runway,approach_type,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,event_type,severity,core_event,lesson_keyword,summary,contributing_factors,operational_lessons,pilot_briefing_sentence,confidence_score,created_at,updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-    .bind(
-      eventId, `EASA ASR ${rec.sourceYear}`, sourceUrl,
-      rec.occDate.slice(0, 10),
-      rec.operationType === "CAT" ? "Commercial Air Transport" : rec.operationType,
-      "", "",
-      "", "",
-      "",
-      rec.aircraftType ?? "",
-      rec.aircraftType.toUpperCase().includes("HELICOPTER") ? "HELICOPTER" : "JET",
-      "",
-      `${rec.location}, ${rec.country}`,
-      "ACCIDENT",
-      severity,
-      "EASA Fatal Accident",
-      "EASA Annual Safety Review",
-      summary,
-      JSON.stringify([]), JSON.stringify([]),
-      `${rec.country} fatal accident — ${rec.aircraftType}. ${rec.headline}`.slice(0, 200),
-      0.7, now, now
-    ).run();
-
-  for (const tag of tags) {
-    await db.prepare("INSERT INTO event_tags (event_id,tag_type,tag_value) VALUES (?,?,?)").bind(eventId, "risk", tag).run();
-  }
-  return true;
+  return await upsertEventRecord(db, {
+    id: eventId, source_name: `EASA ASR ${rec.sourceYear}`, source_url: sourceUrl,
+    event_date: rec.occDate.slice(0, 10),
+    operation_type: rec.operationType === "CAT" ? "Commercial Air Transport" : rec.operationType,
+    airport_iata: "", airport_icao: "",
+    aircraft_type: rec.aircraftType ?? "",
+    aircraft_category: rec.aircraftType.toUpperCase().includes("HELICOPTER") ? "HELICOPTER" : "JET",
+    operator: "",
+    weather_summary: `${rec.location}, ${rec.country}`,
+    event_type: "ACCIDENT",
+    severity: severity,
+    core_event: "EASA Fatal Accident",
+    lesson_keyword: "EASA Annual Safety Review",
+    summary: summary,
+    tags: tags,
+    pilot_briefing_sentence: `${rec.country} fatal accident — ${rec.aircraftType}. ${rec.headline}`.slice(0, 200),
+    confidence_score: 0.7
+  });
 }
 
 export async function ingestEasaBatch(db: D1Database, records: EasaRecord[]): Promise<{ checked: number; created: number }> {

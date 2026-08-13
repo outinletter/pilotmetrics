@@ -35,6 +35,8 @@ export type EventRow = {
   operation_type: string | null;
   airport_iata: string | null;
   airport_icao: string | null;
+  destination_iata: string | null;
+  destination_icao: string | null;
   runway: string | null;
   approach_type: string | null;
   flight_conditions: string | null;  // VMC/IMC (NTSB siteCondition)

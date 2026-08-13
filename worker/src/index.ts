@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import type { Env } from "./types";
 import { iataToIcao, icaoToIata, AIRPORTS } from "./data/airports";
 import { backfillAirportCodes } from "./services/official_event_parsers";
-import { enrichWithLLM } from "./services/llm_classifier";
+import { enrichWithLLM, enrichEventsWithThreats } from "./services/llm_classifier";
 import { getFlight, normalizeFlightNumber } from "./services/aviation_stack";
 import { getWeather } from "./services/noaa";
 import { parseWeatherTags, selectArrivalTafSegment, isNightArrival, arrivalWeatherBrief } from "./services/metar_parser";
@@ -183,6 +183,20 @@ app.post("/api/ops-intel/backfill-airports", async c => {
   return c.json(result);
 });
 
+// Full Backfill API: Airport codes, NTSB times, and METARs
+app.post("/api/ops-intel/backfill-full", async c => {
+  const airportResult = await backfillAirportCodes(c.env.DB);
+  const { backfillNtsbEventTime } = await import("./services/official_event_parsers");
+  const ntsbResult = await backfillNtsbEventTime(c.env.DB, 100);
+  const metarResult = await backfillMetar(c.env.DB, 100);
+  return c.json({
+    status: "complete",
+    airport_backfill: airportResult,
+    ntsb_time_backfill: ntsbResult,
+    metar_backfill: metarResult
+  });
+});
+
 app.get("/api/weather/:icao", async c => {
   const icao = c.req.param("icao").toUpperCase();
   const [weather, messages] = await getWeather(icao);
@@ -225,6 +239,13 @@ app.post("/api/ops-intel/enrich-llm", async c => {
   return c.json(await enrichWithLLM(c.env.AI, c.env.DB, body.limit ?? 20));
 });
 
+// events.summary → 구조화 위협 파라미터 추출 (TSB/NTSB 자유텍스트 대상)
+app.post("/api/ops-intel/enrich-event-threats", async c => {
+  if (!c.env.AI) return c.json({ error: "AI binding not available" }, 503);
+  const body = await c.req.json<{ limit?: number }>().catch(() => ({}));
+  return c.json(await enrichEventsWithThreats(c.env.AI, c.env.DB, body.limit ?? 20));
+});
+
 app.post("/api/ops-intel/collect-official-recent", async c => {
   const body = await c.req.json<{ years_back?: number }>().catch(() => ({ years_back: undefined }));
   return c.json(await collectRecentOfficialEvents(c.env.DB, body.years_back ?? 20));
@@ -247,6 +268,15 @@ app.post("/api/ops-intel/ingest-tsb", async c => {
   if (!Array.isArray(body.records) || body.records.length === 0) return c.json({ error: "records array required" }, 400);
   const { ingestTsbBatch } = await import("./services/official_event_parsers");
   return c.json(await ingestTsbBatch(c.env.DB, body.records as Parameters<typeof ingestTsbBatch>[1]));
+});
+
+// ASN(Aviation Safety Network) 데이터 수집 (로컬 스크립트가 GitHub 미러에서 받아 파싱 후 전송)
+// POST /api/ops-intel/ingest-asn  Body: { records: AsnRecord[] }
+app.post("/api/ops-intel/ingest-asn", async c => {
+  const body = await c.req.json<{ records?: unknown[] }>().catch(() => ({ records: [] }));
+  if (!Array.isArray(body.records) || body.records.length === 0) return c.json({ error: "records array required" }, 400);
+  const { ingestAsnBatch } = await import("./services/official_event_parsers");
+  return c.json(await ingestAsnBatch(c.env.DB, body.records as Parameters<typeof ingestAsnBatch>[1]));
 });
 
 // POST /api/ops-intel/ingest-easa  Body: { records: EasaRecord[] }
