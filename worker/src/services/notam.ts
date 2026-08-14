@@ -296,15 +296,29 @@ function classifyNotam(text: string): {
       riskScore: rule.riskScore, tag: rule.tag, headline: rule.headline(m),
     };
   }
+
+  // General Notice catch-all for aviation-relevant keywords
+  if (/(?:RWY|ILS|TWY|CLSD|OTS|U\/S|CLOSED|OUT\s*OF\s*SERVICE)/i.test(upper)) {
+    return {
+      category: "OTHER",
+      severity: "LOW",
+      riskScore: 10,
+      tag: "GENERAL_NOTICE",
+      headline: "General operational notice / possible facility degradation",
+    };
+  }
+
   return null;
 }
 
 // ── ETA Overlap ──────────────────────────────────────────────────────────────
 
-function overlapsEta(startIso: string, endIso: string, etaMs: number, windowMs = 60 * 60 * 1000): boolean {
+function overlapsEta(startIso: string, endIso: string, etaMs: number, windowMs = 12 * 60 * 60 * 1000): boolean {
   try {
     const s = new Date(startIso).getTime();
     const e = (endIso === "PERM" || !endIso) ? etaMs + windowMs + 1 : new Date(endIso).getTime();
+    if (isNaN(s)) return true; // Safety: show if date is weird
+    // Increased window to 12 hours for briefing awareness
     return s <= etaMs + windowMs && e >= etaMs - windowMs;
   } catch { return true; }
 }

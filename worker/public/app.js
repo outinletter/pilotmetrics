@@ -246,6 +246,7 @@ function renderNotamThreats(notams) {
 
   const activeNotams = (notams || []);
   if (activeNotams.length === 0) {
+    // Check if we should show a "Scanning" or "Clear" message
     section.style.display = "none";
     return;
   }
