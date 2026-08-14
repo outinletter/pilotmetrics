@@ -1,0 +1,17 @@
+{
+  "name": "PilotMetrics Threat Briefing",
+  "short_name": "PilotMetrics",
+  "description": "Korean Air Operational Safety Intelligence & Threat Briefing",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07192e",
+  "theme_color": "#0f4c81",
+  "icons": [
+    {
+      "src": "/app_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
