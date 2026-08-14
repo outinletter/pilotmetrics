@@ -25,16 +25,36 @@ function localRoute(fn: string) {
   return null;
 }
 
-// KE 편번 범위로 ICN 출발/귀항 방향 추론 후 ROUTE_PAIRS에서 노선 확인
+// KE 편번 범위로 출발/귀항 방향 추론 후 ROUTE_PAIRS에서 노선 확인
 function guessKeRoute(fn: string): { departure_iata: string; arrival_iata: string; aircraft_type: string } | null {
   if (!fn.startsWith("KE")) return null;
   const num = parseInt(fn.slice(2), 10);
   if (isNaN(num)) return null;
 
-  // 홀수=ICN 출발, 짝수=ICN 귀항 (대부분의 KE 관례)
   const outbound = num % 2 === 1;
 
-  // 편번 대역별 대표 목적지 목록 (ROUTE_PAIRS에 있는 실제 노선 기준)
+  // 4자리 편번 (국내선 및 특정 셔틀 노선)
+  if (num >= 1000) {
+    let candidates: [string, string][] = [];
+    if (num >= 1001 && num <= 1999) {
+      // Domestic: Hub (GMP, PUS, ICN) <=> CJU/PUS/USN/RSU
+      candidates = outbound
+        ? [["GMP", "CJU"], ["PUS", "CJU"], ["ICN", "PUS"], ["GMP", "PUS"], ["GMP", "USN"], ["GMP", "RSU"]]
+        : [["CJU", "GMP"], ["CJU", "PUS"], ["PUS", "ICN"], ["PUS", "GMP"], ["USN", "GMP"], ["RSU", "GMP"]];
+    } else if (num >= 2101 && num <= 2199) {
+      candidates = outbound ? [["GMP", "HND"]] : [["HND", "GMP"]];
+    } else if (num >= 2701 && num <= 2800) {
+      candidates = outbound ? [["GMP", "SHA"], ["GMP", "TSA"]] : [["SHA", "GMP"], ["TSA", "GMP"]];
+    }
+
+    for (const [dep, arr] of candidates) {
+      const pair = ROUTE_PAIRS[`${dep}-${arr}`];
+      if (pair) return pair;
+    }
+    return null;
+  }
+
+  // 3자리 이하 편번 (국제선 중심, ICN 기준)
   const regionMap: Record<string, string[]> = {
     "1-99":   ["JFK","LAX","ORD","SFO","ATL","IAD","IAH"],
     "100-199":["SYD","AKL","BNE","NAN"],
@@ -49,25 +69,28 @@ function guessKeRoute(fn: string): { departure_iata: string; arrival_iata: strin
     "900-999":["CDG","FRA","LHR","AMS","MXP","FCO","MAD","VIE","ZRH","PRG","IST"],
   };
 
-  // 편번 범위에 해당하는 후보 목적지 목록 선택
-  let candidates: string[] = [];
-  if (num >= 1   && num <= 99)  candidates = regionMap["1-99"];
-  else if (num >= 100 && num <= 199) candidates = regionMap["100-199"];
-  else if (num >= 200 && num <= 299) candidates = regionMap["200-299"];
-  else if (num >= 300 && num <= 399) candidates = regionMap["300-399"];
-  else if (num >= 461 && num <= 470) candidates = regionMap["461-470"];
-  else if (num >= 471 && num <= 499) candidates = regionMap["471-480"];
-  else if (num >= 600 && num <= 699) candidates = regionMap["600-699"];
-  else if (num >= 700 && num <= 799) candidates = regionMap["700-799"];
-  else if (num >= 800 && num <= 899) candidates = regionMap["800-899"];
-  else if (num >= 900 && num <= 999) candidates = regionMap["900-999"];
+  let dests: string[] = [];
+  if (num >= 1   && num <= 99)  dests = regionMap["1-99"];
+  else if (num >= 100 && num <= 199) dests = regionMap["100-199"];
+  else if (num >= 200 && num <= 299) dests = regionMap["200-299"];
+  else if (num >= 300 && num <= 399) dests = regionMap["300-399"];
+  else if (num >= 461 && num <= 470) dests = regionMap["461-470"];
+  else if (num >= 471 && num <= 499) dests = regionMap["471-480"];
+  else if (num >= 600 && num <= 699) dests = regionMap["600-699"];
+  else if (num >= 700 && num <= 799) dests = regionMap["700-799"];
+  else if (num >= 800 && num <= 899) dests = regionMap["800-899"];
+  else if (num >= 900 && num <= 999) dests = regionMap["900-999"];
 
-  // ROUTE_PAIRS에서 실제 운항 노선 중 첫 번째 매칭
-  for (const dst of candidates) {
+  for (const dst of dests) {
     const key = outbound ? `ICN-${dst}` : `${dst}-ICN`;
     const pair = ROUTE_PAIRS[key];
     if (pair) return pair;
   }
+
+  return outbound
+    ? { departure_iata: "ICN", arrival_iata: "UNKNOWN", aircraft_type: "Unknown" }
+    : { departure_iata: "UNKNOWN", arrival_iata: "ICN", aircraft_type: "Unknown" };
+}
 
   // 최후 fallback: ICN 출발/귀항만 설정
   return outbound

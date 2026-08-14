@@ -271,6 +271,11 @@ function generateHeuristicLessons(e: EventRow): string[] {
 export async function buildThreats(db: D1Database, context: Record<string, unknown>, tags: string[], ai?: Ai): Promise<unknown[]> {
   const groups = new Map<string, { title: string; description: string; events: unknown[] }>();
 
+  const domesticIatas = new Set(["ICN","GMP","CJU","PUS","TAE","USN","RSU","KWJ","YNY","WJU","HIN","KUV","CJJ"]);
+  const isDomestic = context.departure_iata && context.arrival_iata &&
+    domesticIatas.has(context.departure_iata as string) &&
+    domesticIatas.has(context.arrival_iata as string);
+
   const ranked = ai
     ? await rankedEventsWithLLM(db, ai, context, tags)
     : await rankedEventsWithTags(db, context, tags);
@@ -281,7 +286,14 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
     // flight_phase 불확실 이벤트는 위협 그룹 내에서 "General Awareness"로 표시
     const phase = resolveFlightPhase(event);
     const phaseLabel = phase === "UNKNOWN" ? " [General Awareness]" : "";
-    const recAction = recommendedAction(event);
+
+    let fuelAdv = fuelAdvisory(eTags, context);
+    let recAct = recommendedAction(event);
+
+    if (isDomestic) {
+      fuelAdv = "High-frequency operations: monitor quick turn-around fuel requirements and potential taxi congestion.";
+      recAct = "Review congested domestic airspace procedures, frequent frequency changes, and standard taxi routes at hubs.";
+    }
 
     // Factors: AI (if exists) or Heuristic
     let factors = jsonList(event.contributing_factors);
@@ -310,8 +322,8 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
         contributing_factors: factors,
         operational_lessons: lessons,
         a350_b787_applicability: a350b787(event),
-        recommended_action: recAction,
-        fuel_advisory: fuelAdvisory(eTags, context),
+        recommended_action: recAct,
+        fuel_advisory: fuelAdv,
         briefing_keywords: briefingKeywords(event),
       });
     }
