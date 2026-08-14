@@ -87,11 +87,6 @@ function guessKeRoute(fn: string): { departure_iata: string; arrival_iata: strin
     if (pair) return pair;
   }
 
-  return outbound
-    ? { departure_iata: "ICN", arrival_iata: "UNKNOWN", aircraft_type: "Unknown" }
-    : { departure_iata: "UNKNOWN", arrival_iata: "ICN", aircraft_type: "Unknown" };
-}
-
   // 최후 fallback: ICN 출발/귀항만 설정
   return outbound
     ? { departure_iata: "ICN", arrival_iata: "UNKNOWN", aircraft_type: "Unknown" }
