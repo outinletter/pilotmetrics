@@ -916,17 +916,27 @@ export async function parseIcaoIstars(db: D1Database, apiKey: string, yearsBack:
   for (const state of states) {
     for (let year = startYear; year <= endYear; year++) {
       try {
-        const url = `https://applications.icao.int/dataservices/api/get-occurrences?api_key=${apiKey}&State=${state}&Year=${year}`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-        if (!res.ok) continue;
-        const data = await res.json() as any[];
-        if (!Array.isArray(data)) continue;
-        for (const occ of data) {
+        const url = `https://applications.icao.int/dataservices/api/get-occurrences?api_key=${apiKey}&State=${state}&Year=${year}&format=json`;
+        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+        if (!res.ok) {
+          errors.push(`${state} ${year}: HTTP ${res.status}`);
+          continue;
+        }
+        const data = await res.json();
+        // iSTARS can return either a raw array or { "status": true, "data": [...] }
+        const list = Array.isArray(data) ? data : (data as any)?.data || [];
+
+        if (!Array.isArray(list)) {
+          errors.push(`${state} ${year}: Unexpected response format`);
+          continue;
+        }
+
+        for (const occ of list) {
           checked++;
-          const eventDate = occ.Date || `${year}-01-01`;
+          const eventDate = occ.Date || occ.OccurrenceDate || `${year}-01-01`;
           const title = `${occ.OccurrenceCategory || "Occurrence"} - ${occ.StateName || state}`;
-          const summary = occ.Narrative || `ICAO iSTARS occurrence in ${occ.StateName} on ${eventDate}. Type: ${occ.OccurrenceCategory}.`;
-          const sourceUrl = `https://applications.icao.int/istars/ (Ref: ${occ.OccurrenceNo})`;
+          const summary = occ.Narrative || `ICAO iSTARS occurrence in ${occ.StateName || state} on ${eventDate}. Type: ${occ.OccurrenceCategory || "N/A"}.`;
+          const sourceUrl = `https://applications.icao.int/istars/ (Ref: ${occ.OccurrenceNo || 'N/A'})`;
           const [iata, icao] = airportForLocation("", "", occ.StateName || "", summary);
 
           if (await upsertEventRecord(db, {
@@ -938,12 +948,6 @@ export async function parseIcaoIstars(db: D1Database, apiKey: string, yearsBack:
             tags: ["ICAO", "iSTARS", state, "OFFICIAL_REPORT"],
             event_type: occ.OccurrenceCategory
           })) created++;
-
-          await upsertOfficialItem(db, {
-            sourceName: "ICAO iSTARS", sourceUrl: sourceUrl, title,
-            category: "Accident / Incident", severity: "Medium", summary,
-            tags: ["ICAO", "iSTARS", state]
-          });
         }
       } catch (e) { errors.push(`${state} ${year}: ${e}`); }
     }
@@ -952,7 +956,7 @@ export async function parseIcaoIstars(db: D1Database, apiKey: string, yearsBack:
 }
 
 // ─── ARAIB Korea (South Korea) ────────────────────────────────────────────────
-export async function parseAraibKorea(db: D1Database, maxPages = 10): Promise<Record<string, unknown>> {
+export async function parseAraibKorea(db: D1Database, maxPages = 50): Promise<Record<string, unknown>> {
   const baseUrl = "https://araib.molit.go.kr/eng/section/list.do?menuSeq=1043";
   let checked = 0, created = 0;
   let stopParsing = false;
@@ -961,24 +965,37 @@ export async function parseAraibKorea(db: D1Database, maxPages = 10): Promise<Re
     if (stopParsing) break;
     try {
       const url = `${baseUrl}&pageIndex=${page}`;
-      const res = await fetch(url, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
+      // ARAIB blocks simple fetches; adding more realistic headers
+      const res = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        },
+        signal: AbortSignal.timeout(20000),
+        redirect: "follow"
+      });
       if (!res.ok) break;
       const html = await res.text();
       let pageItems = 0;
       for (const m of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)) {
         const cells = [...m[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(c => cleanText(c[1]));
-        if (cells.length < 5) continue;
-        const dateText = cells[1];
+        if (cells.length < 4) continue;
+
+        const dateText = cells.find(c => /\d{4}-\d{2}-\d{2}/.test(c) || /\d{2}\/\d{2}\/\d{4}/.test(c)) || cells[1];
+        if (!dateText) continue;
+
         const eventDate = parseDate(dateText) || new Date(dateText);
         if (isNaN(eventDate.getTime())) continue;
         if (eventDate.getFullYear() < 2000) {
           stopParsing = true;
           break;
         }
+
         const linkMatch = m[1].match(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
         if (!linkMatch) continue;
         const title = cleanText(linkMatch[2]);
-        const fullUrl = new URL(linkMatch[1].replace(/&amp;/g, "&"), url).href;
+        const fullUrl = new URL(linkMatch[1].replace(/&amp;/g, "&"), "https://araib.molit.go.kr").href;
+
         checked++;
         pageItems++;
         const [iata, icao] = airportForLocation("", "", "South Korea", title);
@@ -991,11 +1008,6 @@ export async function parseAraibKorea(db: D1Database, maxPages = 10): Promise<Re
           tags: ["ARAIB", "Korea", "OFFICIAL_REPORT"],
           event_type: "Investigation Report"
         })) created++;
-        await upsertOfficialItem(db, {
-          sourceName: "ARAIB (Korea)", sourceUrl: fullUrl, title,
-          category: "Accident / Incident", severity: "Medium", summary: title,
-          tags: ["ARAIB", "Korea"]
-        });
       }
       if (pageItems === 0) break;
     } catch (e) {
@@ -1012,20 +1024,20 @@ export async function parseJtsbJapan(db: D1Database): Promise<Record<string, unk
   const errors: string[] = [];
 
   try {
-    const res = await fetch(url, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
+    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(15000) });
     if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
     const html = await res.text();
 
     const yearlyLinks = new Set<string>();
-    for (const m of html.matchAll(/<a[^>]+href=["']([^"']+(?:rep-acc|rep-inc)\/\d{4}\.html)["']/gi)) {
-      yearlyLinks.add(new URL(m[1], url).href);
+    // Extended regex to find more yearly archive patterns
+    for (const m of html.matchAll(/href=["']([^"']+(?:rep-acc|rep-inc|rep-inc-m)\/[^"']*\d{4}\.html)["']/gi)) {
+      yearlyLinks.add(new URL(m[1], "https://www.mlit.go.jp/jtsb/").href);
     }
-    // Also include the current page as it might have recent reports
     yearlyLinks.add(url);
 
     for (const pageUrl of yearlyLinks) {
       try {
-        const pageRes = await fetch(pageUrl, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
+        const pageRes = await fetch(pageUrl, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(15000) });
         if (!pageRes.ok) continue;
         const pageHtml = await pageRes.text();
 
@@ -1033,12 +1045,12 @@ export async function parseJtsbJapan(db: D1Database): Promise<Record<string, unk
           const link = m[1];
           const title = cleanText(m[2]);
           if (!link.includes("/jtsb/aircraft/rep-acc/") && !link.includes("/jtsb/aircraft/rep-inc/")) continue;
-          if (link.endsWith(".html") && link.match(/\d{4}\.html$/)) continue; // skip yearly links within pages
+          if (link.endsWith(".html") && link.match(/\/\d{4}\.html$/)) continue;
 
           const fullUrl = new URL(link.replace(/&amp;/g, "&"), pageUrl).href;
           const yearMatch = title.match(/\b(20\d{2})\b/) || link.match(/\b(20\d{2})\b/);
           const year = yearMatch ? parseInt(yearMatch[1]) : 0;
-          if (year < 2000 && year !== 0) continue;
+          if (year > 0 && year < 2000) continue;
 
           checked++;
           const [iata, icao] = airportForLocation("", "", "Japan", title);
@@ -1051,11 +1063,6 @@ export async function parseJtsbJapan(db: D1Database): Promise<Record<string, unk
             tags: ["JTSB", "Japan", "OFFICIAL_REPORT"],
             event_type: "Investigation Report"
           })) created++;
-          await upsertOfficialItem(db, {
-            sourceName: "JTSB (Japan)", sourceUrl: fullUrl, title,
-            category: "Accident / Incident", severity: "Medium", summary: title,
-            tags: ["JTSB", "Japan"]
-          });
         }
       } catch (e) {
         errors.push(`${pageUrl}: ${e}`);

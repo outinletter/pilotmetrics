@@ -1,50 +1,40 @@
-$API_BASE = "http://localhost:8787/api/admin/collect-step" # Update with your production URL if needed
+# PilotMetrics Mass Ingestion Orchestrator
+# This script bypasses Cloudflare Workers' 30s timeout by splitting requests by year/state.
+
+$API_BASE = "https://pilot-briefing.outinletter.workers.dev/api/admin/collect-step"
 $STATES = @("KOR", "USA", "JPN", "CHN", "FRA", "CAN", "AUS", "UK", "GER", "BRA", "IND", "MEX", "ARE", "SGP", "HKG", "ITA", "ESP", "CHE", "NLD", "RUS")
-$YEAR_START = 2000
-$YEAR_END = 2026
+$START_YEAR = 2000
+$CURRENT_YEAR = [DateTime]::Now.Year
 
-Write-Host "Starting Mass Ingestion for ICAO iSTARS..." -ForegroundColor Cyan
+Write-Host "??Starting Mass Ingestion for PilotMetrics..." -ForegroundColor Cyan
 
-foreach ($year in $YEAR_START..$YEAR_END) {
-    foreach ($state in $STATES) {
-        Write-Host "Collecting $state for year $year..."
-        $body = @{
-            source = "icao"
-            state = $state
-            year = [int]$year
-        } | ConvertTo-Json
+# 1. ARAIB (Korea) - Multiple pages
+Write-Host "`n[1/3] Ingesting ARAIB (Korea) Reports..." -ForegroundColor Yellow
+$araibBody = @{ source = "araib"; max_pages = 50 } | ConvertTo-Json
+Invoke-RestMethod -Uri $API_BASE -Method Post -Body $araibBody -ContentType "application/json"
+Write-Host "?? ARAIB scan initiated." -ForegroundColor Green
 
+# 2. JTSB (Japan) - Yearly archives
+Write-Host "`n[2/3] Ingesting JTSB (Japan) Reports..." -ForegroundColor Yellow
+$jtsbBody = @{ source = "jtsb" } | ConvertTo-Json
+Invoke-RestMethod -Uri $API_BASE -Method Post -Body $jtsbBody -ContentType "application/json"
+Write-Host "?? JTSB scan initiated." -ForegroundColor Green
+
+# 3. ICAO iSTARS - Multi-state, Multi-year (The big one)
+Write-Host "`n[3/3] Ingesting ICAO iSTARS (Global)..." -ForegroundColor Yellow
+foreach ($state in $STATES) {
+    Write-Host " -> Processing $state..." -ForegroundColor Gray
+    foreach ($year in $START_YEAR..$CURRENT_YEAR) {
+        $icaoBody = @{ source = "icao"; state = $state; year = $year } | ConvertTo-Json
         try {
-            $response = Invoke-RestMethod -Uri $API_BASE -Method Post -Body $body -ContentType "application/json" -TimeoutSec 60
-            Write-Host "  Success: $($response.checked) checked, $($response.created) created" -ForegroundColor Green
+            $res = Invoke-RestMethod -Uri $API_BASE -Method Post -Body $icaoBody -ContentType "application/json"
+            Write-Host "    - ${year}: Checked $($res.checked), Created $($res.created)" -ForegroundColor DarkGray
         } catch {
-            Write-Host "  Error collecting $state $year: $_" -ForegroundColor Red
+            Write-Host "    - ${year}: FAILED ($($_.Exception.Message))" -ForegroundColor Red
         }
-        Start-Sleep -Seconds 1 # Avoid overwhelming the worker/API
+        # Small delay to avoid rate limiting
+        Start-Sleep -Milliseconds 200
     }
 }
 
-Write-Host "`nStarting Ingestion for ARAIB Korea (100 pages)..." -ForegroundColor Cyan
-$bodyAraib = @{
-    source = "araib"
-    max_pages = 100
-} | ConvertTo-Json
-try {
-    $resAraib = Invoke-RestMethod -Uri $API_BASE -Method Post -Body $bodyAraib -ContentType "application/json" -TimeoutSec 300
-    Write-Host "  Success: $($resAraib.checked) checked, $($resAraib.created) created" -ForegroundColor Green
-} catch {
-    Write-Host "  Error ARAIB: $_" -ForegroundColor Red
-}
-
-Write-Host "`nStarting Ingestion for JTSB Japan..." -ForegroundColor Cyan
-$bodyJtsb = @{
-    source = "jtsb"
-} | ConvertTo-Json
-try {
-    $resJtsb = Invoke-RestMethod -Uri $API_BASE -Method Post -Body $bodyJtsb -ContentType "application/json" -TimeoutSec 300
-    Write-Host "  Success: $($resJtsb.checked) checked, $($resJtsb.created) created" -ForegroundColor Green
-} catch {
-    Write-Host "  Error JTSB: $_" -ForegroundColor Red
-}
-
-Write-Host "`nMass Ingestion Complete." -ForegroundColor Cyan
+Write-Host "`n?Mass Ingestion Complete! Check your Dashboard for updated stats." -ForegroundColor Cyan
