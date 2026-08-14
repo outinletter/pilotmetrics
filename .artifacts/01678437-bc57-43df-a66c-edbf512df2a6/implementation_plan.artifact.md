@@ -1,42 +1,40 @@
-# 데이터 수집 완결성 및 무오류성 강화 계획
+# 이벤트 분석 브리핑(블릿 포인트) 강화 계획
 
-이 계획은 `PilotMetrics`의 데이터 수집 엔진을 완성하고, 소스 간 중복 제거 및 지능형 공항 매핑을 통해 데이터베이스의 신뢰도를 실무급으로 끌어올리는 것을 목표로 합니다.
+이 계획은 사고 데이터베이스의 "얇은 요약(Thin Summary)" 문제를 해결하고, 조종사에게 실질적인 도움이 되는 **분석적 위험 요소 브리핑**을 제공하는 것을 목표로 합니다.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **데이터베이스 마이그레이션**: `events` 테이블의 신규 컬럼(`destination_iata`, `event_time` 등)을 과거 데이터에도 채워넣는 **Backfill** 작업이 포함됩니다. 이 과정에서 기존 레코드의 `updated_at`이 갱신됩니다.
-
-> [!WARNING]
-> **중복 제거 정책**: 날짜, 공항, 항공기가 동일한 경우 "동일 사고"로 판단하여 정보를 병합(Merge)합니다. 소스 URL이 다르더라도 하나의 사건으로 통합 관리됩니다.
+> [!NOTE]
+> **2단계 브리핑 전략**:
+> 1. **휴리스틱(Heuristic)**: 실시간 요청 시 정규식을 통해 핵심 위험 키워드(FATAL, IMC, 기상 등)를 즉시 추출하여 블릿 포인트로 표시합니다.
+> 2. **AI 백그라운드 강화**: 요청 직후 서버리스 환경의 `waitUntil`을 사용하여 해당 이벤트들을 LLM으로 정밀 분석하고 DB를 갱신합니다. 다음 조회 시에는 사람이 분석한 수준의 고품질 브리핑이 제공됩니다.
 
 ## Proposed Changes
 
-### 1. 데이터 수집 엔진 고도화 (Parser Alignment)
+### 1. 분석적 블릿 포인트 생성 로직 (Briefing Logic)
 
-#### [MODIFY] [official_event_parsers.ts](file:///D:/Data/Project/PilotMetrics/worker/src/services/official_event_parsers.ts)
-- **전체 파서 통합**: `upsertFaaEvent`, `upsertTsbEvent`, `upsertNtsbCase`가 `destination_iata/icao`, `event_time`, `flight_conditions`를 모두 저장하도록 SQL 수정.
-- **지능형 공항 매핑 확산**: FAA와 TSB 수집 시에도 `airportForLocation`에 본문 텍스트를 전달하여 다중 공항 도시(런던, 뉴욕 등) 오매핑 방지.
-- **중복 제거 로직 구현**: `upsertEvent` 공통 함수를 만들어 소스별 고유 ID가 다르더라도 `(date, airport, aircraft)` 조합으로 기존 레코드를 찾아 소스 URL을 병합하는 logic 추가.
+#### [MODIFY] [briefing_generator.ts](file:///D:/Data/Project/PilotMetrics/worker/src/services/briefing_generator.ts)
+- **`generateHeuristicFactors(event)`**: `contributing_factors`가 비어있을 경우, `summary`와 `severity` 필드를 분석하여 다음과 같은 블릿 포인트를 자동 생성합니다.
+    - 예: "Severity: Critical (Fatalities reported)", "Phase: Landing", "Condition: IMC inferred from text"
+- **`buildThreats` 업데이트**: 생성된 휴리스틱 블릿을 `contributing_factors` 필드에 병합하여 UI에 전달합니다.
 
-### 2. 누락 데이터 복구 (Backfill Utility)
+### 2. 실시간 AI 강화 파이프라인 (Live Enrichment)
 
 #### [MODIFY] [index.ts](file:///D:/Data/Project/PilotMetrics/worker/src/index.ts)
-- **`POST /api/ops-intel/backfill-full`**: 기존 `events` 테이블을 순회하며 본문에서 도착 공항, 시각, 기상 조건을 재추출하여 신규 컬럼을 채우는 관리용 API 추가.
+- **`waitUntil` 통합**: 브리핑 API(`/api/briefing/:flightNumber`) 응답 직후, 검색된 상위 18개 이벤트 중 분석 데이터가 없는 항목들에 대해 `enrichEventsWithThreats`를 백그라운드에서 실행합니다.
 
-### 3. 수집 효율화 (Collection Strategy)
+### 3. LLM 분석 프롬프트 고도화 (LLM Enrichment)
 
-#### [MODIFY] [ops_intel_collector.ts](file:///D:/Data/Project/PilotMetrics/worker/src/services/ops_intel_collector.ts)
-- **Smart Fetching**: `MAX_DETAIL_FETCHES`를 동적으로 조절하고, 이미 수집된 URL은 본문 파싱을 건너뛰어 CPU 시간 절약.
+#### [MODIFY] [llm_classifier.ts](file:///D:/Data/Project/PilotMetrics/worker/src/services/llm_classifier.ts)
+- **프롬프트 강화**: `extractEventThreats`의 페르소나를 "Safety Briefing Analyst"로 강화하여, 단순 요약이 아닌 "조종사가 주의해야 할 구체적 위협 요인(Threats)"과 "대응 지침(Countermeasures)"을 블릿 포인트로 추출하도록 수정합니다.
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
-- **Deduplication Test**: 동일한 사고 내용을 NTSB와 SKYbrary 소스로 각각 삽입했을 때, DB에 1개의 레코드만 남고 소스 이름이 병합되는지 확인.
-- **Disambiguation Test**: "Accident in London near Gatwick" 텍스트 입력 시 LHR이 아닌 EGKK로 매핑되는지 검증.
+- **Heuristic Extraction Test**: "Fatal crash in IMC" 텍스트를 가진 이벤트를 조회했을 때, `contributing_factors`에 "Fatal Outcome", "IMC Conditions" 블릿이 포함되는지 확인.
+- **Background Task Test**: 브리핑 조회 후 10초 뒤 DB의 해당 레코드에 AI가 분석한 데이터가 채워져 있는지 확인.
 
 ### Manual Verification
-- **Stats Dashboard**: `api/stats` 호출 시 중복 제거 후의 정확한 이벤트 수와 연도별 분포 확인.
-- **Historical Tab**: 모바일 앱에서 과거 사고 리스트의 '도착지' 정보가 정상 출력되는지 확인.
+- **Screenshot Case (DCA26MA161) 재검증**: 기존에 텍스트 한 줄만 나오던 화면이 위협 요소 블릿 포인트와 풍부한 브리핑 문장으로 채워지는지 확인.

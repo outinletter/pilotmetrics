@@ -76,6 +76,29 @@ function cleanToken(raw: string): string {
   return raw.replace(/^[-–•*]\s*/, "").split(/[,;.]/)[0].trim();
 }
 
+function generateHeuristicFactors(e: EventRow): string[] {
+  const factors: string[] = [];
+  const s = (e.summary ?? "").toUpperCase();
+
+  // Severity and Outcome
+  if ((e.severity ?? 0) >= 5 || s.includes("FATAL")) factors.push("Fatal Outcome");
+  else if ((e.severity ?? 0) >= 4 || s.includes("SERIOUS INJURY")) factors.push("Serious Injury Level");
+  else if (s.includes("DESTROYED") || s.includes("TOTAL LOSS")) factors.push("Aircraft Destroyed");
+
+  // Environmental Threats
+  if (s.includes(" IMC") || s.includes("INSTRUMENT CONDITIONS")) factors.push("IMC Conditions");
+  if (s.includes("NIGHT") || s.includes("DARKNESS")) factors.push("Night Operations");
+  if (s.includes("WINDSHEAR") || s.includes("LLWS")) factors.push("Windshear Reported");
+  if (s.includes("THUNDERSTORM") || s.includes(" TSRA")) factors.push("Convective Activity");
+  if (s.includes("ICING") || s.includes(" ICE ")) factors.push("Icing Environment");
+
+  // Operational Context
+  if (s.includes("SINGLE PILOT")) factors.push("Single Pilot Operation");
+  if (s.includes("MAINTENANCE") || s.includes("REPAIR")) factors.push("Maintenance/Technical Link");
+
+  return factors;
+}
+
 function isUsable(k: string): boolean {
   const t = k.trim();
   return t.length > 2 && t.split(/\s+/).length <= 6 && !KW_NOISE.test(t);
@@ -216,6 +239,12 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
     const phaseLabel = phase === "UNKNOWN" ? " [General Awareness]" : "";
     const recAction = recommendedAction(event);
 
+    // Factors: AI (if exists) or Heuristic
+    let factors = jsonList(event.contributing_factors);
+    if (factors.length === 0) {
+      factors = generateHeuristicFactors(event);
+    }
+
     if (!groups.has(title)) groups.set(title, { title, description, events: [] });
     const g = groups.get(title)!;
     if (g.events.length < 4) {
@@ -228,7 +257,7 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
         operator: event.operator ?? "", severity: severityLabel(event.severity),
         flight_phase: phase + phaseLabel,
         summary: event.summary ?? "",
-        contributing_factors: jsonList(event.contributing_factors),
+        contributing_factors: factors,
         operational_lessons: jsonList(event.operational_lessons),
         a350_b787_applicability: a350b787(event),
         recommended_action: recAction,

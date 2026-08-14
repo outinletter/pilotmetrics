@@ -160,25 +160,31 @@ const EMPTY_THREATS: EventThreats = {
 
 export async function extractEventThreats(ai: Ai, summary: string): Promise<EventThreats | null> {
   const text = summary.slice(0, 2000);
-  const prompt = `You are an aviation safety analyst extracting structured threat data from an occurrence report for pilot pre-flight briefings. Respond with ONLY valid JSON, no markdown, no explanation.
+  const prompt = `You are a Senior Aviation Safety Briefing Analyst. Your goal is to extract structured threat data from an occurrence report to help pilots prepare for similar risks.
+Focus on identifying technical failures, environmental threats (weather/terrain), and specific crew countermeasures.
 
 REPORT TEXT:
 ${text}
 
-Respond with exactly this JSON structure:
+Respond with exactly this JSON structure (no markdown, no explanation):
 {
-  "flight_phase": "<one of: TAKEOFF | CLIMB | CRUISE | DESCENT | APPROACH | LANDING | TAXI | GROUND | UNKNOWN>",
-  "system_affected": "<short uppercase tag, e.g. ENGINE_FUEL_SYSTEM, LANDING_GEAR, AVIONICS, WEATHER, ATC_COORDINATION, or empty string if not a system issue>",
-  "failure_component": "<short phrase naming the specific failed part or nothing, else empty string>",
+  "flight_phase": "<TAKEOFF | CLIMB | CRUISE | DESCENT | APPROACH | LANDING | TAXI | GROUND | UNKNOWN>",
+  "system_affected": "<Specific system tag, e.g. POWERPLANT, HYDRAULICS, AVIONICS, AUTOMATION, TIRES_BRAKES, or empty string>",
+  "failure_component": "<Specific part name, e.g. HP fuel pump, #2 engine, L inner tire, else empty string>",
   "emergency_declared": <true or false>,
-  "emergency_level": "<one of: NONE | PAN_PAN | MAYDAY>",
-  "crew_action": "<short phrase describing what the crew did, max 80 chars>",
-  "outcome": "<short phrase describing the result, max 80 chars>",
-  "contributing_factors": ["<short phrase>", "... up to 5 items, empty array if none stated"],
-  "operational_lesson": "<one concise sentence for pilots, max 150 chars>",
-  "time_since_takeoff_bucket": "<how long after takeoff the event occurred — one of: IMMEDIATE (during takeoff roll or under 5 min after airborne) | EARLY (5-30 min after takeoff, e.g. still climbing) | MID_FLIGHT (30 min to 2 hours after takeoff, e.g. cruise) | LATE (more than 2 hours after takeoff) | NOT_APPLICABLE (event happened on ground/taxi, not related to a takeoff) | UNKNOWN (text does not indicate timing relative to takeoff)>",
-  "time_since_takeoff_minutes": <integer minutes after takeoff if the text states or clearly implies a specific/approximate duration (e.g. "shortly after takeoff" = 3, "20 minutes into the flight" = 20), else null>,
-  "confidence": <0.0 to 1.0, how confident you are the extraction is accurate>
+  "emergency_level": "<NONE | PAN_PAN | MAYDAY>",
+  "crew_action": "<Key safety action taken, e.g. Emergency descent, Single-engine landing, Air turn-back, max 80 chars>",
+  "outcome": "<The final result, e.g. Safe landing, Runway excursion, Component fire, max 80 chars>",
+  "contributing_factors": [
+    "<Concise phrase identifying a threat, e.g. Heavy rain at touchdown>",
+    "<Concise phrase identifying a human factor, e.g. Crew continuation bias>",
+    "<Concise phrase identifying a technical factor, e.g. Intermittent sensor fault>",
+    "... up to 5 items"
+  ],
+  "operational_lesson": "<One high-impact takeaway for a pilot briefing, e.g. Verify brake serviceability if landing on contaminated runway with known sensor alerts, max 150 chars>",
+  "time_since_takeoff_bucket": "<IMMEDIATE | EARLY | MID_FLIGHT | LATE | NOT_APPLICABLE | UNKNOWN>",
+  "time_since_takeoff_minutes": <integer or null>,
+  "confidence": <0.0 to 1.0>
 }`;
 
   try {
@@ -232,15 +238,22 @@ export async function enrichEventsWithThreats(
   ai: Ai,
   db: D1Database,
   limit = 20,
+  targetIds?: string[],
 ): Promise<{ processed: number; updated: number; errors: number; error_samples?: string[] }> {
-  const { results } = await db.prepare(
-    `SELECT id, summary, flight_phase
+  let query = `SELECT id, summary, flight_phase
      FROM events
      WHERE (contributing_factors IS NULL OR contributing_factors = '[]')
-       AND summary IS NOT NULL AND summary != ''
-     ORDER BY event_date DESC
-     LIMIT ?`
-  ).bind(limit).all<{ id: string; summary: string; flight_phase: string | null }>();
+       AND summary IS NOT NULL AND summary != ''`;
+
+  if (targetIds && targetIds.length > 0) {
+    query += ` AND id IN (${targetIds.map(() => '?').join(',')})`;
+  }
+
+  query += ` ORDER BY event_date DESC LIMIT ?`;
+
+  const stmt = db.prepare(query);
+  const params = targetIds ? [...targetIds, limit] : [limit];
+  const { results } = await stmt.bind(...params).all<{ id: string; summary: string; flight_phase: string | null }>();
 
   let updated = 0, errors = 0;
   const errorSamples: string[] = [];

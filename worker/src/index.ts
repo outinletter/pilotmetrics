@@ -153,6 +153,27 @@ app.get("/api/briefing/:flightNumber", async c => {
       : Promise.resolve([]),
   ]);
 
+  // Background Enrichment: 브리핑에 포함된 이벤트들 중 분석이 안 된 것들 LLM 처리
+  if (c.env.AI && threats.length > 0) {
+    c.executionCtx.waitUntil((async () => {
+      // buildThreats에서 반환된 groups 내의 event id 수집
+      const eventIds = (threats as any[]).flatMap(g => g.events.map((e: any) => e.id));
+      if (eventIds.length === 0) return;
+
+      // 분석이 필요한 대상(factors가 비어있음)만 선별하여 처리
+      const { results } = await c.env.DB.prepare(
+        `SELECT id, summary, flight_phase FROM events
+         WHERE id IN (${eventIds.map(() => '?').join(',')})
+           AND (contributing_factors IS NULL OR contributing_factors = '[]')`
+      ).bind(...eventIds).all<{ id: string; summary: string; flight_phase: string | null }>();
+
+      if (results.length > 0) {
+        // 현재 브리핑 항목 위주로 신속 처리 (ID 명시)
+        await enrichEventsWithThreats(c.env.AI, c.env.DB, 10, results.map(r => r.id));
+      }
+    })());
+  }
+
   return c.json({ flight_context: context, top_threats: threats, notam_threats: notamThreats });
 });
 

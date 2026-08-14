@@ -97,12 +97,19 @@ class ThreatEvent {
   final double score;
   final String headline;
   final String eventDate;
-  final int severity;
+  final String severity;
   final String sourceName;
   final String? flightPhase;
   final String? aircraftType;
   final String? airportIcao;
   final String? coreEvent;
+  final String summary;
+  final List<String> contributingFactors;
+  final List<String> operationalLessons;
+  final String? fuelAdvisory;
+  final List<String> briefingKeywords;
+  final String? a350B787Applicability;
+  final String? recommendedAction;
 
   ThreatEvent({
     required this.eventId,
@@ -111,24 +118,38 @@ class ThreatEvent {
     required this.eventDate,
     required this.severity,
     required this.sourceName,
+    required this.summary,
+    required this.contributingFactors,
+    required this.operationalLessons,
+    required this.briefingKeywords,
     this.flightPhase,
     this.aircraftType,
     this.airportIcao,
     this.coreEvent,
+    this.fuelAdvisory,
+    this.a350B787Applicability,
+    this.recommendedAction,
   });
 
   factory ThreatEvent.fromJson(Map<String, dynamic> json) {
     return ThreatEvent(
-      eventId: json['event_id'] ?? json['id'] ?? '',
-      score: (json['score'] as num?)?.toDouble() ?? 0,
-      headline: json['headline'] ?? json['core_event'] ?? '',
-      eventDate: json['event_date'] ?? '',
-      severity: (json['severity'] as num?)?.toInt() ?? 0,
+      eventId: json['id'] ?? '',
+      score: (json['similarity'] as num?)?.toDouble() ?? 0,
+      headline: json['one_line'] ?? json['detail_title'] ?? '',
+      eventDate: json['date'] ?? '',
+      severity: json['severity'] ?? 'LOW',
       sourceName: json['source_name'] ?? '',
+      summary: json['summary'] ?? '',
+      contributingFactors: List<String>.from(json['contributing_factors'] ?? []),
+      operationalLessons: List<String>.from(json['operational_lessons'] ?? []),
+      briefingKeywords: List<String>.from(json['briefing_keywords'] ?? []),
       flightPhase: json['flight_phase'],
       aircraftType: json['aircraft_type'],
-      airportIcao: json['airport_icao'],
+      airportIcao: json['airport_iata'] ?? json['airport_icao'],
       coreEvent: json['core_event'],
+      fuelAdvisory: json['fuel_advisory'],
+      a350B787Applicability: json['a350_b787_applicability'],
+      recommendedAction: json['recommended_action'],
     );
   }
 }
