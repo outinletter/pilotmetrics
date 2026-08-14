@@ -19,6 +19,7 @@ export const SOURCES: Source[] = [
   { name: "BEA France", url: "https://bea.aero/en/investigation-reports/notified-accidents-and-serious-incidents/", category: "Accident / Incident", tags: ["BEA", "France", "Accident", "Investigation"] },
   { name: "ATSB Aviation", url: "https://www.atsb.gov.au/aviation/", category: "Accident / Incident", tags: ["ATSB", "Australia", "Accident", "Investigation"] },
   { name: "TSB Canada Aviation", url: "https://www.tsb.gc.ca/eng/rapports-reports/aviation/", category: "Accident / Incident", tags: ["TSB", "Canada", "Accident", "Investigation"] },
+  { name: "ARAIB Korea", url: "https://araib.molit.go.kr/eng/section/list.do?menuSeq=1043", category: "Accident / Incident", tags: ["ARAIB", "Korea", "Accident", "Investigation"] },
   { name: "JTSB Japan", url: "https://www.mlit.go.jp/jtsb/aviation.html", category: "Accident / Incident", tags: ["JTSB", "Japan", "Accident", "Investigation"] },
   // ── 추가 안전 자료 ─────────────────────────────────────────
   { name: "FAA Lessons Learned", url: "https://lessonslearned.faa.gov/", category: "Accident / Incident", tags: ["FAA", "Lessons Learned", "Accident"] },

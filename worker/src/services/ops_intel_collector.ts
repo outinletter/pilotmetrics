@@ -3,7 +3,7 @@ import { SOURCES } from "../data/sources";
 import { collectRecentOfficialEvents } from "./official_event_parsers";
 import { enrichWithLLM } from "./llm_classifier";
 
-const OFFICIAL_HOSTS = ["faa.gov", "ntsb.gov", "nasa.gov", "icao.int", "easa.europa.eu", "skybrary.aero"];
+const OFFICIAL_HOSTS = ["faa.gov", "ntsb.gov", "nasa.gov", "icao.int", "easa.europa.eu", "skybrary.aero", "molit.go.kr", "mlit.go.jp", "tsb.gc.ca"];
 const EVENT_KEYWORDS = ["accident","incident","investigation","safety","recommendation","safo","advisory","airworthiness","directive","runway","engine","fire","smoke","gps","gnss","jamming","mel","training","part-121","part 135","approach","landing","departure","takeoff"];
 const REPORT_KEYWORDS = ["report","final","preliminary","investigation","recommendation","safo","advisory circular","airworthiness directive","safety alert","accident","incident","asrs","callback","lessons learned"];
 const SKIP_LABELS = ["skip to","main content","enable javascript","subscribe","login","sign in","privacy","contact"];
