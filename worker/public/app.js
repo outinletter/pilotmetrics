@@ -236,7 +236,6 @@ function formatNotamTime(iso) {
 }
 
 function renderNotamThreats(notams) {
-  // NOTAM 섹션 컨테이너 찾기 또는 생성
   let section = document.getElementById("notamSection");
   if (!section) {
     section = document.createElement("section");
@@ -245,47 +244,47 @@ function renderNotamThreats(notams) {
     threatsEl.parentElement.insertBefore(section, threatsEl);
   }
 
-  const activeNotams = (notams || []).filter(n => n.isActive);
-
+  const activeNotams = (notams || []);
   if (activeNotams.length === 0) {
-    section.innerHTML = "";
+    section.style.display = "none";
     return;
   }
+  section.style.display = "block";
 
-  // 최상위 위험도 확인 (CRITICAL/HIGH가 있으면 강조 헤더)
   const hasCritical = activeNotams.some(n => n.severity === "CRITICAL" || n.severity === "HIGH");
 
   section.innerHTML = `
-    <div class="notam-header ${hasCritical ? 'notam-header-critical' : ''}">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L2 19h20L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        <path d="M12 9v5M12 17v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      공항 활성 위협 (NOTAM)
-      <span class="notam-count">${activeNotams.length}건 식별됨</span>
-    </div>
-    <div class="notam-list">
-      ${activeNotams.map(n => `
-        <div class="notam-card notam-${n.severity.toLowerCase()}">
-          <div class="notam-card-top">
-            <span class="notam-icon ${NOTAM_SEV_CLASS[n.severity]}">${NOTAM_CATEGORY_ICON[n.category] || NOTAM_CATEGORY_ICON.OTHER}</span>
-            <div class="notam-card-main">
-              <div class="notam-card-headline">${n.headline}</div>
-              <div class="notam-card-meta">
-                <span class="notam-id">${n.notamId}</span>
-                <span class="notam-time">${formatNotamTime(n.effectiveStart)} – ${formatNotamTime(n.effectiveEnd)}</span>
+    <div class="notam-alert-box ${hasCritical ? 'notam-alert-critical' : ''}">
+      <div class="notam-header">
+        <div class="notam-header-left">
+          <span class="notam-pulse"></span>
+          <span class="notam-header-title">Active NOTAM Threats</span>
+        </div>
+        <span class="notam-count">${activeNotams.length} items detected</span>
+      </div>
+      <div class="notam-list">
+        ${activeNotams.map(n => `
+          <div class="notam-card notam-${n.severity.toLowerCase()}">
+            <div class="notam-card-top">
+              <span class="notam-icon-wrap ${NOTAM_SEV_CLASS[n.severity]}">${NOTAM_CATEGORY_ICON[n.category] || NOTAM_CATEGORY_ICON.OTHER}</span>
+              <div class="notam-card-main">
+                <div class="notam-card-headline">${esc(n.headline)}</div>
+                <div class="notam-card-meta">
+                  <span class="notam-id">${esc(n.notamId)}</span>
+                  <span class="notam-time">${formatNotamTime(n.effectiveStart)} – ${formatNotamTime(n.effectiveEnd)}</span>
+                </div>
+              </div>
+              <div class="notam-score-badge notam-score-${n.severity.toLowerCase()}">
+                <span class="notam-score-val">+${Math.round(n.riskScore)}</span>
               </div>
             </div>
-            <div class="notam-score-badge notam-score-${n.severity.toLowerCase()}">
-              <span class="notam-score-val">+${Math.round(n.riskScore)}</span>
-            </div>
+            <details class="notam-raw-wrap">
+              <summary class="notam-raw-toggle">View Raw NOTAM Text</summary>
+              <pre class="notam-raw">${esc(n.rawText)}</pre>
+            </details>
           </div>
-          <details class="notam-raw-wrap">
-            <summary class="notam-raw-toggle">NOTAM 원문 보기</summary>
-            <pre class="notam-raw">${n.rawText}</pre>
-          </details>
-        </div>
-      `).join("")}
+        `).join("")}
+      </div>
     </div>
   `;
 }

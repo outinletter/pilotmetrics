@@ -62,7 +62,22 @@ app.get("/api/briefing/:flightNumber", async c => {
       arrival_tags: tags,
       metar_tags: tags,
     };
-    return c.json({ flight_context: context, top_threats: await buildThreats(c.env.DB, context, tags, c.env.AI) });
+
+    // NOTAM 및 위협 정보 병렬 조회
+    const hasNotam = arrIcao && (c.env.NMS_CLIENT_ID || c.env.FAA_NOTAM_API_KEY);
+    const [threats, notamThreats] = await Promise.all([
+      buildThreats(c.env.DB, context, tags, c.env.AI),
+      hasNotam
+        ? fetchNotamThreats(arrIcao!, null, {
+            nmsClientId:     c.env.NMS_CLIENT_ID,
+            nmsClientSecret: c.env.NMS_CLIENT_SECRET,
+            nmsEnv:          c.env.NMS_ENV,
+            legacyKey:       c.env.FAA_NOTAM_API_KEY,
+          })
+        : Promise.resolve([]),
+    ]);
+
+    return c.json({ flight_context: context, top_threats: threats, notam_threats: notamThreats });
   }
 
   // ── 편명 처리 (KE629, OZ202 등) ──────────────────────────────────────────
