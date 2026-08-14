@@ -902,6 +902,166 @@ async function parseAaib(db: D1Database, cutoff: Date): Promise<Record<string, u
   return { checked, created };
 }
 
+// ─── ICAO iSTARS APIDS API ──────────────────────────────────────────────────
+async function parseIcaoIstars(db: D1Database, apiKey: string, yearsBack: number): Promise<Record<string, unknown>> {
+  const states = ["KOR", "USA", "JPN", "CHN", "FRA", "CAN", "AUS", "UK", "GER"];
+  const currentYear = new Date().getFullYear();
+  const startYear = Math.max(2000, currentYear - yearsBack);
+  let checked = 0, created = 0;
+  const errors: string[] = [];
+
+  for (const state of states) {
+    for (let year = startYear; year <= currentYear; year++) {
+      try {
+        const url = `https://applications.icao.int/dataservices/api/get-occurrences?api_key=${apiKey}&State=${state}&Year=${year}`;
+        const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) continue;
+        const data = await res.json() as any[];
+        if (!Array.isArray(data)) continue;
+        for (const occ of data) {
+          checked++;
+          const eventDate = occ.Date || `${year}-01-01`;
+          const title = `${occ.OccurrenceCategory || "Occurrence"} - ${occ.StateName || state}`;
+          const summary = occ.Narrative || `ICAO iSTARS occurrence in ${occ.StateName} on ${eventDate}. Type: ${occ.OccurrenceCategory}.`;
+          const sourceUrl = `https://applications.icao.int/istars/ (Ref: ${occ.OccurrenceNo})`;
+          const [iata, icao] = airportForLocation("", "", occ.StateName || "", summary);
+
+          if (await upsertEventRecord(db, {
+            id: `ICAO-${occ.OccurrenceNo || Math.random().toString(36).substr(2, 9)}`,
+            source_name: "ICAO iSTARS", source_url: sourceUrl,
+            event_date: eventDate.slice(0, 10),
+            airport_iata: iata, airport_icao: icao,
+            summary: summary, severity: 3,
+            tags: ["ICAO", "iSTARS", state, "OFFICIAL_REPORT"],
+            event_type: occ.OccurrenceCategory
+          })) created++;
+
+          await upsertOfficialItem(db, {
+            sourceName: "ICAO iSTARS", sourceUrl: sourceUrl, title,
+            category: "Accident / Incident", severity: "Medium", summary,
+            tags: ["ICAO", "iSTARS", state]
+          });
+        }
+      } catch (e) { errors.push(`${state} ${year}: ${e}`); }
+    }
+  }
+  return { checked, created, errors };
+}
+
+// ─── ARAIB Korea (South Korea) ────────────────────────────────────────────────
+async function parseAraibKorea(db: D1Database): Promise<Record<string, unknown>> {
+  const url = "https://araib.molit.go.kr/eng/section/list.do?menuSeq=1043";
+  let checked = 0, created = 0;
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
+    if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
+    const html = await res.text();
+    for (const m of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)) {
+      const cells = [...m[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(c => cleanText(c[1]));
+      if (cells.length < 5) continue;
+      const dateText = cells[1];
+      const eventDate = parseDate(dateText) || new Date(dateText);
+      if (isNaN(eventDate.getTime()) || eventDate.getFullYear() < 2000) continue;
+      const linkMatch = m[1].match(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
+      if (!linkMatch) continue;
+      const title = cleanText(linkMatch[2]);
+      const fullUrl = new URL(linkMatch[1].replace(/&amp;/g, "&"), url).href;
+      checked++;
+      const [iata, icao] = airportForLocation("", "", "South Korea", title);
+      if (await upsertEventRecord(db, {
+        id: `ARAIB-${fullUrl.split("=").pop() || Math.random()}`,
+        source_name: "ARAIB (Korea)", source_url: fullUrl,
+        event_date: eventDate.toISOString().slice(0, 10),
+        airport_iata: iata, airport_icao: icao,
+        summary: title, severity: 3,
+        tags: ["ARAIB", "Korea", "OFFICIAL_REPORT"],
+        event_type: "Investigation Report"
+      })) created++;
+      await upsertOfficialItem(db, {
+        sourceName: "ARAIB (Korea)", sourceUrl: fullUrl, title,
+        category: "Accident / Incident", severity: "Medium", summary: title,
+        tags: ["ARAIB", "Korea"]
+      });
+    }
+  } catch (e) { return { checked, created, error: String(e) }; }
+  return { checked, created };
+}
+
+// ─── JTSB Japan (Japan) ─────────────────────────────────────────────────────
+async function parseJtsbJapan(db: D1Database): Promise<Record<string, unknown>> {
+  const url = "https://www.mlit.go.jp/jtsb/aviation.html";
+  let checked = 0, created = 0;
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
+    if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
+    const html = await res.text();
+    for (const m of html.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+      const link = m[1];
+      const title = cleanText(m[2]);
+      if (!link.includes("/jtsb/aircraft/rep-acc/") && !link.includes("/jtsb/aircraft/rep-inc/")) continue;
+      const fullUrl = new URL(link.replace(/&amp;/g, "&"), url).href;
+      const yearMatch = title.match(/\b(20\d{2})\b/) || link.match(/\b(20\d{2})\b/);
+      const year = yearMatch ? parseInt(yearMatch[1]) : 0;
+      if (year < 2000 && year !== 0) continue;
+      checked++;
+      const [iata, icao] = airportForLocation("", "", "Japan", title);
+      if (await upsertEventRecord(db, {
+        id: `JTSB-${fullUrl.split("/").pop()?.replace(".html", "") || Math.random()}`,
+        source_name: "JTSB (Japan)", source_url: fullUrl,
+        event_date: year ? `${year}-01-01` : new Date().toISOString().slice(0, 10),
+        airport_iata: iata, airport_icao: icao,
+        summary: title, severity: 3,
+        tags: ["JTSB", "Japan", "OFFICIAL_REPORT"],
+        event_type: "Investigation Report"
+      })) created++;
+      await upsertOfficialItem(db, {
+        sourceName: "JTSB (Japan)", sourceUrl: fullUrl, title,
+        category: "Accident / Incident", severity: "Medium", summary: title,
+        tags: ["JTSB", "Japan"]
+      });
+    }
+  } catch (e) { return { checked, created, error: String(e) }; }
+  return { checked, created };
+}
+
+// ─── AvHerald (RSS Workaround) ──────────────────────────────────────────────
+async function parseAvHerald(db: D1Database): Promise<Record<string, unknown>> {
+  const url = "https://bsky.app/profile/avherald.com/rss";
+  let checked = 0, created = 0;
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
+    if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
+    const xml = await res.text();
+    const cutoff2000 = new Date("2000-01-01");
+    for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)) {
+      const item = m[1];
+      const title = rssField(item, "title");
+      const link = rssField(item, "link") || rssField(item, "guid");
+      const desc = rssField(item, "description") || rssField(item, "summary");
+      const pubDate = rssField(item, "pubDate");
+      if (!link || !title) continue;
+      const d = pubDate ? new Date(pubDate) : new Date();
+      if (d < cutoff2000) continue;
+      checked++;
+      const [iata, icao] = airportForLocation("", "", "", `${title} ${desc}`);
+      const eventId = `AVH-${link.split("/").pop() || Math.random()}`.toUpperCase().replace(/[^A-Z0-9-]/g, "-");
+      if (await upsertEventRecord(db, {
+        id: eventId, source_name: "Aviation Herald (via Bluesky)", source_url: link,
+        event_date: d.toISOString().slice(0, 10), airport_iata: iata, airport_icao: icao,
+        summary: desc || title, severity: 3,
+        tags: ["AvHerald", "Bluesky", "Incident", "RSS_EVENT"],
+        event_type: "Incident"
+      })) created++;
+      await upsertOfficialItem(db, {
+        sourceName: "Aviation Herald (via Bluesky)", sourceUrl: link, title,
+        category: "Accident / Incident", severity: "Medium", summary: desc || title,
+        tags: ["AvHerald", "Bluesky", "real_time"]
+      });
+    }
+  } catch (e) { return { checked, created, error: String(e) }; }
+  return { checked, created };
+}
+
 // ─── SKYbrary — Drupal JSON:API ────────────────────────────────────────────────
 async function parseSkybrary(db: D1Database, cutoff: Date): Promise<Record<string, unknown>> {
   let checked = 0, created = 0;
@@ -940,6 +1100,7 @@ async function parseSkybrary(db: D1Database, cutoff: Date): Promise<Record<strin
 
 export async function collectRecentOfficialEvents(db: D1Database, yearsBack = 20): Promise<Record<string, unknown>> {
   const cutoff = cutoffDate(yearsBack);
+  const icaoKey = "2113c549-8f2d-4a98-a587-e35192569e55";
 
   const RSS_SOURCES: RssSource[] = [
     {
@@ -966,12 +1127,16 @@ export async function collectRecentOfficialEvents(db: D1Database, yearsBack = 20
     },
   ];
 
-  const [ntsb, faa, asrs, aaib, skybrary, ...rssResults] = await Promise.allSettled([
+  const [ntsb, faa, asrs, aaib, skybrary, icao, araib, jtsb, avherald, ...rssResults] = await Promise.allSettled([
     parseNtsbCarol(db, yearsBack),
     parseFaaTransportLibrary(db, yearsBack),
     parseAsrsReportSets(db),
     parseAaib(db, cutoff),
     parseSkybrary(db, cutoff),
+    parseIcaoIstars(db, icaoKey, yearsBack),
+    parseAraibKorea(db),
+    parseJtsbJapan(db),
+    parseAvHerald(db),
     ...RSS_SOURCES.map(src => parseRssFeed(db, src, cutoff)),
   ]);
 
@@ -981,6 +1146,7 @@ export async function collectRecentOfficialEvents(db: D1Database, yearsBack = 20
   const srcResults: Record<string, unknown> = {
     ntsb: r(ntsb), faa: r(faa), asrs: r(asrs),
     aaib: r(aaib), skybrary: r(skybrary),
+    icao: r(icao), araib: r(araib), jtsb: r(jtsb), avherald: r(avherald),
   };
   RSS_SOURCES.forEach((src, i) => { srcResults[src.tags[0].toLowerCase()] = r(rssResults[i]); });
 
