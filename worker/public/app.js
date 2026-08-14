@@ -318,8 +318,10 @@ function renderThreats(threats) {
           const sc     = sevClass(ev.severity);
           const scol   = scoreColor(pct);
           const family = acFamilyLabel(ev.aircraft_type);
+          const isPending = !ev.contributing_factors || ev.contributing_factors.some(f => f.includes("pending AI analysis"));
           // compact one-line: strip leading "XX% | " that briefing_generator prepends
           const oneLine = esc((ev.one_line || "").replace(/^\d+%\s*\|\s*/i, ""));
+
           return `
           <details class="event-item">
             <summary class="event-summary">
@@ -329,8 +331,9 @@ function renderThreats(threats) {
               <div class="event-summary-body">
                 <div class="event-one-line">${oneLine}</div>
                 <div class="event-summary-tags">
-                  ${ev.briefing_keywords?.slice(0,3).map(k => `<span class="briefing-kw">${esc(k)}</span>`).join("") ?? ""}
+                  ${ev.briefing_keywords?.slice(0,3).map(k => `<span class="briefing-kw ${k.toLowerCase().includes('phase') ? 'phase-kw' : ''}">${esc(k)}</span>`).join("") ?? ""}
                   ${family ? `<span class="ac-family-tag">${esc(family)}</span>` : ""}
+                  ${isPending ? `<span class="pending-ai-tag">Analysis in progress...</span>` : ""}
                 </div>
                 ${ev.fuel_advisory ? `
                 <div class="fuel-advisory-inline">
@@ -348,22 +351,33 @@ function renderThreats(threats) {
                 ${ev.category ? `<span class="event-meta-chip">${esc(ev.category)}</span>` : ""}
                 <span class="event-meta-chip sev-${sc}">${esc(String(ev.severity || "").toUpperCase() || "N/A")}</span>
               </div>
+
+              <div class="event-section-label">Occurrence Summary</div>
               ${summaryToList(ev.summary)}
+
               ${ev.contributing_factors?.length ? `
                 <div class="event-section-label">Contributing Factors</div>
-                <ul class="event-list">${ev.contributing_factors.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+                <ul class="event-list bullet-list">${ev.contributing_factors.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+
               ${ev.operational_lessons?.length ? `
-                <div class="event-section-label">Operational Lessons</div>
-                <ul class="event-list">${ev.operational_lessons.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+                <div class="event-section-label lesson-label">Operational Lessons</div>
+                <ul class="event-list bullet-list lesson-list">${ev.operational_lessons.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+
+              ${ev.recommended_action ? `
+                <div class="event-section-label rec-label">Recommended Action</div>
+                <div class="rec-action-box">${esc(ev.recommended_action)}</div>` : ""}
+
               ${ev.a350_b787_applicability ? `
                 <div class="event-section-label">A350 / B787 Applicability</div>
-                <p class="event-summary-text">${esc(ev.a350_b787_applicability)}</p>` : ""}
-              ${ev.briefing_keywords?.length ? `
-                <div class="event-section-label">Watch For</div>
-                <div class="briefing-kw-row">${ev.briefing_keywords.map(k => `<span class="briefing-kw">${esc(k)}</span>`).join("")}</div>` : ""}
+                <p class="event-summary-text subtle-text">${esc(ev.a350_b787_applicability)}</p>` : ""}
+
               ${ev.fuel_advisory ? `
                 <div class="event-section-label fuel-advisory-label">⛽ Fuel / Decision Advisory</div>
-                <p class="event-summary-text fuel-advisory-text">${esc(ev.fuel_advisory).replace(/\s*\|\s*/g, '<br>• ')}</p>` : ""}
+                <div class="fuel-advisory-box">${esc(ev.fuel_advisory).split('|').map(l => `<div class="fuel-adv-line">• ${esc(l.trim())}</div>`).join("")}</div>` : ""}
+
+              <div class="event-footer">
+                Source: ${esc(ev.source_name)} | ID: ${esc(ev.id)}
+              </div>
             </div>
           </details>`;
         }).join("")}

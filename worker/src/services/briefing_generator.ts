@@ -79,24 +79,44 @@ function cleanToken(raw: string): string {
 function generateHeuristicFactors(e: EventRow): string[] {
   const factors: string[] = [];
   const s = (e.summary ?? "").toUpperCase();
+  const t = (e.core_event ?? "").toUpperCase();
+  const k = (e.lesson_keyword ?? "").toUpperCase();
+  const haystack = `${s} ${t} ${k}`;
 
   // Severity and Outcome
-  if ((e.severity ?? 0) >= 5 || s.includes("FATAL")) factors.push("Fatal Outcome");
-  else if ((e.severity ?? 0) >= 4 || s.includes("SERIOUS INJURY")) factors.push("Serious Injury Level");
-  else if (s.includes("DESTROYED") || s.includes("TOTAL LOSS")) factors.push("Aircraft Destroyed");
+  if ((e.severity ?? 0) >= 5 || haystack.includes("FATAL")) factors.push("Fatal Outcome");
+  else if ((e.severity ?? 0) >= 4 || haystack.includes("SERIOUS INJURY")) factors.push("Serious Injury Level");
+
+  if (haystack.includes("DESTROYED") || haystack.includes("TOTAL LOSS")) factors.push("Aircraft Destroyed");
+  if (haystack.includes("SUBSTANTIAL") && haystack.includes("DAMAGE")) factors.push("Substantial Aircraft Damage");
+
+  // Flight Phase Specifics
+  if (haystack.includes("UNSTABLE") && haystack.includes("APPROACH")) factors.push("Unstable Approach Path");
+  if (haystack.includes("REJECTED TAKEOFF") || haystack.includes(" RTO ")) factors.push("Rejected Takeoff (RTO)");
+  if (haystack.includes("GO-AROUND") || haystack.includes("GO AROUND")) factors.push("Go-Around Executed");
+  if (haystack.includes("TAILSTRIKE") || haystack.includes("TAIL STRIKE")) factors.push("Tail Strike Event");
+  if (haystack.includes("HARD LANDING")) factors.push("High-G Hard Landing");
 
   // Environmental Threats
-  if (s.includes(" IMC") || s.includes("INSTRUMENT CONDITIONS")) factors.push("IMC Conditions");
-  if (s.includes("NIGHT") || s.includes("DARKNESS")) factors.push("Night Operations");
-  if (s.includes("WINDSHEAR") || s.includes("LLWS")) factors.push("Windshear Reported");
-  if (s.includes("THUNDERSTORM") || s.includes(" TSRA")) factors.push("Convective Activity");
-  if (s.includes("ICING") || s.includes(" ICE ")) factors.push("Icing Environment");
+  if (haystack.includes(" IMC") || haystack.includes("INSTRUMENT CONDITIONS")) factors.push("IMC Conditions");
+  if (haystack.includes("NIGHT") || haystack.includes("DARKNESS")) factors.push("Night Operations");
+  if (haystack.includes("WINDSHEAR") || haystack.includes("LLWS")) factors.push("Windshear Reported");
+  if (haystack.includes("THUNDERSTORM") || haystack.includes(" TSRA") || haystack.includes("CONVECTIVE")) factors.push("Convective Activity");
+  if (haystack.includes("ICING") || haystack.includes(" ICE ") || haystack.includes("FREEZING")) factors.push("Icing Environment");
+  if (haystack.includes("BIRD STRIKE")) factors.push("Bird Strike Hazard");
 
-  // Operational Context
-  if (s.includes("SINGLE PILOT")) factors.push("Single Pilot Operation");
-  if (s.includes("MAINTENANCE") || s.includes("REPAIR")) factors.push("Maintenance/Technical Link");
+  // System/Technical link
+  if (haystack.includes("ENGINE FAILURE") || haystack.includes("ENGINE SHUTDOWN")) factors.push("Engine Failure/Shutdown");
+  if (haystack.includes("FIRE") || haystack.includes("SMOKE") || haystack.includes("FUMES")) factors.push("Fire / Smoke / Fumes");
+  if (haystack.includes("HYDRAULIC")) factors.push("Hydraulic System Loss");
+  if (haystack.includes("LANDING GEAR") || haystack.includes(" GEAR ")) factors.push("Landing Gear Malfunction");
+  if (haystack.includes("MAINTENANCE") || haystack.includes("REPAIR")) factors.push("Maintenance/Technical Link");
 
-  return factors;
+  // Human Factors
+  if (haystack.includes("FATIGUE")) factors.push("Crew Fatigue Factor");
+  if (haystack.includes("COMMUNICATION") || haystack.includes("MISUNDERSTANDING")) factors.push("Communication Breakdown");
+
+  return factors.length > 0 ? factors : ["Detailed factors pending AI analysis"];
 }
 
 function isUsable(k: string): boolean {
@@ -224,6 +244,30 @@ function resolveFlightPhase(e: EventRow): string {
   return KNOWN_PHASES.has(phase) ? phase : "UNKNOWN";
 }
 
+function generateHeuristicLessons(e: EventRow): string[] {
+  const lessons: string[] = [];
+  const phase = (e.flight_phase ?? "").toUpperCase();
+  const type = (e.event_type ?? "").toUpperCase();
+  const summary = (e.summary ?? "").toUpperCase();
+
+  if (phase === "LANDING" || phase === "APPROACH") {
+    lessons.push("Strict adherence to stabilized approach criteria is mandatory below 1,000 ft AAL.");
+    lessons.push("Perform early missed-approach briefing focusing on terrain and go-around thrust settings.");
+  } else if (phase === "TAKEOFF" || phase === "CLIMB") {
+    lessons.push("Verify takeoff performance for actual runway conditions and ambient temperature.");
+  }
+
+  if (type.includes("FIRE") || summary.includes("SMOKE")) {
+    lessons.push("Immediate execution of 'Smoke/Fire/Fumes' checklist; prioritize immediate landing at nearest suitable airport.");
+  }
+
+  if (lessons.length === 0 && e.pilot_briefing_sentence) {
+    lessons.push(e.pilot_briefing_sentence);
+  }
+
+  return lessons.length > 0 ? lessons : ["Review full occurrence report for human factors and organizational precursors."];
+}
+
 export async function buildThreats(db: D1Database, context: Record<string, unknown>, tags: string[], ai?: Ai): Promise<unknown[]> {
   const groups = new Map<string, { title: string; description: string; events: unknown[] }>();
 
@@ -245,6 +289,12 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
       factors = generateHeuristicFactors(event);
     }
 
+    // Lessons: AI or Heuristic
+    let lessons = jsonList(event.operational_lessons);
+    if (lessons.length === 0) {
+      lessons = generateHeuristicLessons(event);
+    }
+
     if (!groups.has(title)) groups.set(title, { title, description, events: [] });
     const g = groups.get(title)!;
     if (g.events.length < 4) {
@@ -258,7 +308,7 @@ export async function buildThreats(db: D1Database, context: Record<string, unkno
         flight_phase: phase + phaseLabel,
         summary: event.summary ?? "",
         contributing_factors: factors,
-        operational_lessons: jsonList(event.operational_lessons),
+        operational_lessons: lessons,
         a350_b787_applicability: a350b787(event),
         recommended_action: recAction,
         fuel_advisory: fuelAdvisory(eTags, context),

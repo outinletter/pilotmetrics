@@ -160,8 +160,14 @@ const EMPTY_THREATS: EventThreats = {
 
 export async function extractEventThreats(ai: Ai, summary: string): Promise<EventThreats | null> {
   const text = summary.slice(0, 2000);
-  const prompt = `You are a Senior Aviation Safety Briefing Analyst. Your goal is to extract structured threat data from an occurrence report to help pilots prepare for similar risks.
-Focus on identifying technical failures, environmental threats (weather/terrain), and specific crew countermeasures.
+  const prompt = `You are a Senior Aviation Safety Briefing Analyst. Your mission is to extract highly structured threat data from an occurrence report to help pilots prepare for similar operational risks.
+
+Focus on:
+1. Technical Precursors: Specific system or component degradations.
+2. Environmental Threats: Weather, terrain, or infrastructure issues.
+3. Crew Countermeasures: What the crew did (or failed to do) that impacted the safety margin.
+
+Even if the report is brief, use your expert knowledge to infer likely contributing factors (e.g., if a crash occurred in IMC, "Terrain Awareness" and "Instrument Proficiency" are relevant factors).
 
 REPORT TEXT:
 ${text}
@@ -177,11 +183,11 @@ Respond with exactly this JSON structure (no markdown, no explanation):
   "outcome": "<The final result, e.g. Safe landing, Runway excursion, Component fire, max 80 chars>",
   "contributing_factors": [
     "<Concise phrase identifying a threat, e.g. Heavy rain at touchdown>",
-    "<Concise phrase identifying a human factor, e.g. Crew continuation bias>",
-    "<Concise phrase identifying a technical factor, e.g. Intermittent sensor fault>",
+    "<Concise human factor, e.g. Crew continuation bias>",
+    "<Concise technical factor, e.g. Intermittent sensor fault>",
     "... up to 5 items"
   ],
-  "operational_lesson": "<One high-impact takeaway for a pilot briefing, e.g. Verify brake serviceability if landing on contaminated runway with known sensor alerts, max 150 chars>",
+  "operational_lesson": "<One high-impact takeaway for a pilot briefing, focus on 'WATCH FOR X', max 150 chars>",
   "time_since_takeoff_bucket": "<IMMEDIATE | EARLY | MID_FLIGHT | LATE | NOT_APPLICABLE | UNKNOWN>",
   "time_since_takeoff_minutes": <integer or null>,
   "confidence": <0.0 to 1.0>
