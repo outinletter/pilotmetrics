@@ -206,6 +206,10 @@ function renderContext(ctx) {
               </div>`).join("")}
           </div>
         </div>` : ""}
+      <div id="notamBoxContainer" class="ctx-block">
+        <div class="ctx-block-label">Active NOTAM Threats</div>
+        <div id="notamInnerContent" class="notam-placeholder-text">Scanning for airport threats...</div>
+      </div>
     </div>
   `;
 }
@@ -236,56 +240,44 @@ function formatNotamTime(iso) {
 }
 
 function renderNotamThreats(notams) {
-  let section = document.getElementById("notamSection");
-  if (!section) {
-    section = document.createElement("section");
-    section.id = "notamSection";
-    section.className = "notam-section";
-    threatsEl.parentElement.insertBefore(section, threatsEl);
-  }
+  const container = document.getElementById("notamBoxContainer");
+  const content = document.getElementById("notamInnerContent");
+  if (!container || !content) return;
 
   const activeNotams = (notams || []);
+
   if (activeNotams.length === 0) {
-    // Check if we should show a "Scanning" or "Clear" message
-    section.style.display = "none";
+    content.innerHTML = `
+      <div class="notam-clear-msg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color: var(--green-500); opacity: 0.6;">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>No significant NOTAM threats detected for arrival.</span>
+      </div>`;
     return;
   }
-  section.style.display = "block";
 
   const hasCritical = activeNotams.some(n => n.severity === "CRITICAL" || n.severity === "HIGH");
+  if (hasCritical) {
+    container.classList.add("notam-block-critical");
+  }
 
-  section.innerHTML = `
-    <div class="notam-alert-box ${hasCritical ? 'notam-alert-critical' : ''}">
-      <div class="notam-header">
-        <div class="notam-header-left">
-          <span class="notam-pulse"></span>
-          <span class="notam-header-title">Active NOTAM Threats</span>
-        </div>
-        <span class="notam-count">${activeNotams.length} items detected</span>
-      </div>
-      <div class="notam-list">
-        ${activeNotams.map(n => `
-          <div class="notam-card notam-${n.severity.toLowerCase()}">
-            <div class="notam-card-top">
-              <span class="notam-icon-wrap ${NOTAM_SEV_CLASS[n.severity]}">${NOTAM_CATEGORY_ICON[n.category] || NOTAM_CATEGORY_ICON.OTHER}</span>
-              <div class="notam-card-main">
-                <div class="notam-card-headline">${esc(n.headline)}</div>
-                <div class="notam-card-meta">
-                  <span class="notam-id">${esc(n.notamId)}</span>
-                  <span class="notam-time">${formatNotamTime(n.effectiveStart)} – ${formatNotamTime(n.effectiveEnd)}</span>
-                </div>
-              </div>
-              <div class="notam-score-badge notam-score-${n.severity.toLowerCase()}">
-                <span class="notam-score-val">+${Math.round(n.riskScore)}</span>
-              </div>
+  content.innerHTML = `
+    <div class="notam-mini-list">
+      ${activeNotams.map(n => `
+        <div class="notam-mini-card notam-${n.severity.toLowerCase()}">
+          <div class="notam-mini-top">
+            <span class="notam-mini-icon ${NOTAM_SEV_CLASS[n.severity]}">${NOTAM_CATEGORY_ICON[n.category] || NOTAM_CATEGORY_ICON.OTHER}</span>
+            <div class="notam-mini-main">
+              <div class="notam-mini-headline">${esc(n.headline)}</div>
+              <div class="notam-mini-id">${esc(n.notamId)}</div>
             </div>
-            <details class="notam-raw-wrap">
-              <summary class="notam-raw-toggle">View Raw NOTAM Text</summary>
-              <pre class="notam-raw">${esc(n.rawText)}</pre>
-            </details>
+            <div class="notam-mini-score">+${Math.round(n.riskScore)}</div>
           </div>
-        `).join("")}
-      </div>
+        </div>
+      `).join("")}
+      <p class="notam-footer-note">Review full NOTAMs in official flight folder.</p>
     </div>
   `;
 }
