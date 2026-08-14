@@ -375,8 +375,10 @@ async function upsertEventRecord(db: D1Database, rec: UnifiedEventRecord): Promi
     const urls = new Set((existing.source_url || "").split(" , "));
     urls.add(rec.source_url);
 
-    await db.prepare(`UPDATE events SET source_name=?, source_url=?, event_time=COALESCE(event_time,?), operation_type=COALESCE(operation_type,?), airport_iata=COALESCE(airport_iata,?), airport_icao=COALESCE(airport_icao,?), destination_iata=COALESCE(destination_iata,?), destination_icao=COALESCE(destination_icao,?), runway=COALESCE(runway,?), approach_type=COALESCE(approach_type,?), flight_conditions=COALESCE(flight_conditions,?), flight_phase=COALESCE(flight_phase,?), aircraft_type=COALESCE(aircraft_type,?), aircraft_category=COALESCE(aircraft_category,?), operator=COALESCE(operator,?), weather_summary=COALESCE(weather_summary,?), metar_source=COALESCE(metar_source,?), event_type=COALESCE(event_type,?), severity=MAX(COALESCE(severity,0),?), updated_at=? WHERE id=?`)
-      .bind(Array.from(sources).join(" / "), Array.from(urls).join(" , "), rec.event_time || null, rec.operation_type || null, rec.airport_iata || null, rec.airport_icao || null, rec.destination_iata || null, rec.destination_icao || null, rec.runway || null, rec.approach_type || null, rec.flight_conditions || null, rec.flight_phase || null, rec.aircraft_type || null, rec.aircraft_category || null, rec.operator || null, rec.weather_summary || null, rec.metar_source || null, rec.event_type || null, rec.severity, now, existing.id).run();
+    const summary = rec.summary.length > 4000 ? rec.summary.slice(0, 3997) + "..." : rec.summary;
+
+    await db.prepare(`UPDATE events SET source_name=?, source_url=?, event_time=COALESCE(event_time,?), operation_type=COALESCE(operation_type,?), airport_iata=COALESCE(airport_iata,?), airport_icao=COALESCE(airport_icao,?), destination_iata=COALESCE(destination_iata,?), destination_icao=COALESCE(destination_icao,?), runway=COALESCE(runway,?), approach_type=COALESCE(approach_type,?), flight_conditions=COALESCE(flight_conditions,?), flight_phase=COALESCE(flight_phase,?), aircraft_type=COALESCE(aircraft_type,?), aircraft_category=COALESCE(aircraft_category,?), operator=COALESCE(operator,?), weather_summary=COALESCE(weather_summary,?), metar_source=COALESCE(metar_source,?), event_type=COALESCE(event_type,?), summary=?, severity=MAX(COALESCE(severity,0),?), updated_at=? WHERE id=?`)
+      .bind(Array.from(sources).join(" / "), Array.from(urls).join(" , "), rec.event_time || null, rec.operation_type || null, rec.airport_iata || null, rec.airport_icao || null, rec.destination_iata || null, rec.destination_icao || null, rec.runway || null, rec.approach_type || null, rec.flight_conditions || null, rec.flight_phase || null, rec.aircraft_type || null, rec.aircraft_category || null, rec.operator || null, rec.weather_summary || null, rec.metar_source || null, rec.event_type || null, summary, rec.severity, now, existing.id).run();
 
     for (const tag of rec.tags) {
       await db.prepare("INSERT OR IGNORE INTO event_tags (event_id, tag_type, tag_value) VALUES (?, 'risk', ?)").bind(existing.id, tag).run();
@@ -384,8 +386,10 @@ async function upsertEventRecord(db: D1Database, rec: UnifiedEventRecord): Promi
     return false;
   }
 
+  const summary = rec.summary.length > 4000 ? rec.summary.slice(0, 3997) + "..." : rec.summary;
+
   await db.prepare(`INSERT INTO events (id,source_name,source_url,event_date,event_time,operation_type,airport_iata,airport_icao,destination_iata,destination_icao,runway,approach_type,flight_conditions,flight_phase,aircraft_type,aircraft_category,operator,weather_summary,metar_source,event_type,severity,core_event,lesson_keyword,summary,pilot_briefing_sentence,confidence_score,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-    .bind(rec.id, rec.source_name, rec.source_url, rec.event_date, rec.event_time || null, rec.operation_type || null, rec.airport_iata || null, rec.airport_icao || null, rec.destination_iata || null, rec.destination_icao || null, rec.runway || null, rec.approach_type || null, rec.flight_conditions || null, rec.flight_phase || null, rec.aircraft_type || null, rec.aircraft_category || null, rec.operator || null, rec.weather_summary || null, rec.metar_source || null, rec.event_type || null, rec.severity, rec.core_event || null, rec.lesson_keyword || null, rec.summary, rec.pilot_briefing_sentence || null, rec.confidence_score || 0.5, now, now).run();
+    .bind(rec.id, rec.source_name, rec.source_url, rec.event_date, rec.event_time || null, rec.operation_type || null, rec.airport_iata || null, rec.airport_icao || null, rec.destination_iata || null, rec.destination_icao || null, rec.runway || null, rec.approach_type || null, rec.flight_conditions || null, rec.flight_phase || null, rec.aircraft_type || null, rec.aircraft_category || null, rec.operator || null, rec.weather_summary || null, rec.metar_source || null, rec.event_type || null, rec.severity, rec.core_event || null, rec.lesson_keyword || null, summary, rec.pilot_briefing_sentence || null, rec.confidence_score || 0.5, now, now).run();
 
   for (const tag of rec.tags) {
     await db.prepare("INSERT OR IGNORE INTO event_tags (event_id, tag_type, tag_value) VALUES (?, 'risk', ?)").bind(rec.id, tag).run();
@@ -901,15 +905,16 @@ async function parseAaib(db: D1Database, cutoff: Date): Promise<Record<string, u
 }
 
 // ─── ICAO iSTARS APIDS API ──────────────────────────────────────────────────
-async function parseIcaoIstars(db: D1Database, apiKey: string, yearsBack: number): Promise<Record<string, unknown>> {
-  const states = ["KOR", "USA", "JPN", "CHN", "FRA", "CAN", "AUS", "UK", "GER"];
+export async function parseIcaoIstars(db: D1Database, apiKey: string, yearsBack: number, specificState?: string, specificYear?: number): Promise<Record<string, unknown>> {
+  const states = specificState ? [specificState] : ["KOR", "USA", "JPN", "CHN", "FRA", "CAN", "AUS", "UK", "GER", "BRA", "IND", "MEX", "ARE", "SGP", "HKG", "ITA", "ESP", "CHE", "NLD", "RUS"];
   const currentYear = new Date().getFullYear();
-  const startYear = Math.max(2000, currentYear - yearsBack);
+  const startYear = specificYear ?? Math.max(2000, currentYear - yearsBack);
+  const endYear = specificYear ?? currentYear;
   let checked = 0, created = 0;
   const errors: string[] = [];
 
   for (const state of states) {
-    for (let year = startYear; year <= currentYear; year++) {
+    for (let year = startYear; year <= endYear; year++) {
       try {
         const url = `https://applications.icao.int/dataservices/api/get-occurrences?api_key=${apiKey}&State=${state}&Year=${year}`;
         const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
@@ -947,79 +952,117 @@ async function parseIcaoIstars(db: D1Database, apiKey: string, yearsBack: number
 }
 
 // ─── ARAIB Korea (South Korea) ────────────────────────────────────────────────
-async function parseAraibKorea(db: D1Database): Promise<Record<string, unknown>> {
-  const url = "https://araib.molit.go.kr/eng/section/list.do?menuSeq=1043";
+export async function parseAraibKorea(db: D1Database, maxPages = 10): Promise<Record<string, unknown>> {
+  const baseUrl = "https://araib.molit.go.kr/eng/section/list.do?menuSeq=1043";
   let checked = 0, created = 0;
-  try {
-    const res = await fetch(url, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
-    if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
-    const html = await res.text();
-    for (const m of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)) {
-      const cells = [...m[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(c => cleanText(c[1]));
-      if (cells.length < 5) continue;
-      const dateText = cells[1];
-      const eventDate = parseDate(dateText) || new Date(dateText);
-      if (isNaN(eventDate.getTime()) || eventDate.getFullYear() < 2000) continue;
-      const linkMatch = m[1].match(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
-      if (!linkMatch) continue;
-      const title = cleanText(linkMatch[2]);
-      const fullUrl = new URL(linkMatch[1].replace(/&amp;/g, "&"), url).href;
-      checked++;
-      const [iata, icao] = airportForLocation("", "", "South Korea", title);
-      if (await upsertEventRecord(db, {
-        id: `ARAIB-${fullUrl.split("=").pop() || Math.random()}`,
-        source_name: "ARAIB (Korea)", source_url: fullUrl,
-        event_date: eventDate.toISOString().slice(0, 10),
-        airport_iata: iata, airport_icao: icao,
-        summary: title, severity: 3,
-        tags: ["ARAIB", "Korea", "OFFICIAL_REPORT"],
-        event_type: "Investigation Report"
-      })) created++;
-      await upsertOfficialItem(db, {
-        sourceName: "ARAIB (Korea)", sourceUrl: fullUrl, title,
-        category: "Accident / Incident", severity: "Medium", summary: title,
-        tags: ["ARAIB", "Korea"]
-      });
+  let stopParsing = false;
+
+  for (let page = 1; page <= maxPages; page++) {
+    if (stopParsing) break;
+    try {
+      const url = `${baseUrl}&pageIndex=${page}`;
+      const res = await fetch(url, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
+      if (!res.ok) break;
+      const html = await res.text();
+      let pageItems = 0;
+      for (const m of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)) {
+        const cells = [...m[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(c => cleanText(c[1]));
+        if (cells.length < 5) continue;
+        const dateText = cells[1];
+        const eventDate = parseDate(dateText) || new Date(dateText);
+        if (isNaN(eventDate.getTime())) continue;
+        if (eventDate.getFullYear() < 2000) {
+          stopParsing = true;
+          break;
+        }
+        const linkMatch = m[1].match(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
+        if (!linkMatch) continue;
+        const title = cleanText(linkMatch[2]);
+        const fullUrl = new URL(linkMatch[1].replace(/&amp;/g, "&"), url).href;
+        checked++;
+        pageItems++;
+        const [iata, icao] = airportForLocation("", "", "South Korea", title);
+        if (await upsertEventRecord(db, {
+          id: `ARAIB-${fullUrl.split("=").pop() || Math.random()}`,
+          source_name: "ARAIB (Korea)", source_url: fullUrl,
+          event_date: eventDate.toISOString().slice(0, 10),
+          airport_iata: iata, airport_icao: icao,
+          summary: title, severity: 3,
+          tags: ["ARAIB", "Korea", "OFFICIAL_REPORT"],
+          event_type: "Investigation Report"
+        })) created++;
+        await upsertOfficialItem(db, {
+          sourceName: "ARAIB (Korea)", sourceUrl: fullUrl, title,
+          category: "Accident / Incident", severity: "Medium", summary: title,
+          tags: ["ARAIB", "Korea"]
+        });
+      }
+      if (pageItems === 0) break;
+    } catch (e) {
+      return { checked, created, error: String(e), page };
     }
-  } catch (e) { return { checked, created, error: String(e) }; }
+  }
   return { checked, created };
 }
 
 // ─── JTSB Japan (Japan) ─────────────────────────────────────────────────────
-async function parseJtsbJapan(db: D1Database): Promise<Record<string, unknown>> {
+export async function parseJtsbJapan(db: D1Database): Promise<Record<string, unknown>> {
   const url = "https://www.mlit.go.jp/jtsb/aviation.html";
   let checked = 0, created = 0;
+  const errors: string[] = [];
+
   try {
     const res = await fetch(url, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
     if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
     const html = await res.text();
-    for (const m of html.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
-      const link = m[1];
-      const title = cleanText(m[2]);
-      if (!link.includes("/jtsb/aircraft/rep-acc/") && !link.includes("/jtsb/aircraft/rep-inc/")) continue;
-      const fullUrl = new URL(link.replace(/&amp;/g, "&"), url).href;
-      const yearMatch = title.match(/\b(20\d{2})\b/) || link.match(/\b(20\d{2})\b/);
-      const year = yearMatch ? parseInt(yearMatch[1]) : 0;
-      if (year < 2000 && year !== 0) continue;
-      checked++;
-      const [iata, icao] = airportForLocation("", "", "Japan", title);
-      if (await upsertEventRecord(db, {
-        id: `JTSB-${fullUrl.split("/").pop()?.replace(".html", "") || Math.random()}`,
-        source_name: "JTSB (Japan)", source_url: fullUrl,
-        event_date: year ? `${year}-01-01` : new Date().toISOString().slice(0, 10),
-        airport_iata: iata, airport_icao: icao,
-        summary: title, severity: 3,
-        tags: ["JTSB", "Japan", "OFFICIAL_REPORT"],
-        event_type: "Investigation Report"
-      })) created++;
-      await upsertOfficialItem(db, {
-        sourceName: "JTSB (Japan)", sourceUrl: fullUrl, title,
-        category: "Accident / Incident", severity: "Medium", summary: title,
-        tags: ["JTSB", "Japan"]
-      });
+
+    const yearlyLinks = new Set<string>();
+    for (const m of html.matchAll(/<a[^>]+href=["']([^"']+(?:rep-acc|rep-inc)\/\d{4}\.html)["']/gi)) {
+      yearlyLinks.add(new URL(m[1], url).href);
     }
-  } catch (e) { return { checked, created, error: String(e) }; }
-  return { checked, created };
+    // Also include the current page as it might have recent reports
+    yearlyLinks.add(url);
+
+    for (const pageUrl of yearlyLinks) {
+      try {
+        const pageRes = await fetch(pageUrl, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
+        if (!pageRes.ok) continue;
+        const pageHtml = await pageRes.text();
+
+        for (const m of pageHtml.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+          const link = m[1];
+          const title = cleanText(m[2]);
+          if (!link.includes("/jtsb/aircraft/rep-acc/") && !link.includes("/jtsb/aircraft/rep-inc/")) continue;
+          if (link.endsWith(".html") && link.match(/\d{4}\.html$/)) continue; // skip yearly links within pages
+
+          const fullUrl = new URL(link.replace(/&amp;/g, "&"), pageUrl).href;
+          const yearMatch = title.match(/\b(20\d{2})\b/) || link.match(/\b(20\d{2})\b/);
+          const year = yearMatch ? parseInt(yearMatch[1]) : 0;
+          if (year < 2000 && year !== 0) continue;
+
+          checked++;
+          const [iata, icao] = airportForLocation("", "", "Japan", title);
+          if (await upsertEventRecord(db, {
+            id: `JTSB-${fullUrl.split("/").pop()?.replace(".html", "") || Math.random()}`,
+            source_name: "JTSB (Japan)", source_url: fullUrl,
+            event_date: year ? `${year}-01-01` : new Date().toISOString().slice(0, 10),
+            airport_iata: iata, airport_icao: icao,
+            summary: title, severity: 3,
+            tags: ["JTSB", "Japan", "OFFICIAL_REPORT"],
+            event_type: "Investigation Report"
+          })) created++;
+          await upsertOfficialItem(db, {
+            sourceName: "JTSB (Japan)", sourceUrl: fullUrl, title,
+            category: "Accident / Incident", severity: "Medium", summary: title,
+            tags: ["JTSB", "Japan"]
+          });
+        }
+      } catch (e) {
+        errors.push(`${pageUrl}: ${e}`);
+      }
+    }
+  } catch (e) { return { checked, created, error: String(e), errors }; }
+  return { checked, created, errors };
 }
 
 // ─── AvHerald (RSS Workaround) ──────────────────────────────────────────────

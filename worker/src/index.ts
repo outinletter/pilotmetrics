@@ -287,6 +287,26 @@ app.post("/api/ops-intel/collect-official-recent", async c => {
   return c.json(await collectRecentOfficialEvents(c.env.DB, body.years_back ?? 20));
 });
 
+// Granular collection for mass ingestion
+app.post("/api/admin/collect-step", async c => {
+  const body = await c.req.json<{ source: string; state?: string; year?: number; max_pages?: number }>().catch(() => ({}));
+  const { source, state, year, max_pages } = body as { source: string; state?: string; year?: number; max_pages?: number };
+  const db = c.env.DB;
+
+  const { parseIcaoIstars, parseAraibKorea, parseJtsbJapan } = await import("./services/official_event_parsers");
+
+  switch (source) {
+    case "icao":
+      return c.json(await parseIcaoIstars(db, "2113c549-8f2d-4a98-a587-e35192569e55", 25, state, year));
+    case "araib":
+      return c.json(await parseAraibKorea(db, max_pages ?? 10));
+    case "jtsb":
+      return c.json(await parseJtsbJapan(db));
+    default:
+      return c.json({ error: "Unknown source" }, 400);
+  }
+});
+
 // NTSB CAROL 연도 범위 지정 수집 (Workers CPU 제한 회피용)
 // 예: POST /api/ops-intel/collect-ntsb { "start": "2020-01-01", "end": "2022-12-31" }
 app.post("/api/ops-intel/collect-ntsb", async c => {
