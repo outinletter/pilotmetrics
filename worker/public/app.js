@@ -245,22 +245,27 @@ function renderNotamThreats(notams) {
     threatsEl.parentElement.insertBefore(section, threatsEl);
   }
 
-  if (!notams || notams.length === 0) {
+  const activeNotams = (notams || []).filter(n => n.isActive);
+
+  if (activeNotams.length === 0) {
     section.innerHTML = "";
     return;
   }
 
+  // 최상위 위험도 확인 (CRITICAL/HIGH가 있으면 강조 헤더)
+  const hasCritical = activeNotams.some(n => n.severity === "CRITICAL" || n.severity === "HIGH");
+
   section.innerHTML = `
-    <div class="notam-header">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <div class="notam-header ${hasCritical ? 'notam-header-critical' : ''}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L2 19h20L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M12 9v5M12 17v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
-      NOTAM 활성 위협
-      <span class="notam-count">${notams.length}건 · ETA ±1h 이내</span>
+      공항 활성 위협 (NOTAM)
+      <span class="notam-count">${activeNotams.length}건 식별됨</span>
     </div>
     <div class="notam-list">
-      ${notams.map(n => `
+      ${activeNotams.map(n => `
         <div class="notam-card notam-${n.severity.toLowerCase()}">
           <div class="notam-card-top">
             <span class="notam-icon ${NOTAM_SEV_CLASS[n.severity]}">${NOTAM_CATEGORY_ICON[n.category] || NOTAM_CATEGORY_ICON.OTHER}</span>
@@ -271,7 +276,9 @@ function renderNotamThreats(notams) {
                 <span class="notam-time">${formatNotamTime(n.effectiveStart)} – ${formatNotamTime(n.effectiveEnd)}</span>
               </div>
             </div>
-            <div class="notam-score-badge notam-score-${n.severity.toLowerCase()}">${Math.round(n.riskScore)}</div>
+            <div class="notam-score-badge notam-score-${n.severity.toLowerCase()}">
+              <span class="notam-score-val">+${Math.round(n.riskScore)}</span>
+            </div>
           </div>
           <details class="notam-raw-wrap">
             <summary class="notam-raw-toggle">NOTAM 원문 보기</summary>
@@ -318,7 +325,7 @@ function renderThreats(threats) {
           const sc     = sevClass(ev.severity);
           const scol   = scoreColor(pct);
           const family = acFamilyLabel(ev.aircraft_type);
-          const isPending = !ev.contributing_factors || ev.contributing_factors.some(f => f.includes("pending AI analysis"));
+          const isPending = !ev.contributing_factors || ev.contributing_factors.some(f => f.includes("Pending Deep Analysis"));
           // compact one-line: strip leading "XX% | " that briefing_generator prepends
           const oneLine = esc((ev.one_line || "").replace(/^\d+%\s*\|\s*/i, ""));
 
@@ -355,17 +362,16 @@ function renderThreats(threats) {
               <div class="event-section-label">Occurrence Summary</div>
               ${summaryToList(ev.summary)}
 
-              ${ev.contributing_factors?.length ? `
-                <div class="event-section-label">Contributing Factors</div>
+              ${(ev.contributing_factors && ev.contributing_factors.length > 0) ? `
+                <div class="event-section-label factor-label">Threats & Contributing Factors</div>
                 <ul class="event-list bullet-list">${ev.contributing_factors.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
 
-              ${ev.operational_lessons?.length ? `
-                <div class="event-section-label lesson-label">Operational Lessons</div>
+              ${(ev.operational_lessons && ev.operational_lessons.length > 0) ? `
+                <div class="event-section-label lesson-label">Operational Takeaways</div>
                 <ul class="event-list bullet-list lesson-list">${ev.operational_lessons.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
 
-              ${ev.recommended_action ? `
-                <div class="event-section-label rec-label">Recommended Action</div>
-                <div class="rec-action-box">${esc(ev.recommended_action)}</div>` : ""}
+              <div class="event-section-label rec-label">Recommended Action Plan</div>
+              <div class="rec-action-box">${esc(ev.recommended_action || "Standard safety briefing and trend monitoring.")}</div>
 
               ${ev.a350_b787_applicability ? `
                 <div class="event-section-label">A350 / B787 Applicability</div>

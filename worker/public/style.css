@@ -1178,26 +1178,35 @@ details summary::marker { content: ""; }
 
 .notam-header {
   display: flex; align-items: center; gap: 8px;
-  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
-  text-transform: uppercase; color: rgba(255,255,255,0.5);
-  margin-bottom: 10px;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 12px;
+  padding: 0 4px;
 }
+.notam-header-critical {
+  color: var(--amber-400);
+}
+.notam-header svg { color: var(--sky-400); }
+.notam-header-critical svg { color: var(--amber-400); }
+
 .notam-count {
-  font-weight: 400; color: rgba(255,255,255,0.3); margin-left: 4px;
+  font-weight: 600; color: rgba(255,255,255,0.25); margin-left: auto;
+  font-size: 11px;
 }
-.notam-list { display: flex; flex-direction: column; gap: 8px; }
+.notam-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
 
 .notam-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  padding: 12px 14px;
-  border-left-width: 3px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 14px;
+  border-left: 4px solid transparent;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
-.notam-card.notam-critical { border-left-color: #ef4444; }
-.notam-card.notam-high     { border-left-color: #f97316; }
-.notam-card.notam-medium   { border-left-color: #eab308; }
-.notam-card.notam-low      { border-left-color: #22c55e; }
+.notam-card.notam-critical { border-left-color: var(--red-500); background: rgba(239,68,68,0.04); }
+.notam-card.notam-high     { border-left-color: var(--orange-500); }
+.notam-card.notam-medium   { border-left-color: var(--amber-500); }
+.notam-card.notam-low      { border-left-color: var(--green-500); }
 
 .notam-card-top {
   display: flex; align-items: flex-start; gap: 10px;
@@ -1226,14 +1235,16 @@ details summary::marker { content: ""; }
 .notam-id { color: rgba(56,189,248,0.6); }
 
 .notam-score-badge {
-  font-size: 15px; font-weight: 700; min-width: 36px;
-  text-align: right; flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-weight: 800;
 }
-.notam-score-badge.notam-score-critical { color: #ef4444; }
-.notam-score-badge.notam-score-high     { color: #f97316; }
-.notam-score-badge.notam-score-medium   { color: #eab308; }
-.notam-score-badge.notam-score-low      { color: #22c55e; }
+.notam-score-val {
+  font-size: 14px;
+}
+.notam-score-badge.notam-score-critical { color: var(--red-500); }
+.notam-score-badge.notam-score-high     { color: var(--orange-500); }
+.notam-score-badge.notam-score-medium   { color: var(--amber-500); }
+.notam-score-badge.notam-score-low      { color: var(--green-500); }
 
 .notam-raw-wrap { margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; }
 .notam-raw-toggle {
