@@ -335,12 +335,19 @@ app.post("/api/ops-intel/ingest-asn", async c => {
   return c.json(await ingestAsnBatch(c.env.DB, body.records as Parameters<typeof ingestAsnBatch>[1]));
 });
 
-// POST /api/ops-intel/ingest-easa  Body: { records: EasaRecord[] }
-app.post("/api/ops-intel/ingest-easa", async c => {
-  const body = await c.req.json<{ records?: unknown[] }>().catch(() => ({ records: [] }));
+// POST /api/ops-intel/ingest-events — Generic event ingestion
+app.post("/api/ops-intel/ingest-events", async c => {
+  const body = await c.req.json<{ records?: any[] }>().catch(() => ({ records: [] }));
   if (!Array.isArray(body.records) || body.records.length === 0) return c.json({ error: "records array required" }, 400);
-  const { ingestEasaBatch } = await import("./services/official_event_parsers");
-  return c.json(await ingestEasaBatch(c.env.DB, body.records as Parameters<typeof ingestEasaBatch>[1]));
+
+  const { upsertEventRecord } = await import("./services/official_event_parsers");
+  let created = 0;
+  for (const rec of body.records) {
+    try {
+      if (await upsertEventRecord(c.env.DB, rec)) created++;
+    } catch (e) { console.error("Ingest failed for record:", rec.id, e); }
+  }
+  return c.json({ checked: body.records.length, created });
 });
 
 // DELETE /api/ops-intel/purge-easa  — remove all EASA records (for re-ingestion)

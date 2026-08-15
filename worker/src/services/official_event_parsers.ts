@@ -359,7 +359,7 @@ export interface UnifiedEventRecord {
   confidence_score?: number | null;
 }
 
-async function upsertEventRecord(db: D1Database, rec: UnifiedEventRecord): Promise<boolean> {
+export async function upsertEventRecord(db: D1Database, rec: UnifiedEventRecord): Promise<boolean> {
   const now = new Date().toISOString();
   let existing = await db.prepare("SELECT * FROM events WHERE event_date = ? AND (airport_icao = ? AND airport_icao != '' OR airport_iata = ? AND airport_iata != '')")
     .bind(rec.event_date, rec.airport_icao || "---", rec.airport_iata || "---")
