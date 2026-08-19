@@ -1374,7 +1374,7 @@ details summary::marker { content: ""; }
   .hero-title { font-size: clamp(28px, 8vw, 40px); }
   .hero-sub { font-size: 14px; margin-bottom: 24px; text-align: left; }
   .hero-eyebrow { margin-bottom: 12px; }
-  .hero-tags { justify-content: flex-start; }
+  .hero-tags { justify-content: center; }
 
   /* Search */
   .search-box { flex-direction: column; gap: 0; padding: 6px 6px 6px 6px; }
