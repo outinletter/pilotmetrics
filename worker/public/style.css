@@ -400,7 +400,38 @@ body {
   font-size: 15px;
   color: var(--amber-400);
   min-height: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
+}
+
+.survey-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+.survey-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: var(--sky-400);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(4px);
+}
+.survey-link:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--sky-300);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.survey-link:active {
+  transform: translateY(0);
 }
 
 .hero-tags {
