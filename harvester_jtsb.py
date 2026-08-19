@@ -4,82 +4,96 @@ import time
 import re
 
 # Config
-BASE_URL = "https://www.mlit.go.jp/jtsb/english/aviation/aviation.html"
+SEARCH_URL = "https://jtsb.mlit.go.jp/jtsb/aircraft/air-kensaku-list.php"
+DETAIL_BASE = "https://jtsb.mlit.go.jp/jtsb/aircraft/"
 INGEST_URL = "https://pilot-briefing.outinletter.workers.dev/api/ops-intel/ingest-events"
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+}
 
-def collect_jtsb():
-    print(f"?? Starting JTSB (Japan) Harvester...")
+def collect():
+    print(f"?? Starting JTSB (Japan) English Database Harvester...")
+    records = []
+    page = 1
     
-    try:
-        res = requests.get(BASE_URL, timeout=20)
-        soup = BeautifulSoup(res.text, "html.parser")
-        
-        yearly_links = []
-        # Find links like "rep-acc-2023.html"
-        for a in soup.find_all("a", href=True):
-            if re.search(r"rep-(?:acc|inc)[^/]*\d{4}\.html", a['href']):
-                yearly_links.append(requests.compat.urljoin(BASE_URL, a['href']))
-        
-        # Include current page
-        yearly_links.append(BASE_URL)
-        yearly_links = list(set(yearly_links))
-        
-        all_records = []
-        for year_url in yearly_links:
-            year_match = re.search(r"(\d{4})", year_url)
-            year_val = int(year_match.group(1)) if year_match else 0
-            if year_val and year_val < 2000: continue
+    while True:
+        print(f" -> Fetching page {page}...", end="\r")
+        # Direct GET with search params
+        params = {
+            "lang": "en",
+            "init": "1",
+            "type[]": ["accident", "incident"],
+            "page": page
+        }
+        try:
+            res = requests.get(SEARCH_URL, params=params, headers=HEADERS, timeout=20)
+            if not res.ok: break
             
-            print(f" -> Scanning {year_url}...")
-            r_year = requests.get(year_url, timeout=20)
-            s_year = BeautifulSoup(r_year.text, "html.parser")
+            soup = BeautifulSoup(res.text, "html.parser")
+            rows = soup.select("tr")
+            if not rows or len(rows) <= 1: break
             
-            for link_tag in s_year.find_all("a", href=True):
-                href = link_tag['href']
-                if "/jtsb/aircraft/" in href and (href.endswith(".pdf") or "id=" in href):
-                    title = link_tag.get_text(strip=True)
-                    if len(title) < 10: continue
-                    
-                    full_link = requests.compat.urljoin(year_url, href)
-                    
-                    # Try to find a date or year in the title
-                    found_year = 0
-                    y_m = re.search(r"\b(20\d{2})\b", title)
-                    if y_m: found_year = int(y_m.group(1))
-                    elif year_val: found_year = year_val
-                    
-                    if found_year and found_year < 2000: continue
-                    
-                    all_records.append({
-                        "id": f"JTSB-{hash(full_link)}",
-                        "source_name": "JTSB (Japan)",
-                        "source_url": full_link,
-                        "event_date": f"{found_year}-01-01" if found_year else "2000-01-01",
-                        "summary": title,
-                        "severity": 3,
-                        "tags": ["JTSB", "Japan", "OFFICIAL_REPORT"],
-                        "event_type": "Investigation Report"
-                    })
-        
-        print(f"?? Found {len(all_records)} potential JTSB records.")
-        return all_records
+            page_found = 0
+            for row in rows[1:]: # Skip header
+                cells = row.select("td")
+                if len(cells) < 6: continue
+                
+                # JTSB Table structure: 
+                # 0=Type, 1=Date, 2=AC Type, 3=Registration, 4=Operator, 5=Location/Summary
+                date_str = cells[1].get_text(strip=True).replace("/", "-")
+                ac_type = cells[2].get_text(strip=True)
+                operator = cells[4].get_text(strip=True)
+                
+                link_tag = cells[5].select_one("a")
+                if not link_tag: continue
+                
+                summary = link_tag.get_text(strip=True)
+                relative_link = link_tag['href']
+                detail_url = requests.compat.urljoin(DETAIL_BASE, relative_link)
+                
+                try:
+                    year = int(date_str.split("-")[0])
+                    if year < 2000: continue
+                except: continue
 
-    except Exception as e:
-        print(f"?? Error: {e}")
-        return []
+                id_match = re.search(r"id=(\d+)", relative_link)
+                id_val = id_match.group(1) if id_match else str(hash(detail_url))
 
-def upload_batches(records, batch_size=50):
-    total = len(records)
-    print(f"?? Uploading {total} records to {INGEST_URL}...")
-    for i in range(0, total, batch_size):
+                records.append({
+                    "id": f"JTSB-{id_val}",
+                    "source_name": "JTSB (Japan)",
+                    "source_url": detail_url,
+                    "event_date": date_str,
+                    "summary": f"{summary} - {ac_type} ({operator})",
+                    "aircraft_type": ac_type,
+                    "operator": operator,
+                    "severity": 3 if "incident" in cells[0].get_text().lower() else 4,
+                    "tags": ["JTSB", "Japan", "OFFICIAL_REPORT"],
+                    "event_type": cells[0].get_text(strip=True)
+                })
+                page_found += 1
+                
+            if page_found == 0: break
+            page += 1
+            time.sleep(0.5)
+        except Exception as e:
+            print(f"\n [!] Error: {e}")
+            break
+            
+    print(f"\n?? Found {len(records)} records.")
+    return records
+
+def upload(records):
+    print(f"?? Uploading to {INGEST_URL}...")
+    batch_size = 50
+    for i in range(0, len(records), batch_size):
         batch = records[i:i+batch_size]
         try:
             res = requests.post(INGEST_URL, json={"records": batch}, timeout=60)
             print(f" [+] Batch {i//batch_size + 1}: {len(batch)} items. Status: {res.status_code}")
         except Exception as e:
-            print(f" [!] Batch {i//batch_size + 1} Failed: {e}")
+            print(f" [!] Batch failed: {e}")
 
 if __name__ == "__main__":
-    records = collect_jtsb()
-    if records:
-        upload_batches(records)
+    data = collect()
+    if data: upload(data)

@@ -1,78 +1,57 @@
 import requests
 from bs4 import BeautifulSoup
-import json
 import time
 import re
-from datetime import datetime
 
-# Configuration
-BASE_URL = "https://araib.molit.go.kr/eng/section/list.do?menuSeq=1043"
+# Config
+LIST_URL = "https://araib.molit.go.kr/USR/BORD0201/m_34591/LST.jsp"
+DETAIL_BASE = "https://araib.molit.go.kr/USR/BORD0201/m_34591/"
 INGEST_URL = "https://pilot-briefing.outinletter.workers.dev/api/ops-intel/ingest-events"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 }
 
-def parse_date(text):
-    # Try YYYY-MM-DD
-    match = re.search(r"(\d{4})-(\d{2})-(\d{2})", text)
-    if match: return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
-    # Try DD/MM/YYYY
-    match = re.search(r"(\d{2})/(\d{2})/(\d{4})", text)
-    if match: return f"{match.group(3)}-{match.group(2)}-{match.group(1)}"
-    return None
-
-def collect_araib():
+def collect():
+    print(f"?? Starting ARAIB (Korea) English Archive Harvester...")
     records = []
     page = 1
-    max_pages = 100 # Adjust as needed for full history
     
-    print(f"?? Starting ARAIB (Korea) Harvester...")
-
-    while page <= max_pages:
+    while True:
         print(f" -> Fetching page {page}...", end="\r")
-        url = f"{BASE_URL}&pageIndex={page}"
+        url = f"{LIST_URL}?lcmspage={page}"
         try:
             res = requests.get(url, headers=HEADERS, timeout=20)
             if not res.ok: break
             
             soup = BeautifulSoup(res.text, "html.parser")
-            rows = soup.select("table tbody tr")
-            if not rows or "no data" in soup.text.lower():
-                break
+            rows = soup.select("tr")
+            if not rows or len(rows) <= 1: break
                 
             page_found = 0
-            for row in rows:
-                cells = [c.get_text(strip=True) for c in row.select("td")]
+            for row in rows[1:]: # Skip header
+                cells = row.select("td")
                 if len(cells) < 4: continue
                 
-                # Find date in cells
-                date_str = None
-                for c in cells:
-                    parsed = parse_date(c)
-                    if parsed:
-                        date_str = parsed
-                        break
+                title_tag = row.select_one("td.tl a")
+                if not title_tag: continue
                 
-                if not date_str: continue
+                title = title_tag.get_text(strip=True)
+                relative_link = title_tag['href']
+                detail_url = requests.compat.urljoin(DETAIL_BASE, relative_link)
+                date_str = cells[2].get_text(strip=True).replace(".", "-") # 2025.12.15
                 
-                # 2000 year cutoff
-                year = int(date_str.split("-")[0])
-                if year < 2000:
-                    print(f"\n?? Reached 2000 cutoff at page {page}. Stopping.")
-                    return records
+                try:
+                    year = int(date_str.split("-")[0])
+                    if year < 2000: continue
+                except: continue
 
-                link_tag = row.select_one("a")
-                if not link_tag: continue
-                
-                title = link_tag.get_text(strip=True)
-                link = "https://araib.molit.go.kr" + link_tag['href']
-                id_val = re.search(r"id=(\d+)", link)
-                id_val = id_val.group(1) if id_val else str(hash(link))
+                id_match = re.search(r"idx=(\d+)", relative_link)
+                id_val = id_match.group(1) if id_match else str(hash(detail_url))
 
                 records.append({
                     "id": f"ARAIB-{id_val}",
                     "source_name": "ARAIB (Korea)",
-                    "source_url": link,
+                    "source_url": detail_url,
                     "event_date": date_str,
                     "summary": title,
                     "severity": 3,
@@ -83,33 +62,25 @@ def collect_araib():
             
             if page_found == 0: break
             page += 1
-            time.sleep(1) # Be polite
-            
+            time.sleep(0.5)
         except Exception as e:
-            print(f"\n?? Error at page {page}: {e}")
+            print(f"\n [!] Error: {e}")
             break
             
-    print(f"\n?? Collection complete. Found {len(records)} records.")
+    print(f"\n?? Found {len(records)} records.")
     return records
 
-def upload_batches(records, batch_size=50):
-    total = len(records)
-    print(f"?? Uploading {total} records in batches of {batch_size}...")
-    
-    for i in range(0, total, batch_size):
-        batch = records[i:i + batch_size]
-        payload = {"records": batch}
+def upload(records):
+    print(f"?? Uploading to {INGEST_URL}...")
+    batch_size = 50
+    for i in range(0, len(records), batch_size):
+        batch = records[i:i+batch_size]
         try:
-            res = requests.post(INGEST_URL, json=payload, timeout=30)
-            if res.ok:
-                data = res.json()
-                print(f" [+] Batch {i//batch_size + 1}: Sent {len(batch)}, Created {data.get('created')}")
-            else:
-                print(f" [!] Batch {i//batch_size + 1} FAILED: HTTP {res.status_code}")
+            res = requests.post(INGEST_URL, json={"records": batch}, timeout=60)
+            print(f" [+] Batch {i//batch_size + 1}: {len(batch)} items. Status: {res.status_code}")
         except Exception as e:
-            print(f" [!] Batch {i//batch_size + 1} EXCEPTION: {e}")
+            print(f" [!] Batch failed: {e}")
 
 if __name__ == "__main__":
-    all_records = collect_araib()
-    if all_records:
-        upload_batches(all_records)
+    data = collect()
+    if data: upload(data)
