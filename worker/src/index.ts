@@ -193,24 +193,43 @@ app.get("/api/briefing/:flightNumber", async c => {
 });
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
+// 통계는 실시간일 필요 없음 — events 데이터가 실제로 바뀔 때만 재계산한다.
+// updated_at 최신값(가벼운 쿼리 1개)으로 변경 여부만 먼저 확인하고,
+// 캐시된 값과 같으면 나머지 5개 쿼리 없이 캐시를 그대로 반환한다.
 app.get("/api/stats", async c => {
-  const [total, yearRange, airports, sources, sev, lastUpdated] = await Promise.all([
+  const cache = caches.default;
+  const cacheKey = new Request(c.req.url, c.req.raw);
+
+  const lastUpdated = await c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>();
+  const currentTs = lastUpdated?.ts ?? null;
+
+  const cached = await cache.match(cacheKey);
+  if (cached) {
+    const cachedBody = await cached.clone().json<{ last_updated: string | null }>();
+    if (cachedBody.last_updated === currentTs) return cached;
+  }
+
+  // 데이터가 바뀌었거나 캐시가 없을 때만 나머지 통계 재계산
+  const [total, yearRange, airports, sources, sev] = await Promise.all([
     c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number }>(),
     c.env.DB.prepare("SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events WHERE event_date IS NOT NULL").first<{ min_yr: string; max_yr: string }>(),
     Promise.resolve({ n: Object.keys(AIRPORTS).length }),
     c.env.DB.prepare("SELECT DISTINCT source_name FROM events WHERE source_name IS NOT NULL AND source_name != '' ORDER BY source_name").all<{ source_name: string }>(),
     c.env.DB.prepare("SELECT severity, COUNT(*) as n FROM events GROUP BY severity ORDER BY severity DESC").all<{ severity: number; n: number }>(),
-    c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>(),
   ]);
-  return c.json({
+  const response = c.json({
     total_events: total?.n ?? 0,
     year_min: yearRange?.min_yr ?? "—",
     year_max: yearRange?.max_yr ?? "—",
     airports_covered: airports?.n ?? 0,
     sources: sources.results.map(r => r.source_name),
     severity_breakdown: sev.results,
-    last_updated: lastUpdated?.ts ?? null,
+    last_updated: currentTs,
   });
+  // 캐시는 우리가 위 로직으로 직접 무효화하므로 만료기한을 길게 둔다.
+  response.headers.set("Cache-Control", "public, max-age=31536000");
+  c.executionCtx.waitUntil(cache.put(cacheKey, response.clone()));
+  return response;
 });
 
 // 기존 이벤트 공항코드 백필
