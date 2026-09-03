@@ -1,4 +1,3 @@
-import { LOCAL_ROUTES } from "../data/routes";
 import { ROUTE_PAIRS } from "../data/route_pairs";
 import { KAC_CSV_SCHEDULE } from "../data/kac_csv_schedule";
 
@@ -16,14 +15,6 @@ function candidates(fn: string): string[] {
     return [...new Set([fn, `${airline}${num}`, `${airline}${String(num).padStart(3, "0")}`])];
   }
   return [fn];
-}
-
-function localRoute(fn: string) {
-  for (const q of candidates(fn)) {
-    const r = LOCAL_ROUTES[q];
-    if (r) return { ...r };
-  }
-  return null;
 }
 
 // KE 편번 범위로 출발/귀항 방향 추론 후 ROUTE_PAIRS에서 노선 확인
@@ -93,22 +84,6 @@ function guessKeRoute(fn: string): { departure_iata: string; arrival_iata: strin
     : { departure_iata: "UNKNOWN", arrival_iata: "ICN", aircraft_type: "Unknown" };
 }
 
-function flightFromItem(fn: string, item: Record<string, unknown>) {
-  return {
-    flight_number: fn,
-    airline_iata: (item.airline as Record<string, string>)?.iata ?? null,
-    flight_iata: (item.flight as Record<string, string>)?.iata ?? null,
-    departure_iata: (item.departure as Record<string, string>)?.iata ?? null,
-    arrival_iata: (item.arrival as Record<string, string>)?.iata ?? null,
-    scheduled_departure: (item.departure as Record<string, string>)?.scheduled ?? null,
-    scheduled_arrival: (item.arrival as Record<string, string>)?.scheduled ?? null,
-    estimated_departure: (item.departure as Record<string, string>)?.estimated ?? null,
-    estimated_arrival: (item.arrival as Record<string, string>)?.estimated ?? null,
-    aircraft_type: (item.aircraft as Record<string, string>)?.iata ?? null,
-    raw: item,
-  };
-}
-
 // ─── Flightradar24 공개 API — 스케줄 시각 조회 ────────────────────────────────
 const FR24_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 
@@ -120,7 +95,6 @@ interface Fr24Times {
 }
 
 async function fr24Times(fn: string): Promise<Fr24Times | null> {
-  // FR24 flight-list endpoint (공개, 인증 불필요)
   const url = `https://api.flightradar24.com/common/v1/flight/list.json?query=${encodeURIComponent(fn)}&fetchBy=flight&page=1&limit=10&format=json`;
   try {
     const res = await fetch(url, {
@@ -129,12 +103,8 @@ async function fr24Times(fn: string): Promise<Fr24Times | null> {
     });
     if (!res.ok) return null;
     const json = await res.json() as Record<string, unknown>;
-
-    // 응답 구조: { result: { response: { data: { item: { rows: [...] } } } } }
     const rows = (json as any)?.result?.response?.data?.item?.rows as Record<string, unknown>[] | undefined;
     if (!rows?.length) return null;
-
-    // 가장 최근 항편 (배열 첫 번째)
     const row = rows[0] as Record<string, unknown>;
 
     function toIso(epoch: unknown): string | null {
@@ -154,17 +124,11 @@ async function fr24Times(fn: string): Promise<Fr24Times | null> {
   } catch { return null; }
 }
 
-// ─── 한국공항공사(Airportal) 국제선 운항 스케줄 — 공식 데이터, AviationStack보다 우선 ──────
-// NOTE: 실제 응답 필드명(airline/flightId/depAirportId 등)과 편명 필터 파라미터 지원 여부는
-// 공식 Swagger 문서로 검증 필요. 편명 직접 필터가 안 될 경우 페이지 스캔이 느릴 수 있어
-// 최대 5페이지(5000행)까지만 조회하고 못 찾으면 포기한다.
 const AIRPORTAL_BASE = "https://apis.data.go.kr/B551178/flight-schedule";
 const AIRPORTAL_MAX_PAGES = 5;
 
 async function airportalLookup(fn: string, serviceKey?: string) {
   if (!serviceKey) return null;
-
-  // Try International (/int) first, then Domestic (/dom)
   for (const suffix of ["/int", "/dom"]) {
     for (let page = 1; page <= AIRPORTAL_MAX_PAGES; page++) {
       const url = `${AIRPORTAL_BASE}${suffix}?serviceKey=${serviceKey}&pageNo=${page}&numOfRows=1000&type=json`;
@@ -173,29 +137,19 @@ async function airportalLookup(fn: string, serviceKey?: string) {
         if (!res.ok) continue;
         const json = await res.json() as Record<string, unknown>;
         if (!json || typeof json !== "object") continue;
-
         const items = (json as any)?.response?.body?.items?.item;
         if (!items) continue;
-
         const rows: Record<string, unknown>[] = Array.isArray(items) ? items : [items];
-        if (!rows.length) break; // End of pages for this suffix
-
+        if (!rows.length) break;
         for (const q of candidates(fn)) {
-          // International uses flightId, Domestic uses flightNo
-          const match = rows.find(r =>
-            String(r.flightId ?? r.flightNo ?? "").toUpperCase() === q
-          );
+          const match = rows.find(r => String(r.flightId ?? r.flightNo ?? "").toUpperCase() === q);
           if (match) {
             return {
-              flight_number: fn,
-              airline_iata: "KE",
-              flight_iata: q,
+              flight_number: fn, airline_iata: "KE", flight_iata: q,
               departure_iata: (match.depAirportId as string) ?? null,
               arrival_iata: (match.arrAirportId as string) ?? null,
-              scheduled_departure: null,
-              scheduled_arrival: null,
-              estimated_departure: null,
-              estimated_arrival: null,
+              scheduled_departure: null, scheduled_arrival: null,
+              estimated_departure: null, estimated_arrival: null,
               aircraft_type: null,
               raw: { source: `airportal${suffix}`, ...match },
             };
@@ -217,10 +171,8 @@ function kacCsvLookup(fn: string) {
       flight_iata: q,
       departure_iata: match.dep,
       arrival_iata: match.arr,
-      scheduled_departure: null,
-      scheduled_arrival: null,
-      estimated_departure: null,
-      estimated_arrival: null,
+      scheduled_departure: null, scheduled_arrival: null,
+      estimated_departure: null, estimated_arrival: null,
       aircraft_type: null,
       raw: { source: "kac_csv_20250922", ...match },
     };
@@ -228,82 +180,21 @@ function kacCsvLookup(fn: string) {
   return null;
 }
 
-async function aviationstackLookup(fn: string, apiKey: string) {
-  if (!apiKey) return null;
-  // 1차: 실시간 flights (현재 비행 중인 편)
-  for (const q of candidates(fn)) {
-    const url = `http://api.aviationstack.com/v1/flights?access_key=${apiKey}&flight_iata=${q}`;
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) continue;
-      const data = (await res.json() as { data?: unknown[] }).data;
-      if (data?.length) return flightFromItem(fn, data[0] as Record<string, unknown>);
-    } catch { /* continue */ }
-  }
-  // 2차: timetable (스케줄 데이터 — 비행 중이 아닐 때)
-  for (const q of candidates(fn)) {
-    const url = `http://api.aviationstack.com/v1/timetable?access_key=${apiKey}&iataCode=ICN&type=departure&flight_number=${q}`;
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) continue;
-      const json = await res.json() as { data?: unknown[] };
-      const data = json.data;
-      if (data?.length) {
-        const item = data[0] as Record<string, unknown>;
-        // timetable 응답 구조를 flightFromItem 형식으로 변환
-        const dep = item.departure as Record<string, string> | undefined;
-        const arr = item.arrival as Record<string, string> | undefined;
-        return {
-          flight_number: fn,
-          airline_iata: (item.airline as Record<string, string>)?.iata ?? "KE",
-          flight_iata: q,
-          departure_iata: dep?.iata ?? null,
-          arrival_iata: arr?.iata ?? null,
-          scheduled_departure: dep?.scheduledTime ?? dep?.scheduled ?? null,
-          scheduled_arrival: arr?.scheduledTime ?? arr?.scheduled ?? null,
-          estimated_departure: null,
-          estimated_arrival: null,
-          aircraft_type: (item.aircraft as Record<string, string>)?.iata ?? null,
-          raw: item,
-        };
-      }
-    } catch { /* continue */ }
-  }
-  return null;
-}
-
-/** 시각이 모두 null인지 확인 */
 function hasNoTimes(f: Record<string, unknown>): boolean {
   return !f.scheduled_departure && !f.scheduled_arrival && !f.estimated_departure && !f.estimated_arrival;
-}
-
-/** FR24에서 가져온 시각으로 결과 보완 */
-async function enrichTimesFromFr24(result: Record<string, unknown>, fn: string): Promise<void> {
-  if (!hasNoTimes(result)) return;
-  try {
-    const t = await fr24Times(fn);
-    if (!t) return;
-    if (t.scheduled_departure)  result.scheduled_departure  = t.scheduled_departure;
-    if (t.scheduled_arrival)    result.scheduled_arrival    = t.scheduled_arrival;
-    if (t.estimated_departure)  result.estimated_departure  = t.estimated_departure;
-    if (t.estimated_arrival)    result.estimated_arrival    = t.estimated_arrival;
-    if (t.scheduled_departure || t.scheduled_arrival) result.time_source = "flightradar24";
-  } catch { /* silent */ }
 }
 
 export async function getFlight(fn: string, apiKey: string, airportalKey?: string): Promise<[Record<string, unknown>, string | null]> {
   fn = normalizeFlightNumber(fn);
 
   let airportalFlight: Awaited<ReturnType<typeof airportalLookup>> = null;
-  let apiFlight: ReturnType<typeof flightFromItem> | null = null;
 
   // 1순위: 한국공항공사 공식 스케줄 (최우선)
-  // Parallel search start, but we will prioritize airportalFlight result
-  const [, , fr24] = await Promise.allSettled([
-    (async () => { try { apiFlight = await aviationstackLookup(fn, apiKey); } catch { /* ignore */ } })(),
-    (async () => { try { airportalFlight = await airportalLookup(fn, airportalKey); } catch { /* ignore */ } })(),
+  const [apRes, fr24] = await Promise.allSettled([
+    airportalLookup(fn, airportalKey),
     fr24Times(fn),
   ]);
+  airportalFlight = apRes.status === "fulfilled" ? apRes.value : null;
   const fr24Result = fr24.status === "fulfilled" ? fr24.value : null;
 
   function applyFr24(target: Record<string, unknown>) {
@@ -315,7 +206,7 @@ export async function getFlight(fn: string, apiKey: string, airportalKey?: strin
     if (fr24Result.scheduled_departure || fr24Result.scheduled_arrival) target.time_source = "flightradar24";
   }
 
-  // 2순위: Airportal (KAC 공식) 데이터가 있으면 즉시 채택
+  // 2순위: Airportal (KAC 공식 API)
   if (airportalFlight) {
     const dep = (airportalFlight.departure_iata as string) ?? "";
     const arr = (airportalFlight.arrival_iata as string) ?? "";
@@ -328,45 +219,18 @@ export async function getFlight(fn: string, apiKey: string, airportalKey?: strin
     return [result, null];
   }
 
-  // 3순위: 한국공항공사 CSV 스케줄 목록 (신규)
+  // 3순위: 한국공항공사 CSV 스케줄 목록
   const csvFlight = kacCsvLookup(fn);
   if (csvFlight) {
     const dep = csvFlight.departure_iata ?? "";
     const arr = csvFlight.arrival_iata ?? "";
     const pair = ROUTE_PAIRS[`${dep}-${arr}`];
-    if (pair) csvFlight.aircraft_type = pair.aircraft_type;
+    if (pair) (csvFlight as any).aircraft_type = pair.aircraft_type;
     applyFr24(csvFlight as unknown as Record<string, unknown>);
     return [csvFlight as unknown as Record<string, unknown>, null];
   }
 
-  // 3순위: LOCAL_ROUTES (수동 매핑)
-  const local = localRoute(fn);
-  if (local) {
-    if (apiFlight) {
-      local.aircraft_type = apiFlight.aircraft_type ?? local.aircraft_type;
-      for (const k of ["scheduled_departure","scheduled_arrival","estimated_departure","estimated_arrival"] as const) {
-        (local as Record<string, unknown>)[k] = (apiFlight as Record<string, unknown>)[k];
-      }
-    }
-    const result: Record<string, unknown> = { ...local, flight_number: fn, airline_iata: "KE", flight_iata: apiFlight?.flight_iata ?? fn, raw: apiFlight?.raw ?? { source: "local_routes" } };
-    applyFr24(result);
-    return [result, null];
-  }
-
-  // 4순위: AviationStack API 실시간 데이터
-  if (apiFlight) {
-    const dep = (apiFlight.departure_iata as string) ?? "";
-    const arr = (apiFlight.arrival_iata as string) ?? "";
-    const pair = ROUTE_PAIRS[`${dep}-${arr}`];
-    if (!apiFlight.aircraft_type && pair) {
-      (apiFlight as Record<string, unknown>).aircraft_type = pair.aircraft_type;
-    }
-    const result = apiFlight as unknown as Record<string, unknown>;
-    applyFr24(result);
-    return [result, null];
-  }
-
-  // 4순위: ROUTE_PAIRS 기반 추론
+  // 4순위: ROUTE_PAIRS 기반 추론 (OpenFlights)
   const keGuess = guessKeRoute(fn);
   const hasRoute = keGuess && keGuess.arrival_iata !== "UNKNOWN" && keGuess.departure_iata !== "UNKNOWN";
   const fallback: Record<string, unknown> = {
