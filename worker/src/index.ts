@@ -197,16 +197,26 @@ app.get("/api/briefing/:flightNumber", async c => {
 // updated_at 최신값(가벼운 쿼리 1개)으로 변경 여부만 먼저 확인하고,
 // 캐시된 값과 같으면 나머지 5개 쿼리 없이 캐시를 그대로 반환한다.
 app.get("/api/stats", async c => {
-  const cache = caches.default;
-  const cacheKey = new Request(c.req.url, c.req.raw);
+  // caches.default는 커스텀 도메인(zone)에서만 지원됨 — workers.dev 등에서는
+  // 예외를 던질 수 있으므로 실패해도 통계 계산 자체는 계속 진행되도록 감싼다.
+  let cache: Cache | null = null;
+  let cacheKey: Request | null = null;
+  try {
+    cache = caches.default;
+    cacheKey = new Request(c.req.url, c.req.raw);
+  } catch { /* Cache API 미지원 환경 */ }
 
   const lastUpdated = await c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>();
   const currentTs = lastUpdated?.ts ?? null;
 
-  const cached = await cache.match(cacheKey);
-  if (cached) {
-    const cachedBody = await cached.clone().json<{ last_updated: string | null }>();
-    if (cachedBody.last_updated === currentTs) return cached;
+  if (cache && cacheKey) {
+    try {
+      const cached = await cache.match(cacheKey);
+      if (cached) {
+        const cachedBody = await cached.clone().json<{ last_updated: string | null }>();
+        if (cachedBody.last_updated === currentTs) return cached;
+      }
+    } catch { /* 캐시 조회 실패 — 아래에서 새로 계산 */ }
   }
 
   // 데이터가 바뀌었거나 캐시가 없을 때만 나머지 통계 재계산
@@ -228,7 +238,9 @@ app.get("/api/stats", async c => {
   });
   // 캐시는 우리가 위 로직으로 직접 무효화하므로 만료기한을 길게 둔다.
   response.headers.set("Cache-Control", "public, max-age=31536000");
-  c.executionCtx.waitUntil(cache.put(cacheKey, response.clone()));
+  if (cache && cacheKey) {
+    try { c.executionCtx.waitUntil(cache.put(cacheKey, response.clone())); } catch { /* ignore */ }
+  }
   return response;
 });
 
