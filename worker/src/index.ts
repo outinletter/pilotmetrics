@@ -197,51 +197,54 @@ app.get("/api/briefing/:flightNumber", async c => {
 // updated_at 최신값(가벼운 쿼리 1개)으로 변경 여부만 먼저 확인하고,
 // 캐시된 값과 같으면 나머지 5개 쿼리 없이 캐시를 그대로 반환한다.
 app.get("/api/stats", async c => {
-  // caches.default는 커스텀 도메인(zone)에서만 지원됨 — workers.dev 등에서는
-  // 예외를 던질 수 있으므로 실패해도 통계 계산 자체는 계속 진행되도록 감싼다.
-  let cache: Cache | null = null;
-  let cacheKey: Request | null = null;
   try {
-    cache = caches.default;
-    cacheKey = new Request(c.req.url, c.req.raw);
-  } catch { /* Cache API 미지원 환경 */ }
+    const lastUpdated = await c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>().catch(() => null);
+    const currentTs = lastUpdated?.ts ?? null;
 
-  const lastUpdated = await c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>();
-  const currentTs = lastUpdated?.ts ?? null;
-
-  if (cache && cacheKey) {
+    // Cache attempt
+    let cache: Cache | null = null;
+    let cacheKey: Request | null = null;
     try {
-      const cached = await cache.match(cacheKey);
-      if (cached) {
-        const cachedBody = await cached.clone().json<{ last_updated: string | null }>();
-        if (cachedBody.last_updated === currentTs) return cached;
+      cache = caches.default;
+      cacheKey = new Request(c.req.url, c.req.raw);
+      if (cache && cacheKey) {
+        const cached = await cache.match(cacheKey);
+        if (cached) {
+          const cachedBody = await cached.clone().json<{ last_updated: string | null }>().catch(() => null);
+          if (cachedBody && cachedBody.last_updated === currentTs) return cached;
+        }
       }
-    } catch { /* 캐시 조회 실패 — 아래에서 새로 계산 */ }
-  }
+    } catch { /* ignore cache errors */ }
 
-  // 데이터가 바뀌었거나 캐시가 없을 때만 나머지 통계 재계산
-  const [total, yearRange, airports, sources, sev] = await Promise.all([
-    c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number }>(),
-    c.env.DB.prepare("SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events WHERE event_date IS NOT NULL AND event_date != ''").first<{ min_yr: string; max_yr: string }>(),
-    Promise.resolve({ n: Object.keys(AIRPORTS).length }),
-    c.env.DB.prepare("SELECT DISTINCT source_name FROM events WHERE source_name IS NOT NULL AND source_name != '' ORDER BY source_name").all<{ source_name: string }>(),
-    c.env.DB.prepare("SELECT severity, COUNT(*) as n FROM events GROUP BY severity ORDER BY severity DESC").all<{ severity: number; n: number }>(),
-  ]);
-  const response = c.json({
-    total_events: total?.n ?? 0,
-    year_min: yearRange?.min_yr && yearRange.min_yr !== "" ? yearRange.min_yr : "—",
-    year_max: yearRange?.max_yr && yearRange.max_yr !== "" ? yearRange.max_yr : "—",
-    airports_covered: airports?.n ?? 0,
-    sources: sources.results?.map(r => r.source_name) ?? [],
-    severity_breakdown: sev.results ?? [],
-    last_updated: currentTs,
-  });
-  // 캐시는 우리가 위 로직으로 직접 무효화하므로 만료기한을 길게 둔다.
-  response.headers.set("Cache-Control", "public, max-age=31536000");
-  if (cache && cacheKey) {
-    try { c.executionCtx.waitUntil(cache.put(cacheKey, response.clone())); } catch { /* ignore */ }
+    const [total, yearRange, airports, sources, sev] = await Promise.all([
+      c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number }>().catch(() => ({ n: 0 })),
+      c.env.DB.prepare("SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events WHERE event_date IS NOT NULL AND event_date != ''").first<{ min_yr: string; max_yr: string }>().catch(() => ({ min_yr: "—", max_yr: "—" })),
+      Promise.resolve({ n: Object.keys(AIRPORTS).length }),
+      c.env.DB.prepare("SELECT DISTINCT source_name FROM events WHERE source_name IS NOT NULL AND source_name != '' ORDER BY source_name").all<{ source_name: string }>().catch(() => ({ results: [] })),
+      c.env.DB.prepare("SELECT severity, COUNT(*) as n FROM events GROUP BY severity ORDER BY severity DESC").all<{ severity: number; n: number }>().catch(() => ({ results: [] })),
+    ]);
+
+    const stats = {
+      total_events: total?.n ?? 0,
+      year_min: (yearRange?.min_yr && yearRange.min_yr !== "") ? yearRange.min_yr : "—",
+      year_max: (yearRange?.max_yr && yearRange.max_yr !== "") ? yearRange.max_yr : "—",
+      airports_covered: airports?.n ?? 0,
+      sources: sources?.results?.map(r => r.source_name) ?? [],
+      severity_breakdown: sev?.results ?? [],
+      last_updated: currentTs,
+    };
+
+    const res = c.json(stats, 200, {
+      "Cache-Control": "public, max-age=31536000"
+    });
+
+    if (cache && cacheKey) {
+      try { c.executionCtx.waitUntil(cache.put(cacheKey, res.clone())); } catch { /* ignore */ }
+    }
+    return res;
+  } catch (err) {
+    return c.json({ error: "Internal Server Error", details: String(err) }, 500);
   }
-  return response;
 });
 
 // 기존 이벤트 공항코드 백필
