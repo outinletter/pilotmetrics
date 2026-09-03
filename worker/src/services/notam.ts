@@ -184,9 +184,17 @@ function extractNotamFields(item: NmsNotamItem): {
   end: string;
 } {
   const core = item.properties?.coreNOTAMData?.notam;
+  const trans = item.properties?.coreNOTAMData?.notamTranslation;
+
+  // Try to find the best text available (some international NOTAMs might be in notamTranslation)
+  let text = core?.text ?? item.notamText ?? "";
+  if (!text && trans && trans.length > 0) {
+    text = trans[0].simpleText ?? trans[0].domestic_message ?? "";
+  }
+
   return {
     id:    core?.number ?? core?.id ?? item.notamNumber ?? item.id ?? "UNKNOWN",
-    text:  core?.text   ?? item.notamText ?? "",
+    text:  text,
     start: core?.effectiveStart ?? item.effectiveStartDate ?? "",
     end:   core?.effectiveEnd   ?? item.effectiveEndDate   ?? "",
   };
@@ -277,6 +285,30 @@ const RULES: Rule[] = [
     headline: m => `Taxiway ${m[1]} closed`,
   },
   {
+    pattern: /(?:WIP|WORK\s+IN\s+PROGRESS|CONSTRUCTION|MEN\s+WORKING)/i,
+    category: "OTHER", severity: "LOW", riskScore: 15,
+    tag: "WIP_NOTICE",
+    headline: () => "Work in progress / Construction reported",
+  },
+  {
+    pattern: /(?:VHF|UHF|RADIO|FREQ|COMMUNICATION)\s*(?:U\/S|OTS|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE)/i,
+    category: "COMM", severity: "MEDIUM", riskScore: 35,
+    tag: "COMM_OUTAGE",
+    headline: () => "Communication facility outage",
+  },
+  {
+    pattern: /(?:LVP|LOW\s*VISIBILITY\s*PROC)\s*(?:ACT|ACTIVE|FORCE|EFFECT)/i,
+    category: "OTHER", severity: "MEDIUM", riskScore: 45,
+    tag: "LVP_ACTIVE",
+    headline: () => "Low Visibility Procedures (LVP) active / standby",
+  },
+  {
+    pattern: /(?:PROC|SID|STAR|IAC|APCH|INSTRUMENT\s+APPROACH)\s*(?:CHANGED|AMENDED|SUSPENDED|NOT\s*AVBL)/i,
+    category: "OTHER", severity: "MEDIUM", riskScore: 40,
+    tag: "PROC_CHANGE",
+    headline: () => "Instrument procedure change / suspension",
+  },
+  {
     pattern: /(?:ATIS|D-ATIS)\s*(?:U\/S|OTS|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE)/i,
     category: "COMM", severity: "LOW", riskScore: 20,
     tag: "ATIS_OUTAGE",
@@ -297,14 +329,20 @@ function classifyNotam(text: string): {
     };
   }
 
-  // General Notice catch-all for aviation-relevant keywords
-  if (/(?:RWY|ILS|TWY|CLSD|OTS|U\/S|CLOSED|OUT\s*OF\s*SERVICE)/i.test(upper)) {
+  // Very broad catch-all for any NOTAM that looks like it has operational impact
+  // This ensures we don't show "No threats" when there are actually NOTAMs
+  if (/(?:RWY|ILS|TWY|CLSD|OTS|U\/S|CLOSED|OUT\s*OF\s*SERVICE|LIMIT|RESTRICT|UNUSABLE|NOT\s*AVBL|AVBL|WIP|WORK|LGT|LIGHT|OBST|CRANE|BIRD|PROC|SID|STAR|IAC|APCH|MIN|ALT|FREQ|RADIO)/i.test(upper)) {
+    // Extract first 60 chars as a pseudo-headline
+    const cleanText = text.replace(/\s+/g, " ").trim();
+    let head = cleanText.slice(0, 60);
+    if (cleanText.length > 60) head += "...";
+
     return {
       category: "OTHER",
       severity: "LOW",
-      riskScore: 10,
-      tag: "GENERAL_NOTICE",
-      headline: "General operational notice / possible facility degradation",
+      riskScore: 5,
+      tag: "OP_NOTICE",
+      headline: head,
     };
   }
 
@@ -313,12 +351,17 @@ function classifyNotam(text: string): {
 
 // ── ETA Overlap ──────────────────────────────────────────────────────────────
 
-function overlapsEta(startIso: string, endIso: string, etaMs: number, windowMs = 12 * 60 * 60 * 1000): boolean {
+function overlapsEta(startIso: string, endIso: string, etaMs: number, windowMs = 24 * 60 * 60 * 1000): boolean {
   try {
-    const s = new Date(startIso).getTime();
-    const e = (endIso === "PERM" || !endIso) ? etaMs + windowMs + 1 : new Date(endIso).getTime();
+    // Standardize date string for parsing (replace space with T)
+    const sStr = startIso.includes("T") ? startIso : startIso.replace(" ", "T");
+    const eStr = endIso.includes("T") ? endIso : endIso.replace(" ", "T");
+
+    const s = new Date(sStr).getTime();
+    const e = (eStr === "PERM" || !eStr) ? etaMs + windowMs + 1 : new Date(eStr).getTime();
+
     if (isNaN(s)) return true; // Safety: show if date is weird
-    // Increased window to 12 hours for briefing awareness
+    // Increased window to 24 hours for better briefing awareness
     return s <= etaMs + windowMs && e >= etaMs - windowMs;
   } catch { return true; }
 }
