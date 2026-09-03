@@ -153,6 +153,48 @@ async function fr24Times(fn: string): Promise<Fr24Times | null> {
   } catch { return null; }
 }
 
+// ─── 한국공항공사(Airportal) 국제선 운항 스케줄 — 공식 데이터, AviationStack보다 우선 ──────
+// NOTE: 실제 응답 필드명(airline/flightId/depAirportId 등)과 편명 필터 파라미터 지원 여부는
+// 공식 Swagger 문서로 검증 필요. 편명 직접 필터가 안 될 경우 페이지 스캔이 느릴 수 있어
+// 최대 5페이지(5000행)까지만 조회하고 못 찾으면 포기한다.
+const AIRPORTAL_URL = "https://apis.data.go.kr/B551178/flight-schedule/int";
+const AIRPORTAL_MAX_PAGES = 5;
+
+async function airportalLookup(fn: string, serviceKey?: string) {
+  if (!serviceKey) return null;
+  for (let page = 1; page <= AIRPORTAL_MAX_PAGES; page++) {
+    const url = `${AIRPORTAL_URL}?serviceKey=${serviceKey}&pageNo=${page}&numOfRows=1000&type=json`;
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      if (!res.ok) return null;
+      const json = await res.json() as Record<string, unknown>;
+      const items = (json as any)?.response?.body?.items?.item;
+      const rows: Record<string, unknown>[] = Array.isArray(items) ? items : items ? [items] : [];
+      if (!rows.length) return null; // 마지막 페이지 도달
+
+      for (const q of candidates(fn)) {
+        const match = rows.find(r => String(r.flightId ?? r.flightNo ?? "").toUpperCase() === q);
+        if (match) {
+          return {
+            flight_number: fn,
+            airline_iata: "KE",
+            flight_iata: q,
+            departure_iata: (match.depAirportId as string) ?? null,
+            arrival_iata: (match.arrAirportId as string) ?? null,
+            scheduled_departure: null,
+            scheduled_arrival: null,
+            estimated_departure: null,
+            estimated_arrival: null,
+            aircraft_type: null,
+            raw: { source: "airportal", ...match },
+          };
+        }
+      }
+    } catch { return null; }
+  }
+  return null;
+}
+
 async function aviationstackLookup(fn: string, apiKey: string) {
   if (!apiKey) return null;
   // 1차: 실시간 flights (현재 비행 중인 편)
@@ -216,14 +258,16 @@ async function enrichTimesFromFr24(result: Record<string, unknown>, fn: string):
   } catch { /* silent */ }
 }
 
-export async function getFlight(fn: string, apiKey: string): Promise<[Record<string, unknown>, string | null]> {
+export async function getFlight(fn: string, apiKey: string, airportalKey?: string): Promise<[Record<string, unknown>, string | null]> {
   fn = normalizeFlightNumber(fn);
   const local = localRoute(fn);
   let apiFlight: ReturnType<typeof flightFromItem> | null = null;
+  let airportalFlight: Awaited<ReturnType<typeof airportalLookup>> = null;
 
-  // AviationStack + FR24 병렬 조회
-  const [, fr24] = await Promise.allSettled([
+  // Airportal(공식) + AviationStack + FR24 병렬 조회
+  const [, , fr24] = await Promise.allSettled([
     (async () => { try { apiFlight = await aviationstackLookup(fn, apiKey); } catch { /* ignore */ } })(),
+    (async () => { try { airportalFlight = await airportalLookup(fn, airportalKey); } catch { /* ignore */ } })(),
     fr24Times(fn),
   ]);
   const fr24Result = fr24.status === "fulfilled" ? fr24.value : null;
@@ -250,7 +294,20 @@ export async function getFlight(fn: string, apiKey: string): Promise<[Record<str
     return [result, null];
   }
 
-  // 2순위: AviationStack API 실시간 데이터
+  // 2순위: Airportal(한국공항공사 공식 스케줄) — 3rd-party API보다 신뢰도 높음
+  if (airportalFlight) {
+    const dep = (airportalFlight.departure_iata as string) ?? "";
+    const arr = (airportalFlight.arrival_iata as string) ?? "";
+    const pair = ROUTE_PAIRS[`${dep}-${arr}`];
+    if (!airportalFlight.aircraft_type && pair) {
+      (airportalFlight as Record<string, unknown>).aircraft_type = pair.aircraft_type;
+    }
+    const result = airportalFlight as unknown as Record<string, unknown>;
+    applyFr24(result);
+    return [result, null];
+  }
+
+  // 3순위: AviationStack API 실시간 데이터
   if (apiFlight) {
     const dep = (apiFlight.departure_iata as string) ?? "";
     const arr = (apiFlight.arrival_iata as string) ?? "";
@@ -263,7 +320,7 @@ export async function getFlight(fn: string, apiKey: string): Promise<[Record<str
     return [result, null];
   }
 
-  // 3순위: ROUTE_PAIRS 기반 추론
+  // 4순위: ROUTE_PAIRS 기반 추론
   const keGuess = guessKeRoute(fn);
   const hasRoute = keGuess && keGuess.arrival_iata !== "UNKNOWN" && keGuess.departure_iata !== "UNKNOWN";
   const fallback: Record<string, unknown> = {
