@@ -1,12 +1,32 @@
 import { ROUTE_PAIRS } from "../data/route_pairs";
 import { KAC_CSV_SCHEDULE } from "../data/kac_csv_schedule";
 
-export function normalizeFlightNumber(fn: string): string {
-  const value = fn.toUpperCase().replace(/[^A-Z0-9]/g, "");
+export type FlightSource =
+  | "kac_gw_int"
+  | "kac_gw_dom"
+  | "kac_international_csv"
+  | "route_pairs_fallback"
+  | "invalid_input";
 
-  // Korean Air historical ICAO/IATA-style input normalization.
-  // KAL913 -> KE913
-  if (value.startsWith("KAL") && /^\d+$/.test(value.slice(3))) {
+export interface FlightLookupResult {
+  flight: Record<string, unknown>;
+  source: FlightSource;
+  message: string | null;
+  errors: Array<{
+    stage: string;
+    message: string;
+  }>;
+}
+
+export function normalizeFlightNumber(fn: string): string {
+  const value = String(fn ?? "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+
+  if (
+    value.startsWith("KAL") &&
+    /^\d+$/.test(value.slice(3))
+  ) {
     return `KE${value.slice(3)}`;
   }
 
@@ -16,7 +36,10 @@ export function normalizeFlightNumber(fn: string): string {
 function candidates(fn: string): string[] {
   fn = normalizeFlightNumber(fn);
 
-  if (fn.length >= 4 && /^\d+$/.test(fn.slice(2))) {
+  if (
+    fn.length >= 4 &&
+    /^\d+$/.test(fn.slice(2))
+  ) {
     const airline = fn.slice(0, 2);
     const num = parseInt(fn.slice(2), 10);
 
@@ -32,27 +55,27 @@ function candidates(fn: string): string[] {
   return [fn];
 }
 
-/**
- * Normalize a value from the KAC API.
- */
 function cleanValue(value: unknown): string | null {
-  if (value === undefined || value === null) return null;
-
-  const text = String(value).trim();
-
-  if (!text || text.toUpperCase() === "NULL" || text === "-") {
+  if (
+    value === undefined ||
+    value === null
+  ) {
     return null;
   }
 
-  return text;
+  const valueString = String(value).trim();
+
+  if (
+    !valueString ||
+    valueString.toUpperCase() === "NULL" ||
+    valueString === "-"
+  ) {
+    return null;
+  }
+
+  return valueString;
 }
 
-/**
- * Find a field from several possible KAC API field names.
- *
- * KAC datasets/API versions can expose slightly different field names,
- * so we deliberately support the common variants.
- */
 function firstValue(
   row: Record<string, unknown>,
   keys: string[],
@@ -68,17 +91,9 @@ function firstValue(
   return null;
 }
 
-/**
- * Normalize an airport code returned by KAC.
- *
- * Some KAC responses may contain:
- *   ICN
- *   RKSI
- *   인천
- *
- * For this service we primarily need IATA.
- */
-function normalizeAirportCode(value: string | null): string | null {
+function normalizeAirportCode(
+  value: string | null,
+): string | null {
   if (!value) return null;
 
   const v = value.toUpperCase().trim();
@@ -87,8 +102,6 @@ function normalizeAirportCode(value: string | null): string | null {
     return v;
   }
 
-  // If an ICAO code is returned, convert the common Korean airport
-  // prefixes to IATA where possible.
   const icaoToIata: Record<string, string> = {
     RKSI: "ICN",
     RKSS: "GMP",
@@ -103,18 +116,15 @@ function normalizeAirportCode(value: string | null): string | null {
     RKTH: "USN",
     RKTN: "TAE",
     RKPU: "PUS",
-    RKJB: "MWX",
   };
 
   return icaoToIata[v] ?? v;
 }
 
-/**
- * KE 편번 범위로 출발/귀항 방향 추론 후 ROUTE_PAIRS에서 노선 확인.
- *
- * This function is ONLY the final fallback.
- * It must never override KAC data.
- */
+/* -------------------------------------------------------------------------- */
+/* ROUTE_PAIRS — final fallback only                                         */
+/* -------------------------------------------------------------------------- */
+
 function guessKeRoute(
   fn: string,
 ): {
@@ -122,15 +132,18 @@ function guessKeRoute(
   arrival_iata: string;
   aircraft_type: string;
 } | null {
-  if (!fn.startsWith("KE")) return null;
+  if (!fn.startsWith("KE")) {
+    return null;
+  }
 
   const num = parseInt(fn.slice(2), 10);
 
-  if (isNaN(num)) return null;
+  if (isNaN(num)) {
+    return null;
+  }
 
   const outbound = num % 2 === 1;
 
-  // 4자리 편번
   if (num >= 1000) {
     let routeCandidates: [string, string][] = [];
 
@@ -152,11 +165,17 @@ function guessKeRoute(
             ["USN", "GMP"],
             ["RSU", "GMP"],
           ];
-    } else if (num >= 2101 && num <= 2199) {
+    } else if (
+      num >= 2101 &&
+      num <= 2199
+    ) {
       routeCandidates = outbound
         ? [["GMP", "HND"]]
         : [["HND", "GMP"]];
-    } else if (num >= 2701 && num <= 2800) {
+    } else if (
+      num >= 2701 &&
+      num <= 2800
+    ) {
       routeCandidates = outbound
         ? [
             ["GMP", "SHA"],
@@ -169,7 +188,8 @@ function guessKeRoute(
     }
 
     for (const [dep, arr] of routeCandidates) {
-      const pair = ROUTE_PAIRS[`${dep}-${arr}`];
+      const pair =
+        ROUTE_PAIRS[`${dep}-${arr}`];
 
       if (pair) {
         return pair;
@@ -179,7 +199,6 @@ function guessKeRoute(
     return null;
   }
 
-  // 3자리 이하 편번
   const regionMap: Record<string, string[]> = {
     "1-99": [
       "JFK",
@@ -325,23 +344,50 @@ function guessKeRoute(
 
   if (num >= 1 && num <= 99) {
     destinations = regionMap["1-99"];
-  } else if (num >= 100 && num <= 199) {
+  } else if (
+    num >= 100 &&
+    num <= 199
+  ) {
     destinations = regionMap["100-199"];
-  } else if (num >= 200 && num <= 299) {
+  } else if (
+    num >= 200 &&
+    num <= 299
+  ) {
     destinations = regionMap["200-299"];
-  } else if (num >= 300 && num <= 399) {
+  } else if (
+    num >= 300 &&
+    num <= 399
+  ) {
     destinations = regionMap["300-399"];
-  } else if (num >= 461 && num <= 470) {
+  } else if (
+    num >= 461 &&
+    num <= 470
+  ) {
     destinations = regionMap["461-470"];
-  } else if (num >= 471 && num <= 499) {
+  } else if (
+    num >= 471 &&
+    num <= 499
+  ) {
     destinations = regionMap["471-480"];
-  } else if (num >= 600 && num <= 699) {
+  } else if (
+    num >= 600 &&
+    num <= 699
+  ) {
     destinations = regionMap["600-699"];
-  } else if (num >= 700 && num <= 799) {
+  } else if (
+    num >= 700 &&
+    num <= 799
+  ) {
     destinations = regionMap["700-799"];
-  } else if (num >= 800 && num <= 899) {
+  } else if (
+    num >= 800 &&
+    num <= 899
+  ) {
     destinations = regionMap["800-899"];
-  } else if (num >= 900 && num <= 999) {
+  } else if (
+    num >= 900 &&
+    num <= 999
+  ) {
     destinations = regionMap["900-999"];
   }
 
@@ -371,7 +417,7 @@ function guessKeRoute(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Flightradar24 — supplemental timing data only                             */
+/* Flightradar24 — timing supplement only                                    */
 /* -------------------------------------------------------------------------- */
 
 const FR24_UA =
@@ -384,7 +430,9 @@ interface Fr24Times {
   estimated_arrival: string | null;
 }
 
-async function fr24Times(fn: string): Promise<Fr24Times | null> {
+async function fr24Times(
+  fn: string,
+): Promise<Fr24Times | null> {
   const url =
     `https://api.flightradar24.com/common/v1/flight/list.json` +
     `?query=${encodeURIComponent(fn)}` +
@@ -395,7 +443,8 @@ async function fr24Times(fn: string): Promise<Fr24Times | null> {
       headers: {
         "User-Agent": FR24_UA,
         Accept: "application/json",
-        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Language":
+          "en-US,en;q=0.9",
       },
       signal: AbortSignal.timeout(7000),
     });
@@ -404,10 +453,17 @@ async function fr24Times(fn: string): Promise<Fr24Times | null> {
       return null;
     }
 
-    const json = (await res.json()) as Record<string, unknown>;
+    const json =
+      (await res.json()) as Record<
+        string,
+        unknown
+      >;
 
-    const rows = (json as any)?.result?.response?.data?.item
-      ?.rows as Record<string, unknown>[] | undefined;
+    const rows =
+      (json as any)?.result?.response?.data
+        ?.item?.rows as
+        | Record<string, unknown>[]
+        | undefined;
 
     if (!rows?.length) {
       return null;
@@ -415,7 +471,9 @@ async function fr24Times(fn: string): Promise<Fr24Times | null> {
 
     const row = rows[0];
 
-    function toIso(epoch: unknown): string | null {
+    function toIso(
+      epoch: unknown,
+    ): string | null {
       if (!epoch) return null;
 
       const t =
@@ -427,68 +485,84 @@ async function fr24Times(fn: string): Promise<Fr24Times | null> {
         return null;
       }
 
-      return new Date(t * 1000).toISOString();
+      return new Date(
+        t * 1000,
+      ).toISOString();
     }
 
     const times = row.time as
-      | Record<string, Record<string, unknown>>
+      | Record<
+          string,
+          Record<string, unknown>
+        >
       | undefined;
 
     return {
-      scheduled_departure: toIso(times?.scheduled?.departure),
-      scheduled_arrival: toIso(times?.scheduled?.arrival),
-      estimated_departure: toIso(
-        times?.estimated?.departure ??
-          times?.real?.departure,
-      ),
-      estimated_arrival: toIso(
-        times?.estimated?.arrival ??
-          times?.real?.arrival,
-      ),
+      scheduled_departure:
+        toIso(times?.scheduled?.departure),
+
+      scheduled_arrival:
+        toIso(times?.scheduled?.arrival),
+
+      estimated_departure:
+        toIso(
+          times?.estimated?.departure ??
+            times?.real?.departure,
+        ),
+
+      estimated_arrival:
+        toIso(
+          times?.estimated?.arrival ??
+            times?.real?.arrival,
+        ),
     };
   } catch {
     return null;
   }
 }
 
-function hasNoTimes(f: Record<string, unknown>): boolean {
-  return (
-    !f.scheduled_departure &&
-    !f.scheduled_arrival &&
-    !f.estimated_departure &&
-    !f.estimated_arrival
-  );
-}
-
-/**
- * Apply FR24 timing only after the authoritative flight source
- * has already been selected.
- *
- * FR24 NEVER determines the flight route and NEVER acts as a
- * fallback for KAC.
- */
 function applyFr24Times(
   target: Record<string, unknown>,
   fr24: Fr24Times | null,
 ): void {
-  if (!fr24 || !hasNoTimes(target)) {
+  if (!fr24) {
     return;
   }
 
-  if (fr24.scheduled_departure) {
-    target.scheduled_departure = fr24.scheduled_departure;
+  /*
+   * Only fill missing time fields.
+   * Never replace authoritative KAC route data.
+   */
+  if (
+    !target.scheduled_departure &&
+    fr24.scheduled_departure
+  ) {
+    target.scheduled_departure =
+      fr24.scheduled_departure;
   }
 
-  if (fr24.scheduled_arrival) {
-    target.scheduled_arrival = fr24.scheduled_arrival;
+  if (
+    !target.scheduled_arrival &&
+    fr24.scheduled_arrival
+  ) {
+    target.scheduled_arrival =
+      fr24.scheduled_arrival;
   }
 
-  if (fr24.estimated_departure) {
-    target.estimated_departure = fr24.estimated_departure;
+  if (
+    !target.estimated_departure &&
+    fr24.estimated_departure
+  ) {
+    target.estimated_departure =
+      fr24.estimated_departure;
   }
 
-  if (fr24.estimated_arrival) {
-    target.estimated_arrival = fr24.estimated_arrival;
+  if (
+    !target.estimated_arrival &&
+    fr24.estimated_arrival
+  ) {
+    target.estimated_arrival =
+      fr24.estimated_arrival;
   }
 
   if (
@@ -502,7 +576,7 @@ function applyFr24Times(
 }
 
 /* -------------------------------------------------------------------------- */
-/* KAC — 1st priority: real-time flight schedule GW API                      */
+/* KAC — 1st priority: real-time GW                                          */
 /* -------------------------------------------------------------------------- */
 
 const KAC_GW_BASE =
@@ -511,29 +585,51 @@ const KAC_GW_BASE =
 const KAC_GW_MAX_PAGES = 5;
 const KAC_GW_ROWS_PER_PAGE = 1000;
 
-/**
- * Search the KAC real-time flight schedule GW API.
- *
- * IMPORTANT:
- * - This is the FIRST flight-data source.
- * - We search international first, then domestic.
- * - We do NOT call CSV or ROUTE_PAIRS while this lookup is running.
- * - Failure or "not found" returns null so getFlight() can proceed
- *   to the second source.
- */
 async function kacGwLookup(
   fn: string,
   serviceKey?: string,
-): Promise<Record<string, unknown> | null> {
+): Promise<{
+  flight: Record<string, unknown> | null;
+  source: FlightSource | null;
+  errors: Array<{
+    stage: string;
+    message: string;
+  }>;
+}> {
+  const errors: Array<{
+    stage: string;
+    message: string;
+  }> = [];
+
   if (!serviceKey) {
-    return null;
+    errors.push({
+      stage: "KAC_GW",
+      message:
+        "AIRPORTAL_SERVICE_KEY is not configured.",
+    });
+
+    return {
+      flight: null,
+      source: null,
+      errors,
+    };
   }
 
-  const normalized = normalizeFlightNumber(fn);
-  const flightCandidates = candidates(normalized);
+  const normalized =
+    normalizeFlightNumber(fn);
 
-  // KAC API exposes international and domestic schedules separately.
+  const flightCandidates =
+    candidates(normalized);
+
   for (const suffix of ["/int", "/dom"]) {
+    const source: FlightSource =
+      suffix === "/int"
+        ? "kac_gw_int"
+        : "kac_gw_dom";
+
+    let sourceHadSuccessfulResponse =
+      false;
+
     for (
       let page = 1;
       page <= KAC_GW_MAX_PAGES;
@@ -541,7 +637,7 @@ async function kacGwLookup(
     ) {
       const url =
         `${KAC_GW_BASE}${suffix}` +
-        `?serviceKey=${serviceKey}` +
+        `?serviceKey=${encodeURIComponent(serviceKey)}` +
         `&pageNo=${page}` +
         `&numOfRows=${KAC_GW_ROWS_PER_PAGE}` +
         `&type=json`;
@@ -552,47 +648,80 @@ async function kacGwLookup(
         });
 
         if (!res.ok) {
+          errors.push({
+            stage: `KAC_GW${suffix}`,
+            message:
+              `HTTP ${res.status} on page ${page}.`,
+          });
           continue;
         }
 
-        const json = (await res.json()) as Record<string, unknown>;
+        const json =
+          (await res.json()) as Record<
+            string,
+            unknown
+          >;
 
-        if (!json || typeof json !== "object") {
-          continue;
-        }
+        const resultCode =
+          (json as any)?.response?.header
+            ?.resultCode;
 
-        const items =
-          (json as any)?.response?.body?.items?.item;
-
-        if (!items) {
-          continue;
-        }
-
-        const rows: Record<string, unknown>[] =
-          Array.isArray(items)
-            ? items
-            : [items];
-
-        if (!rows.length) {
+        if (
+          resultCode &&
+          String(resultCode) !== "00"
+        ) {
+          errors.push({
+            stage: `KAC_GW${suffix}`,
+            message:
+              `API resultCode=${String(resultCode)}.`,
+          });
           break;
         }
 
+        const items =
+          (json as any)?.response?.body
+            ?.items?.item;
+
+        if (!items) {
+          sourceHadSuccessfulResponse = true;
+          break;
+        }
+
+        const rows: Record<
+          string,
+          unknown
+        >[] = Array.isArray(items)
+          ? items
+          : [items];
+
+        if (!rows.length) {
+          sourceHadSuccessfulResponse = true;
+          break;
+        }
+
+        sourceHadSuccessfulResponse = true;
+
         for (const row of rows) {
-          const flightId = firstValue(row, [
-            "flightId",
-            "flightNo",
-            "flightNumber",
-            "airFltNo",
-            "airlineFlightNo",
-            "fltNo",
-          ]);
+          const flightId = firstValue(
+            row,
+            [
+              "flightId",
+              "flightNo",
+              "flightNumber",
+              "airFltNo",
+              "airlineFlightNo",
+              "fltNo",
+            ],
+          );
 
           if (!flightId) {
             continue;
           }
 
           const normalizedFlightId =
-            normalizeFlightNumber(flightId);
+            normalizeFlightNumber(
+              flightId,
+            );
 
           if (
             !flightCandidates.includes(
@@ -602,52 +731,60 @@ async function kacGwLookup(
             continue;
           }
 
-          const departure = normalizeAirportCode(
+          const departure =
+            normalizeAirportCode(
+              firstValue(row, [
+                "depAirportId",
+                "departureAirportId",
+                "departureIata",
+                "departureAirport",
+                "depAirport",
+                "dep",
+                "depIata",
+              ]),
+            );
+
+          const arrival =
+            normalizeAirportCode(
+              firstValue(row, [
+                "arrAirportId",
+                "arrivalAirportId",
+                "arrivalIata",
+                "arrivalAirport",
+                "arrAirport",
+                "arr",
+                "arrIata",
+              ]),
+            );
+
+          const aircraftType =
             firstValue(row, [
-              "depAirportId",
-              "departureAirportId",
-              "departureIata",
-              "departureAirport",
-              "depAirport",
-              "dep",
-              "depIata",
-            ]),
-          );
+              "aircraftType",
+              "aircraft",
+              "aircraftModel",
+              "aircraftName",
+              "aircraftCode",
+            ]);
 
-          const arrival = normalizeAirportCode(
+          const airline =
             firstValue(row, [
-              "arrAirportId",
-              "arrivalAirportId",
-              "arrivalIata",
-              "arrivalAirport",
-              "arrAirport",
-              "arr",
-              "arrIata",
-            ]),
-          );
+              "airlineIata",
+              "airlineCode",
+              "airline",
+              "airlineId",
+            ]);
 
-          const aircraftType = firstValue(row, [
-            "aircraftType",
-            "aircraft",
-            "aircraftModel",
-            "aircraftName",
-            "aircraftCode",
-          ]);
-
-          const airline = firstValue(row, [
-            "airlineIata",
-            "airlineCode",
-            "airline",
-            "airlineId",
-          ]);
-
-          const result: Record<string, unknown> = {
+          const flight: Record<
+            string,
+            unknown
+          > = {
             flight_number: normalized,
             airline_iata:
               airline === "KAL"
                 ? "KE"
                 : airline ?? "KE",
-            flight_iata: normalizedFlightId,
+            flight_iata:
+              normalizedFlightId,
 
             departure_iata: departure,
             arrival_iata: arrival,
@@ -657,7 +794,8 @@ async function kacGwLookup(
             estimated_departure: null,
             estimated_arrival: null,
 
-            aircraft_type: aircraftType,
+            aircraft_type:
+              aircraftType,
 
             raw: {
               source:
@@ -667,10 +805,13 @@ async function kacGwLookup(
             },
           };
 
-          // If KAC doesn't provide aircraft type,
-          // use ROUTE_PAIRS only to enrich aircraft type.
+          /*
+           * ROUTE_PAIRS may enrich aircraft type,
+           * but it is NOT allowed to replace
+           * the KAC route.
+           */
           if (
-            !result.aircraft_type &&
+            !flight.aircraft_type &&
             departure &&
             arrival
           ) {
@@ -680,48 +821,60 @@ async function kacGwLookup(
               ];
 
             if (pair) {
-              result.aircraft_type =
+              flight.aircraft_type =
                 pair.aircraft_type;
             }
           }
 
-          return result;
+          return {
+            flight,
+            source,
+            errors,
+          };
         }
 
-        // If fewer than the requested number of rows are returned,
-        // there is normally no reason to request another page.
-        if (rows.length < KAC_GW_ROWS_PER_PAGE) {
+        if (
+          rows.length <
+          KAC_GW_ROWS_PER_PAGE
+        ) {
           break;
         }
-      } catch {
-        // One page/API failure does NOT immediately jump to CSV.
-        // We finish the current KAC source attempt first.
-        continue;
+      } catch (error) {
+        errors.push({
+          stage: `KAC_GW${suffix}`,
+          message:
+            error instanceof Error
+              ? error.message
+              : String(error),
+        });
       }
+    }
+
+    if (!sourceHadSuccessfulResponse) {
+      errors.push({
+        stage: `KAC_GW${suffix}`,
+        message:
+          "No successful response received.",
+      });
     }
   }
 
-  return null;
+  return {
+    flight: null,
+    source: null,
+    errors,
+  };
 }
 
 /* -------------------------------------------------------------------------- */
-/* KAC — 2nd priority: international flight schedule CSV                     */
+/* KAC — 2nd priority: international CSV                                    */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Search the KAC international flight schedule dataset.
- *
- * This is a static snapshot imported into:
- *   ../data/kac_csv_schedule
- *
- * It is intentionally consulted ONLY after KAC GW fails.
- */
 function kacInternationalCsvLookup(
   fn: string,
 ): Record<string, unknown> | null {
-  const normalized = normalizeFlightNumber(fn);
-
-  const possible = candidates(normalized);
+  const normalized =
+    normalizeFlightNumber(fn);
 
   let match:
     | {
@@ -732,10 +885,14 @@ function kacInternationalCsvLookup(
       }
     | undefined;
 
-  let matchedFlight = normalized;
+  let matchedFlight =
+    normalized;
 
-  for (const candidate of possible) {
-    const found = KAC_CSV_SCHEDULE[candidate];
+  for (const candidate of candidates(
+    normalized,
+  )) {
+    const found =
+      KAC_CSV_SCHEDULE[candidate];
 
     if (found) {
       match = found;
@@ -748,13 +905,11 @@ function kacInternationalCsvLookup(
     return null;
   }
 
-  const departure = normalizeAirportCode(
-    match.dep,
-  );
+  const departure =
+    normalizeAirportCode(match.dep);
 
-  const arrival = normalizeAirportCode(
-    match.arr,
-  );
+  const arrival =
+    normalizeAirportCode(match.arr);
 
   const airline =
     match.airline === "KAL"
@@ -763,7 +918,10 @@ function kacInternationalCsvLookup(
         ? "OZ"
         : match.airline;
 
-  const result: Record<string, unknown> = {
+  const result: Record<
+    string,
+    unknown
+  > = {
     flight_number: normalized,
     airline_iata: airline,
     flight_iata: matchedFlight,
@@ -779,14 +937,16 @@ function kacInternationalCsvLookup(
     aircraft_type: null,
 
     raw: {
-      source: "kac_international_csv",
+      source:
+        "kac_international_csv",
       ...match,
     },
   };
 
-  // CSV has route information but may not contain aircraft type.
-  // ROUTE_PAIRS is allowed only to enrich aircraft type here,
-  // never to replace the CSV route.
+  /*
+   * ROUTE_PAIRS is only enrichment here.
+   * It cannot replace CSV route information.
+   */
   if (departure && arrival) {
     const pair =
       ROUTE_PAIRS[
@@ -803,32 +963,21 @@ function kacInternationalCsvLookup(
 }
 
 /* -------------------------------------------------------------------------- */
-/* getFlight — authoritative source chain                                    */
+/* getFlight — strict source priority                                        */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Flight-data priority:
- *
- *   1. KAC real-time GW API
- *   2. KAC international flight schedule CSV
- *   3. ROUTE_PAIRS fallback
- *
- * FR24 is NOT part of the fallback chain.
- * It is only used after a flight source has already been selected,
- * and only for missing timing fields.
- *
- * The second parameter is retained for API compatibility with the
- * existing index.ts caller. AviationStack is intentionally NOT used
- * for flight-route selection in this implementation.
- */
 export async function getFlight(
   fn: string,
   _apiKey?: string,
   airportalKey?: string,
 ): Promise<
-  [Record<string, unknown>, string | null]
+  [
+    Record<string, unknown>,
+    string | null,
+  ]
 > {
-  const normalized = normalizeFlightNumber(fn);
+  const normalized =
+    normalizeFlightNumber(fn);
 
   if (!normalized) {
     return [
@@ -843,106 +992,102 @@ export async function getFlight(
         estimated_departure: null,
         estimated_arrival: null,
         aircraft_type: null,
-        raw: {
-          source: "invalid_input",
-        },
+        source: "invalid_input",
+        raw: {},
       },
-      "Invalid flight number.",
+      "Flight number is empty or invalid.",
     ];
   }
 
-  /* ---------------------------------------------------------------------- */
-  /* 1st priority: KAC real-time GW                                        */
-  /* ---------------------------------------------------------------------- */
+  /* ====================================================================== */
+  /* 1. KAC REAL-TIME GW                                                    */
+  /* ====================================================================== */
 
-  let kacGwFlight: Record<string, unknown> | null =
-    null;
-
-  try {
-    kacGwFlight = await kacGwLookup(
+  const kacResult =
+    await kacGwLookup(
       normalized,
       airportalKey,
     );
-  } catch {
-    kacGwFlight = null;
-  }
 
-  if (kacGwFlight) {
-    /*
-     * KAC is authoritative for route selection.
-     *
-     * Do NOT consult CSV or ROUTE_PAIRS to replace a KAC route.
-     */
-    let fr24: Fr24Times | null = null;
+  if (kacResult.flight) {
+    const fr24 =
+      await fr24Times(normalized);
 
-    try {
-      fr24 = await fr24Times(normalized);
-    } catch {
-      fr24 = null;
-    }
+    applyFr24Times(
+      kacResult.flight,
+      fr24,
+    );
 
-    applyFr24Times(kacGwFlight, fr24);
+    kacResult.flight.source =
+      kacResult.source;
 
     return [
-      kacGwFlight,
-      "Flight data source: KAC real-time GW API.",
+      kacResult.flight,
+      `Flight source: ${kacResult.source}.`,
     ];
   }
 
-  /* ---------------------------------------------------------------------- */
-  /* 2nd priority: KAC international schedule CSV                          */
-  /* ---------------------------------------------------------------------- */
-
-  let kacCsvFlight: Record<string, unknown> | null =
-    null;
+  /* ====================================================================== */
+  /* 2. KAC INTERNATIONAL CSV                                               */
+  /* ====================================================================== */
 
   try {
-    kacCsvFlight =
-      kacInternationalCsvLookup(normalized);
-  } catch {
-    kacCsvFlight = null;
-  }
+    const csvFlight =
+      kacInternationalCsvLookup(
+        normalized,
+      );
 
-  if (kacCsvFlight) {
-    /*
-     * CSV is the second authoritative source.
-     *
-     * Do NOT call ROUTE_PAIRS to replace its route.
-     * ROUTE_PAIRS may only enrich aircraft type.
-     */
-    let fr24: Fr24Times | null = null;
+    if (csvFlight) {
+      const fr24 =
+        await fr24Times(normalized);
 
-    try {
-      fr24 = await fr24Times(normalized);
-    } catch {
-      fr24 = null;
+      applyFr24Times(
+        csvFlight,
+        fr24,
+      );
+
+      csvFlight.source =
+        "kac_international_csv";
+
+      return [
+        csvFlight,
+        "Flight source: KAC international flight schedule CSV.",
+      ];
     }
-
-    applyFr24Times(kacCsvFlight, fr24);
-
-    return [
-      kacCsvFlight,
-      "Flight data source: KAC international flight schedule CSV.",
-    ];
+  } catch (error) {
+    kacResult.errors.push({
+      stage:
+        "KAC_INTERNATIONAL_CSV",
+      message:
+        error instanceof Error
+          ? error.message
+          : String(error),
+    });
   }
 
-  /* ---------------------------------------------------------------------- */
-  /* 3rd priority: ROUTE_PAIRS fallback                                    */
-  /* ---------------------------------------------------------------------- */
+  /* ====================================================================== */
+  /* 3. ROUTE_PAIRS FINAL FALLBACK                                          */
+  /* ====================================================================== */
 
   const keGuess =
     guessKeRoute(normalized);
 
   const hasRoute =
     !!keGuess &&
-    keGuess.departure_iata !== "UNKNOWN" &&
-    keGuess.arrival_iata !== "UNKNOWN";
+    keGuess.departure_iata !==
+      "UNKNOWN" &&
+    keGuess.arrival_iata !==
+      "UNKNOWN";
 
-  const fallback: Record<string, unknown> = {
+  const fallback: Record<
+    string,
+    unknown
+  > = {
     flight_number: normalized,
-    airline_iata: normalized.startsWith("KE")
-      ? "KE"
-      : normalized.slice(0, 2),
+    airline_iata:
+      normalized.startsWith("KE")
+        ? "KE"
+        : normalized.slice(0, 2),
 
     flight_iata: normalized,
 
@@ -963,32 +1108,37 @@ export async function getFlight(
       ? keGuess!.aircraft_type
       : null,
 
+    source:
+      "route_pairs_fallback",
+
     raw: {
-      source: "route_pairs_fallback",
+      source:
+        "route_pairs_fallback",
       ...keGuess,
     },
   };
 
   /*
-   * FR24 may still provide timing information,
-   * but it is NOT allowed to determine the route.
+   * FR24 can supplement times,
+   * but can NEVER determine the route.
    */
-  let fr24: Fr24Times | null = null;
+  const fr24 =
+    await fr24Times(normalized);
 
-  try {
-    fr24 = await fr24Times(normalized);
-  } catch {
-    fr24 = null;
+  applyFr24Times(
+    fallback,
+    fr24,
+  );
+
+  if (hasRoute) {
+    return [
+      fallback,
+      `KAC_GW and KAC_INTERNATIONAL_CSV did not contain ${normalized}. ROUTE_PAIRS fallback used: ${keGuess!.departure_iata}→${keGuess!.arrival_iata}.`,
+    ];
   }
-
-  applyFr24Times(fallback, fr24);
-
-  const msg = hasRoute
-    ? `KAC real-time GW and KAC international CSV did not contain ${normalized}. Route estimated from ROUTE_PAIRS (${keGuess!.departure_iata}→${keGuess!.arrival_iata}).`
-    : `KAC real-time GW and KAC international CSV did not contain ${normalized}. Flight route not found; showing general Korean Air threat analysis.`;
 
   return [
     fallback,
-    msg,
+    `KAC_GW and KAC_INTERNATIONAL_CSV did not contain ${normalized}. ROUTE_PAIRS could not determine the route.`,
   ];
 }
