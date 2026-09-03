@@ -24,172 +24,165 @@ app.get("/api/health", c => c.json({ ok: true }));
 
 // ─── Briefing ─────────────────────────────────────────────────────────────────
 app.get("/api/briefing/:flightNumber", async c => {
-  const raw = c.req.param("flightNumber").toUpperCase().trim();
+  try {
+    const raw = c.req.param("flightNumber").toUpperCase().trim();
 
-  // ── 공항코드 직접 검색 (IATA 3자 or ICAO 4자) ──────────────────────────────
-  if (/^[A-Z]{3}$/.test(raw) || /^[A-Z]{4}$/.test(raw)) {
-    const arrIcao = raw.length === 4 ? raw : iataToIcao(raw);
-    const arrIata = raw.length === 3 ? raw : icaoToIata(raw);
+    // ── 공항코드 직접 검색 (IATA 3자 or ICAO 4자) ──────────────────────────────
+    if (/^[A-Z]{3}$/.test(raw) || /^[A-Z]{4}$/.test(raw)) {
+      const arrIcao = raw.length === 4 ? raw : iataToIcao(raw);
+      const arrIata = raw.length === 3 ? raw : icaoToIata(raw);
+      const [weather, weatherMessages] = arrIcao ? await getWeather(arrIcao) : [{ metar: "", taf: "" }, []];
+      const fixedRisks = airportFixedRisks(arrIcao);
+      const tags = [...new Set([...parseWeatherTags(weather.metar, weather.taf, arrIcao), ...fixedRisks])];
+
+      const airportEventCount = arrIcao
+        ? ((await c.env.DB
+            .prepare("SELECT COUNT(*) as n FROM events WHERE airport_icao = ? OR airport_iata = ?")
+            .bind(arrIcao, arrIata).first<{ n: number }>().catch(() => ({ n: 0 })))?.n ?? 0)
+        : 0;
+      const score = riskScore(tags, airportEventCount);
+      const level = riskLevel(tags, airportEventCount);
+
+      const context: Record<string, unknown> = {
+        flight_number: raw,
+        route: `— → ${raw}`,
+        aircraft: "Airport Search",
+        departure_icao: "", arrival_icao: arrIcao,
+        departure_iata: "", arrival_iata: arrIata,
+        destination_runway: null,
+        weather: tags.join("/") || "CLEAR",
+        risk_score: score,
+        risk_level: level,
+        risk_summary: riskSummary(score, level, tags),
+        risk_breakdown: riskBreakdown(tags, airportEventCount),
+        arrival_weather_brief: arrivalWeatherBrief(weather.taf, weather.metar, null, 0),
+        airport_event_count: airportEventCount,
+        messages: weatherMessages.filter(Boolean),
+        arrival_weather_time: null,
+        metar: weather.metar, taf: weather.taf, arrival_taf: weather.taf,
+        arrival_tags: tags,
+        metar_tags: tags,
+      };
+
+      const hasNotam = arrIcao && (c.env.NMS_CLIENT_ID || c.env.FAA_NOTAM_API_KEY);
+      const [threats, notamThreats] = await Promise.all([
+        buildThreats(c.env.DB, context, tags, c.env.AI).catch(() => []),
+        hasNotam
+          ? fetchNotamThreats(arrIcao!, null, {
+              nmsClientId:     c.env.NMS_CLIENT_ID,
+              nmsClientSecret: c.env.NMS_CLIENT_SECRET,
+              nmsEnv:          c.env.NMS_ENV,
+              legacyKey:       c.env.FAA_NOTAM_API_KEY,
+            }).catch(() => [])
+          : Promise.resolve([]),
+      ]);
+
+      return c.json({ flight_context: context, top_threats: threats, notam_threats: notamThreats });
+    }
+
+    // ── 편명 처리 (KE629, OZ202 등) ──────────────────────────────────────────
+    const fn = normalizeFlightNumber(raw);
+    const [flight, flightMsg] = await getFlight(fn, c.env.AVIATIONSTACK_API_KEY, c.env.AIRPORTAL_SERVICE_KEY)
+      .catch((e) => [{ flight_number: fn, airline_iata: "KE", flight_iata: fn, raw: { error: String(e) } }, "Live flight data service error"]);
+
+    const depIcao = iataToIcao(flight.departure_iata as string);
+    const arrIcao = iataToIcao(flight.arrival_iata as string);
+    const depIata = (flight.departure_iata as string) ?? "UNKNOWN";
+    const arrIata = (flight.arrival_iata as string) ?? "UNKNOWN";
+
     const [weather, weatherMessages] = arrIcao ? await getWeather(arrIcao) : [{ metar: "", taf: "" }, []];
-    const fixedRisks = airportFixedRisks(arrIcao);
-    const tags = [...new Set([...parseWeatherTags(weather.metar, weather.taf, arrIcao), ...fixedRisks])];
+    const arrivalTime = (flight.estimated_arrival ?? flight.scheduled_arrival) as string | null;
+    const arrivalTaf  = selectArrivalTafSegment(weather.taf || "", arrivalTime);
+
+    const fixedRisks  = airportFixedRisks(arrIcao);
+    const arrivalDate = (arrivalTime && arrivalTime.length > 5) ? new Date(arrivalTime) : new Date();
+    const utcOffset   = airportUtcOffset(arrIcao, arrivalDate);
+    const nightArr    = isNightArrival(arrivalTime, utcOffset);
+
+    const arrivalTags = [...new Set([...parseWeatherTags("", arrivalTaf, arrIcao), ...fixedRisks])];
+    const metarTags   = parseWeatherTags(weather.metar, "", arrIcao);
+    const tags        = [...new Set([...parseWeatherTags(weather.metar, arrivalTaf, arrIcao), ...fixedRisks])];
 
     const airportEventCount = arrIcao
       ? ((await c.env.DB
           .prepare("SELECT COUNT(*) as n FROM events WHERE airport_icao = ? OR airport_iata = ?")
-          .bind(arrIcao, arrIata).first<{ n: number }>())?.n ?? 0)
+          .bind(arrIcao, arrIata).first<{ n: number }>().catch(() => ({ n: 0 })))?.n ?? 0)
       : 0;
-    const score = riskScore(tags, airportEventCount);
-    const level = riskLevel(tags, airportEventCount);
+
+    const activeTags = arrivalTags.length > fixedRisks.length ? arrivalTags : tags;
+    const score = riskScore(activeTags, airportEventCount, nightArr);
+    const level = riskLevel(activeTags, airportEventCount, nightArr);
 
     const context: Record<string, unknown> = {
-      flight_number: raw,
-      route: `— → ${raw}`,
-      aircraft: "Airport Search",
-      departure_icao: "", arrival_icao: arrIcao,
-      departure_iata: "", arrival_iata: arrIata,
+      flight_number: fn,
+      route: `${depIata}-${arrIata}`,
+      aircraft: (flight.aircraft_type as string) ?? "Unknown",
+      departure_icao: depIcao, arrival_icao: arrIcao,
+      departure_iata: depIata, arrival_iata: arrIata,
       destination_runway: null,
       weather: tags.join("/") || "CLEAR",
       risk_score: score,
       risk_level: level,
-      risk_summary: riskSummary(score, level, tags),
-      risk_breakdown: riskBreakdown(tags, airportEventCount),
-      arrival_weather_brief: arrivalWeatherBrief(weather.taf, weather.metar, null, 0),
+      risk_summary: riskSummary(score, level, activeTags, nightArr),
+      risk_breakdown: riskBreakdown(activeTags, airportEventCount, nightArr),
+      arrival_weather_brief: arrivalWeatherBrief(arrivalTaf, weather.metar, arrivalTime, utcOffset),
+      night_arrival: nightArr,
       airport_event_count: airportEventCount,
-      messages: weatherMessages.filter(Boolean),
-      arrival_weather_time: null,
-      metar: weather.metar, taf: weather.taf, arrival_taf: weather.taf,
-      arrival_tags: tags,
-      metar_tags: tags,
+      messages: [flightMsg, ...weatherMessages].filter(Boolean),
+      arrival_weather_time: arrivalTime,
+      scheduled_departure: flight.scheduled_departure ?? null,
+      scheduled_arrival:   flight.scheduled_arrival ?? null,
+      metar: weather.metar, taf: weather.taf, arrival_taf: arrivalTaf,
+      arrival_tags: arrivalTags,
+      metar_tags:   metarTags,
     };
+    if (flightMsg) {
+      const enc = (q: string) => encodeURIComponent(q);
+      context.flight_search_links = [
+        { label: `${fn} flight status`, url: `https://www.google.com/search?q=${enc(`${fn} flight status`)}` },
+        { label: `${fn} ${context.route} today flight`, url: `https://www.google.com/search?q=${enc(`${fn} ${context.route} today flight`)}` },
+      ];
+    }
 
-    // NOTAM 및 위협 정보 병렬 조회
+    c.env.DB.prepare(
+      "INSERT INTO flight_queries (flight_number,airline_iata,flight_iata,departure_iata,arrival_iata,departure_icao,arrival_icao,scheduled_departure,scheduled_arrival,estimated_departure,estimated_arrival,aircraft_type,raw_response_json) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    ).bind(fn, flight.airline_iata ?? null, flight.flight_iata ?? null, depIata, arrIata, depIcao, arrIcao,
+      flight.scheduled_departure ?? null, flight.scheduled_arrival ?? null,
+      flight.estimated_departure ?? null, flight.estimated_arrival ?? null,
+      flight.aircraft_type ?? null, JSON.stringify(flight.raw ?? {})).run().catch(() => {});
+
     const hasNotam = arrIcao && (c.env.NMS_CLIENT_ID || c.env.FAA_NOTAM_API_KEY);
     const [threats, notamThreats] = await Promise.all([
-      buildThreats(c.env.DB, context, tags, c.env.AI),
+      buildThreats(c.env.DB, context, tags, c.env.AI).catch(() => []),
       hasNotam
-        ? fetchNotamThreats(arrIcao!, null, {
+        ? fetchNotamThreats(arrIcao!, arrivalTime, {
             nmsClientId:     c.env.NMS_CLIENT_ID,
             nmsClientSecret: c.env.NMS_CLIENT_SECRET,
             nmsEnv:          c.env.NMS_ENV,
             legacyKey:       c.env.FAA_NOTAM_API_KEY,
-          })
+          }).catch(() => [])
         : Promise.resolve([]),
     ]);
 
+    if (c.env.AI && threats.length > 0) {
+      c.executionCtx.waitUntil((async () => {
+        const eventIds = (threats as any[]).flatMap(g => g.events.map((e: any) => e.id));
+        if (eventIds.length === 0) return;
+        const { results } = await c.env.DB.prepare(
+          `SELECT id, summary, flight_phase FROM events
+           WHERE id IN (${eventIds.map(() => '?').join(',')})
+             AND (contributing_factors IS NULL OR contributing_factors = '[]')`
+        ).bind(...eventIds).all<{ id: string; summary: string; flight_phase: string | null }>().catch(() => ({ results: [] }));
+        if (results.length > 0) {
+          await enrichEventsWithThreats(c.env.AI, c.env.DB, 10, results.map(r => r.id)).catch(() => {});
+        }
+      })());
+    }
+
     return c.json({ flight_context: context, top_threats: threats, notam_threats: notamThreats });
+  } catch (err) {
+    return c.json({ error: "Briefing error", details: String(err) }, 500);
   }
-
-  // ── 편명 처리 (KE629, OZ202 등) ──────────────────────────────────────────
-  const fn = normalizeFlightNumber(raw);
-  const [flight, flightMsg] = await getFlight(fn, c.env.AVIATIONSTACK_API_KEY, c.env.AIRPORTAL_SERVICE_KEY);
-  const depIcao = iataToIcao(flight.departure_iata as string);
-  const arrIcao = iataToIcao(flight.arrival_iata as string);
-  const depIata = (flight.departure_iata as string) ?? "UNKNOWN";
-  const arrIata = (flight.arrival_iata as string) ?? "UNKNOWN";
-
-  const [weather, weatherMessages] = arrIcao ? await getWeather(arrIcao) : [{ metar: "", taf: "" }, []];
-  const arrivalTime = (flight.estimated_arrival ?? flight.scheduled_arrival) as string | null;
-  const arrivalTaf  = selectArrivalTafSegment(weather.taf, arrivalTime);
-
-  // 공항 고정 위험 태그 (지형·접근 특성)
-  const fixedRisks  = airportFixedRisks(arrIcao);
-  const arrivalDate = arrivalTime ? new Date(arrivalTime) : new Date();
-  const utcOffset   = airportUtcOffset(arrIcao, arrivalDate);
-  const nightArr    = isNightArrival(arrivalTime, utcOffset);
-
-  // 태그 합산: METAR + 도착 TAF + 공항 고정 위험
-  const arrivalTags = [...new Set([...parseWeatherTags("", arrivalTaf, arrIcao), ...fixedRisks])];
-  const metarTags   = parseWeatherTags(weather.metar, "", arrIcao);
-  const tags        = [...new Set([...parseWeatherTags(weather.metar, arrivalTaf, arrIcao), ...fixedRisks])];
-
-  // 도착 공항 과거 사고 이력 조회
-  const airportEventCount = arrIcao
-    ? ((await c.env.DB
-        .prepare("SELECT COUNT(*) as n FROM events WHERE airport_icao = ? OR airport_iata = ?")
-        .bind(arrIcao, arrIata).first<{ n: number }>())?.n ?? 0)
-    : 0;
-
-  // 수치 위험도: 도착 시간대 태그 + 공항 이력 + 야간 여부 반영
-  const activeTags = arrivalTags.length > fixedRisks.length ? arrivalTags : tags;
-  const score = riskScore(activeTags, airportEventCount, nightArr);
-  const level = riskLevel(activeTags, airportEventCount, nightArr);
-
-  const context: Record<string, unknown> = {
-    flight_number: fn,
-    route: `${depIata}-${arrIata}`,
-    aircraft: (flight.aircraft_type as string) ?? "Unknown",
-    departure_icao: depIcao, arrival_icao: arrIcao,
-    departure_iata: depIata, arrival_iata: arrIata,
-    destination_runway: null,
-    weather: tags.join("/") || "CLEAR",
-    risk_score: score,
-    risk_level: level,
-    risk_summary: riskSummary(score, level, activeTags, nightArr),
-    risk_breakdown: riskBreakdown(activeTags, airportEventCount, nightArr),
-    arrival_weather_brief: arrivalWeatherBrief(arrivalTaf, weather.metar, arrivalTime, utcOffset),
-    night_arrival: nightArr,
-    airport_event_count: airportEventCount,
-    messages: [flightMsg, ...weatherMessages].filter(Boolean),
-    arrival_weather_time: arrivalTime,
-    scheduled_departure: flight.scheduled_departure ?? null,
-    scheduled_arrival:   flight.scheduled_arrival ?? null,
-    metar: weather.metar, taf: weather.taf, arrival_taf: arrivalTaf,
-    arrival_tags: arrivalTags,
-    metar_tags:   metarTags,
-  };
-  if (flightMsg) {
-    const enc = (q: string) => encodeURIComponent(q);
-    context.flight_search_links = [
-      { label: `${fn} flight status`, url: `https://www.google.com/search?q=${enc(`${fn} flight status`)}` },
-      { label: `${fn} ${context.route} today flight`, url: `https://www.google.com/search?q=${enc(`${fn} ${context.route} today flight`)}` },
-    ];
-  }
-
-  // Persist query to D1 (fire-and-forget — 실패해도 응답에 영향 없음)
-  c.env.DB.prepare(
-    "INSERT INTO flight_queries (flight_number,airline_iata,flight_iata,departure_iata,arrival_iata,departure_icao,arrival_icao,scheduled_departure,scheduled_arrival,estimated_departure,estimated_arrival,aircraft_type,raw_response_json) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
-  ).bind(fn, flight.airline_iata ?? null, flight.flight_iata ?? null, depIata, arrIata, depIcao, arrIcao,
-    flight.scheduled_departure ?? null, flight.scheduled_arrival ?? null,
-    flight.estimated_departure ?? null, flight.estimated_arrival ?? null,
-    flight.aircraft_type ?? null, JSON.stringify(flight.raw ?? {})).run().catch(() => {});
-
-  // NOTAM 위협 병렬 조회 — NMS-API(OAuth2) 우선, legacy 폴백
-  const hasNotam = arrIcao && (c.env.NMS_CLIENT_ID || c.env.FAA_NOTAM_API_KEY);
-  const [threats, notamThreats] = await Promise.all([
-    buildThreats(c.env.DB, context, tags, c.env.AI),
-    hasNotam
-      ? fetchNotamThreats(arrIcao!, arrivalTime, {
-          nmsClientId:     c.env.NMS_CLIENT_ID,
-          nmsClientSecret: c.env.NMS_CLIENT_SECRET,
-          nmsEnv:          c.env.NMS_ENV,
-          legacyKey:       c.env.FAA_NOTAM_API_KEY,
-        })
-      : Promise.resolve([]),
-  ]);
-
-  // Background Enrichment: 브리핑에 포함된 이벤트들 중 분석이 안 된 것들 LLM 처리
-  if (c.env.AI && threats.length > 0) {
-    c.executionCtx.waitUntil((async () => {
-      // buildThreats에서 반환된 groups 내의 event id 수집
-      const eventIds = (threats as any[]).flatMap(g => g.events.map((e: any) => e.id));
-      if (eventIds.length === 0) return;
-
-      // 분석이 필요한 대상(factors가 비어있음)만 선별하여 처리
-      const { results } = await c.env.DB.prepare(
-        `SELECT id, summary, flight_phase FROM events
-         WHERE id IN (${eventIds.map(() => '?').join(',')})
-           AND (contributing_factors IS NULL OR contributing_factors = '[]')`
-      ).bind(...eventIds).all<{ id: string; summary: string; flight_phase: string | null }>();
-
-      if (results.length > 0) {
-        // 현재 브리핑 항목 위주로 신속 처리 (ID 명시)
-        await enrichEventsWithThreats(c.env.AI, c.env.DB, 10, results.map(r => r.id));
-      }
-    })());
-  }
-
-  return c.json({ flight_context: context, top_threats: threats, notam_threats: notamThreats });
 });
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
@@ -201,7 +194,7 @@ app.get("/api/stats", async c => {
     const lastUpdated = await c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>().catch(() => null);
     const currentTs = lastUpdated?.ts ?? null;
 
-    // Cache attempt
+    // Cache check
     let cache: Cache | null = null;
     let cacheKey: Request | null = null;
     try {
@@ -216,20 +209,25 @@ app.get("/api/stats", async c => {
       }
     } catch { /* ignore cache errors */ }
 
-    const [total, yearRange, airports, sources, sev] = await Promise.all([
-      c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number }>().catch(() => ({ n: 0 })),
-      c.env.DB.prepare("SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events WHERE event_date IS NOT NULL AND event_date != ''").first<{ min_yr: string; max_yr: string }>().catch(() => ({ min_yr: "—", max_yr: "—" })),
-      Promise.resolve({ n: Object.keys(AIRPORTS).length }),
+    // Combined query for efficiency and to reduce connection overhead
+    const [eventsStats, opsIntelCount, sources, sev] = await Promise.all([
+      c.env.DB.prepare("SELECT COUNT(*) as total, MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events").first<{ total: number; min_yr: string; max_yr: string }>().catch(() => ({ total: 0, min_yr: "—", max_yr: "—" })),
+      c.env.DB.prepare("SELECT COUNT(*) as total FROM ops_intel_items").first<{ total: number }>().catch(() => ({ total: 0 })),
       c.env.DB.prepare("SELECT DISTINCT source_name FROM events WHERE source_name IS NOT NULL AND source_name != '' ORDER BY source_name").all<{ source_name: string }>().catch(() => ({ results: [] })),
       c.env.DB.prepare("SELECT severity, COUNT(*) as n FROM events GROUP BY severity ORDER BY severity DESC").all<{ severity: number; n: number }>().catch(() => ({ results: [] })),
     ]);
 
+    // If events table is empty but we have ops_intel_items, show those as fallback/addition
+    const finalTotal = (eventsStats?.total || 0) > 0 ? eventsStats!.total : (opsIntelCount?.total || 0);
+
     const stats = {
-      total_events: total?.n ?? 0,
-      year_min: (yearRange?.min_yr && yearRange.min_yr !== "") ? yearRange.min_yr : "—",
-      year_max: (yearRange?.max_yr && yearRange.max_yr !== "") ? yearRange.max_yr : "—",
-      airports_covered: airports?.n ?? 0,
-      sources: sources?.results?.map(r => r.source_name) ?? [],
+      total_events: finalTotal,
+      year_min: (eventsStats?.min_yr && eventsStats.min_yr !== "") ? eventsStats.min_yr : "—",
+      year_max: (eventsStats?.max_yr && eventsStats.max_yr !== "") ? eventsStats.max_yr : "—",
+      airports_covered: Object.keys(AIRPORTS).length,
+      sources: (sources?.results && sources.results.length > 0)
+        ? sources.results.map(r => r.source_name)
+        : ["NTSB", "FAA", "ASRS", "TSB"], // Fallback labels if DB empty
       severity_breakdown: sev?.results ?? [],
       last_updated: currentTs,
     };

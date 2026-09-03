@@ -166,10 +166,14 @@ async function airportalLookup(fn: string, serviceKey?: string) {
     const url = `${AIRPORTAL_URL}?serviceKey=${serviceKey}&pageNo=${page}&numOfRows=1000&type=json`;
     try {
       const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-      if (!res.ok) return null;
+      if (!res.ok) continue; // Skip to next page or fail silently
       const json = await res.json() as Record<string, unknown>;
+      if (!json || typeof json !== "object") continue;
+
       const items = (json as any)?.response?.body?.items?.item;
-      const rows: Record<string, unknown>[] = Array.isArray(items) ? items : items ? [items] : [];
+      if (!items) continue;
+
+      const rows: Record<string, unknown>[] = Array.isArray(items) ? items : [items];
       if (!rows.length) return null; // 마지막 페이지 도달
 
       for (const q of candidates(fn)) {

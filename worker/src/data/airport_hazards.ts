@@ -120,7 +120,7 @@ export function airportUtcOffset(icao: string | null | undefined, at?: Date): nu
   const hazard = AIRPORT_HAZARDS[icao.toUpperCase()];
   if (!hazard) return 0;
   const base = hazard.utc_offset;
-  if (!at) return base;
+  if (!at || isNaN(at.getTime())) return base;
 
   const icaoUpper = icao.toUpperCase();
   const y = at.getUTCFullYear();

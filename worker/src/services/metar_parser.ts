@@ -134,7 +134,10 @@ export function parseWeatherTags(metar = "", taf = "", arrIcao = ""): string[] {
 // ─── ISO UTC 파싱 ─────────────────────────────────────────────────────────────
 function parseIsoUtc(value: string | null | undefined): Date | null {
   if (!value) return null;
-  try { return new Date(value.replace("Z", "+00:00")); } catch { return null; }
+  try {
+    const d = new Date(value.replace("Z", "+00:00"));
+    return isNaN(d.getTime()) ? null : d;
+  } catch { return null; }
 }
 
 // ─── TAF 윈도우 매칭 ──────────────────────────────────────────────────────────

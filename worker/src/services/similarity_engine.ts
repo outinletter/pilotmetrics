@@ -289,14 +289,28 @@ export async function rankedEvents(db: D1Database, context: Record<string, unkno
 }
 
 export async function rankedEventsWithTags(db: D1Database, context: Record<string, unknown>, tags: string[]): Promise<[EventRow, number, Set<string>][]> {
-  const [results, allTags] = await Promise.all([
-    fetchCandidates(db, context),
-    loadAllTags(db),
-  ]);
+  const results = await fetchCandidates(db, context);
+  if (results.length === 0) return [];
+
+  // Optimize: Only fetch tags for candidate events
+  const eventIds = results.map(r => r.id);
+  const chunkedIds = [];
+  for (let i = 0; i < eventIds.length; i += 100) chunkedIds.push(eventIds.slice(i, i + 100));
+
+  const allTagsMap = new Map<string, Set<string>>();
+  await Promise.all(chunkedIds.map(async chunk => {
+    const { results: tagResults } = await db.prepare(
+      `SELECT event_id, tag_value FROM event_tags WHERE event_id IN (${chunk.map(() => '?').join(',')})`
+    ).bind(...chunk).all<{ event_id: string; tag_value: string }>();
+    for (const r of tagResults) {
+      if (!allTagsMap.has(r.event_id)) allTagsMap.set(r.event_id, new Set());
+      allTagsMap.get(r.event_id)!.add(r.tag_value);
+    }
+  }));
 
   const scored: [EventRow, number, Set<string>][] = [];
   for (const event of results) {
-    const eTags = allTags.get(event.id) ?? new Set<string>();
+    const eTags = allTagsMap.get(event.id) ?? new Set<string>();
     const score = scoreEvent(event, context, tags, eTags);
     if (score >= 22) scored.push([event, score, eTags]);
   }
