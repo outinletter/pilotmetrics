@@ -1,4 +1,4 @@
-# PilotMetrics — NTSB CAROL 전체 수집 2000-2025 (월별)
+# PilotBriefing — NTSB CAROL 전체 수집 2000-2025 (월별)
 $BASE  = "https://pilot-briefing.outinletter.workers.dev"
 $DELAY = 15   # 요청 간 대기(초)
 

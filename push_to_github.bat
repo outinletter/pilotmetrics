@@ -16,5 +16,5 @@ git push -u origin main
 :end
 
 echo.
-echo Done! Check https://github.com/outinletter/pilotmetrics
+echo Done! Check https://github.com/outinletter/pilotbriefing
 pause

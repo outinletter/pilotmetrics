@@ -271,6 +271,7 @@ class _StatsBar extends StatelessWidget {
   }
 
   String _fmt(dynamic v) {
+    if (v is List) return v.length.toString();
     final n = (v as num?)?.toInt() ?? 0;
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}k';
     return n.toString();

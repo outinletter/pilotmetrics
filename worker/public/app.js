@@ -1,4 +1,4 @@
-/* PilotMetrics — app.js */
+/* PilotBriefing — app.js */
 
 // ── iOS Safari pull-to-refresh 방지 ───────────────────────
 // passive:false는 렌더링 지연을 일으키므로 최소한으로만 사용
@@ -453,10 +453,12 @@ async function loadStats({ force = false } = {}) {
     if (!force && d.last_updated === _lastStatsTs) return;
     _lastStatsTs = d.last_updated ?? null;
 
-    document.getElementById("statTotal").textContent = Number(d.total_events).toLocaleString();
+    document.getElementById("statTotal").textContent = Number(d.total_events || 0).toLocaleString();
     document.getElementById("statYears").textContent =
-      d.year_min && d.year_max ? `${d.year_min} – ${d.year_max}` : "—";
-    document.getElementById("statAirports").textContent = d.airports_covered ?? "—";
+      (d.year_min && d.year_min !== "—") && (d.year_max && d.year_max !== "—")
+        ? `${d.year_min} – ${d.year_max}`
+        : "—";
+    document.getElementById("statAirports").textContent = (d.airports_covered || 0).toLocaleString();
     const sourcesEl = document.getElementById("statSources");
     const sourceNames = Array.isArray(d.sources) ? d.sources : [];
     sourcesEl.innerHTML = sourceNames.map(s =>
@@ -464,9 +466,15 @@ async function loadStats({ force = false } = {}) {
     ).join("");
 
     if (d.last_updated) {
-      const dt = new Date(d.last_updated);
-      document.getElementById("statUpdated").textContent =
-        dt.toISOString().slice(0, 10);
+      // SQLite datetime('now') is "YYYY-MM-DD HH:MM:SS".
+      // Replace space with T for better cross-browser Date parsing.
+      const dateStr = String(d.last_updated).replace(" ", "T");
+      const dt = new Date(dateStr);
+      if (!isNaN(dt)) {
+        document.getElementById("statUpdated").textContent = dt.toISOString().slice(0, 10);
+      } else {
+        document.getElementById("statUpdated").textContent = String(d.last_updated).slice(0, 10);
+      }
     }
 
     const sevData = (d.severity_breakdown || []).sort((a, b) => b.severity - a.severity);

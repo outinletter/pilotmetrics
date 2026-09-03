@@ -221,7 +221,7 @@ def post_batch(records: list[dict]) -> dict:
         data=payload,
         headers={
             "Content-Type": "application/json",
-            "User-Agent": "PilotMetrics-EASA-Collector/1.0",
+            "User-Agent": "PilotBriefing-EASA-Collector/1.0",
         },
         method="POST",
     )

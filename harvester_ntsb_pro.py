@@ -83,7 +83,7 @@ def collect_ntsb_pro():
                     
             print(f"  [+] Found {len(data)} records. Processing and uploading...")
             
-            # Format for PilotMetrics ingest
+            # Format for PilotBriefing ingest
             records = []
             for c in data:
                 ntsb_num = c.get("cm_ntsbNum") or c.get("cm_NtsbNo")

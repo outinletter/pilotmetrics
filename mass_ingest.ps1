@@ -1,4 +1,4 @@
-# PilotMetrics Mass Ingestion Orchestrator
+# PilotBriefing Mass Ingestion Orchestrator
 # This script bypasses Cloudflare Workers' 30s timeout by splitting requests by year/state.
 
 $API_BASE = "https://pilot-briefing.outinletter.workers.dev/api/admin/collect-step"
@@ -6,7 +6,7 @@ $STATES = @("KOR", "USA", "JPN", "CHN", "FRA", "CAN", "AUS", "UK", "GER", "BRA",
 $START_YEAR = 2000
 $CURRENT_YEAR = [DateTime]::Now.Year
 
-Write-Host "??Starting Mass Ingestion for PilotMetrics..." -ForegroundColor Cyan
+Write-Host "??Starting Mass Ingestion for PilotBriefing..." -ForegroundColor Cyan
 
 # 1. ARAIB (Korea) - Multiple pages
 Write-Host "`n[1/3] Ingesting ARAIB (Korea) Reports..." -ForegroundColor Yellow

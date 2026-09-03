@@ -818,7 +818,7 @@ async function parseRssFeed(db: D1Database, src: RssSource, cutoff: Date): Promi
   let checked = 0, created = 0;
   try {
     const res = await fetch(src.url, {
-      headers: { "User-Agent": "PilotMetrics/1.0 (aviation-safety-research)", "Accept": "application/rss+xml, application/xml, text/xml" },
+      headers: { "User-Agent": "PilotBriefing/1.0 (aviation-safety-research)", "Accept": "application/rss+xml, application/xml, text/xml" },
       signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
@@ -878,7 +878,7 @@ async function parseAaib(db: D1Database, cutoff: Date): Promise<Record<string, u
   const url = "https://www.gov.uk/search/all?content_store_document_type=aaib_report&order=updated-newest&count=100";
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "PilotMetrics/1.0", "Accept": "application/json" },
+      headers: { "User-Agent": "PilotBriefing/1.0", "Accept": "application/json" },
       signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
@@ -1077,7 +1077,7 @@ async function parseAvHerald(db: D1Database): Promise<Record<string, unknown>> {
   const url = "https://bsky.app/profile/avherald.com/rss";
   let checked = 0, created = 0;
   try {
-    const res = await fetch(url, { headers: { "User-Agent": "PilotMetrics/1.0" }, signal: AbortSignal.timeout(15000) });
+    const res = await fetch(url, { headers: { "User-Agent": "PilotBriefing/1.0" }, signal: AbortSignal.timeout(15000) });
     if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };
     const xml = await res.text();
     const cutoff2000 = new Date("2000-01-01");
@@ -1117,7 +1117,7 @@ async function parseSkybrary(db: D1Database, cutoff: Date): Promise<Record<strin
   const url = "https://skybrary.aero/jsonapi/node/accident_and_incident?sort=-field_event_date&page[limit]=100&fields[node--accident_and_incident]=title,field_event_date,path,body";
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "PilotMetrics/1.0", "Accept": "application/vnd.api+json" },
+      headers: { "User-Agent": "PilotBriefing/1.0", "Accept": "application/vnd.api+json" },
       signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) return { checked: 0, created: 0, error: `HTTP ${res.status}` };

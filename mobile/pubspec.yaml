@@ -1,5 +1,5 @@
 name: pilot_metrics
-description: PilotMetrics — Flight Threat Intelligence Briefing App
+description: PilotBriefing — Flight Threat Intelligence Briefing App
 publish_to: 'none'
 version: 1.0.0+1
 

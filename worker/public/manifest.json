@@ -1,6 +1,6 @@
 {
-  "name": "PilotMetrics Threat Briefing",
-  "short_name": "PilotMetrics",
+  "name": "PilotBriefing Threat Briefing",
+  "short_name": "PilotBriefing",
   "description": "Korean Air Operational Safety Intelligence & Threat Briefing",
   "start_url": "/",
   "display": "standalone",

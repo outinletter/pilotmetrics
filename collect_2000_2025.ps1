@@ -1,4 +1,4 @@
-# PilotMetrics - Full data collection 2014-2025 (monthly chunks)
+# PilotBriefing - Full data collection 2014-2025 (monthly chunks)
 $BASE  = "https://pilot-briefing.outinletter.workers.dev"
 $DELAY = 15
 

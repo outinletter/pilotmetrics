@@ -20,7 +20,7 @@ function Download-File {
     param($url, $dest)
     Write-Host "  Downloading: $url" -ForegroundColor DarkCyan
     $wc = New-Object System.Net.WebClient
-    $wc.Headers.Add("User-Agent", "PilotMetrics/1.0")
+    $wc.Headers.Add("User-Agent", "PilotBriefing/1.0")
     try {
         $wc.DownloadFile($url, $dest)
         $sz = [Math]::Round((Get-Item $dest).Length / 1MB, 1)

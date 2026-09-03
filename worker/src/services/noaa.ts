@@ -1,4 +1,4 @@
-const UA = "PilotMetrics/1.0 (aviation-safety-briefing; outinletter@daum.net)";
+const UA = "PilotBriefing/1.0 (aviation-safety-briefing; outinletter@daum.net)";
 
 // ── 공항 좌표 (Open-Meteo / Yr.no 폴백용) ───────────────────────────────────
 // aviationweather.gov가 취약한 비미국 공항 위주로 수록

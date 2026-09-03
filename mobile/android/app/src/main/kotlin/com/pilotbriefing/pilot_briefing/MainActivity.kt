@@ -1,4 +1,4 @@
-package com.pilotmetrics.pilot_metrics
+package com.pilotbriefing.pilot_briefing
 
 import io.flutter.embedding.android.FlutterActivity
 

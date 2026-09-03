@@ -222,18 +222,18 @@ app.get("/api/stats", async c => {
   // 데이터가 바뀌었거나 캐시가 없을 때만 나머지 통계 재계산
   const [total, yearRange, airports, sources, sev] = await Promise.all([
     c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number }>(),
-    c.env.DB.prepare("SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events WHERE event_date IS NOT NULL").first<{ min_yr: string; max_yr: string }>(),
+    c.env.DB.prepare("SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events WHERE event_date IS NOT NULL AND event_date != ''").first<{ min_yr: string; max_yr: string }>(),
     Promise.resolve({ n: Object.keys(AIRPORTS).length }),
     c.env.DB.prepare("SELECT DISTINCT source_name FROM events WHERE source_name IS NOT NULL AND source_name != '' ORDER BY source_name").all<{ source_name: string }>(),
     c.env.DB.prepare("SELECT severity, COUNT(*) as n FROM events GROUP BY severity ORDER BY severity DESC").all<{ severity: number; n: number }>(),
   ]);
   const response = c.json({
     total_events: total?.n ?? 0,
-    year_min: yearRange?.min_yr ?? "—",
-    year_max: yearRange?.max_yr ?? "—",
+    year_min: yearRange?.min_yr && yearRange.min_yr !== "" ? yearRange.min_yr : "—",
+    year_max: yearRange?.max_yr && yearRange.max_yr !== "" ? yearRange.max_yr : "—",
     airports_covered: airports?.n ?? 0,
-    sources: sources.results.map(r => r.source_name),
-    severity_breakdown: sev.results,
+    sources: sources.results?.map(r => r.source_name) ?? [],
+    severity_breakdown: sev.results ?? [],
     last_updated: currentTs,
   });
   // 캐시는 우리가 위 로직으로 직접 무효화하므로 만료기한을 길게 둔다.
