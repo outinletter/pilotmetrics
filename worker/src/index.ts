@@ -191,8 +191,15 @@ app.get("/api/briefing/:flightNumber", async c => {
 // 캐시된 값과 같으면 나머지 5개 쿼리 없이 캐시를 그대로 반환한다.
 app.get("/api/stats", async c => {
   try {
-    const lastUpdated = await c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>().catch(() => null);
-    const currentTs = lastUpdated?.ts ?? null;
+    // 1. Get latest update from BOTH tables
+    const [lastEv, lastOps] = await Promise.all([
+      c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>().catch(() => null),
+      c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM ops_intel_items").first<{ ts: string }>().catch(() => null),
+    ]);
+
+    const currentTs = (lastEv?.ts && lastOps?.ts)
+      ? (lastEv.ts > lastOps.ts ? lastEv.ts : lastOps.ts)
+      : (lastEv?.ts || lastOps?.ts || null);
 
     // Cache check
     let cache: Cache | null = null;
@@ -209,25 +216,30 @@ app.get("/api/stats", async c => {
       }
     } catch { /* ignore cache errors */ }
 
-    // Combined query for efficiency and to reduce connection overhead
+    // 2. Count rows more reliably
     const [eventsStats, opsIntelCount, sources, sev] = await Promise.all([
-      c.env.DB.prepare("SELECT COUNT(*) as total, MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events").first<{ total: number; min_yr: string; max_yr: string }>().catch(() => ({ total: 0, min_yr: "—", max_yr: "—" })),
+      // Count total regardless of date for 'Total Threat Events'
+      c.env.DB.prepare("SELECT COUNT(*) as total FROM events").first<{ total: number }>().catch(() => ({ total: 0 })),
+      // Filtered stats for the period/years display
+      c.env.DB.prepare("SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr FROM events WHERE event_date IS NOT NULL AND event_date != ''").first<{ min_yr: string; max_yr: string }>().catch(() => ({ min_yr: "—", max_yr: "—" })),
       c.env.DB.prepare("SELECT COUNT(*) as total FROM ops_intel_items").first<{ total: number }>().catch(() => ({ total: 0 })),
       c.env.DB.prepare("SELECT DISTINCT source_name FROM events WHERE source_name IS NOT NULL AND source_name != '' ORDER BY source_name").all<{ source_name: string }>().catch(() => ({ results: [] })),
       c.env.DB.prepare("SELECT severity, COUNT(*) as n FROM events GROUP BY severity ORDER BY severity DESC").all<{ severity: number; n: number }>().catch(() => ({ results: [] })),
     ]);
 
-    // If events table is empty but we have ops_intel_items, show those as fallback/addition
-    const finalTotal = (eventsStats?.total || 0) > 0 ? eventsStats!.total : (opsIntelCount?.total || 0);
+    // Show combined total if main events is small/empty
+    const evCount = eventsStats?.total || 0;
+    const opsCount = opsIntelCount?.total || 0;
+    const finalTotal = evCount > 0 ? evCount : opsCount;
 
     const stats = {
       total_events: finalTotal,
-      year_min: (eventsStats?.min_yr && eventsStats.min_yr !== "") ? eventsStats.min_yr : "—",
-      year_max: (eventsStats?.max_yr && eventsStats.max_yr !== "") ? eventsStats.max_yr : "—",
+      year_min: (eventsStats as any)?.min_yr || "—",
+      year_max: (eventsStats as any)?.max_yr || "—",
       airports_covered: Object.keys(AIRPORTS).length,
       sources: (sources?.results && sources.results.length > 0)
         ? sources.results.map(r => r.source_name)
-        : ["NTSB", "FAA", "ASRS", "TSB"], // Fallback labels if DB empty
+        : ["NTSB", "FAA", "ASRS", "TSB"], // Default fallback labels
       severity_breakdown: sev?.results ?? [],
       last_updated: currentTs,
     };
