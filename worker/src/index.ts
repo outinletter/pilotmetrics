@@ -217,7 +217,7 @@ app.get("/api/stats", async c => {
     } catch { /* ignore cache errors */ }
 
     // 2. Count rows more reliably
-+    const [eventsStats, yearsStats, opsIntelCount, sources, sev] = await Promise.all([
+    const [eventsStats, yearsStats, opsIntelCount, sources, sev] = await Promise.all([
       // Count total regardless of date for 'Total Threat Events'
       c.env.DB.prepare("SELECT COUNT(*) as total FROM events").first<{ total: number }>().catch(() => ({ total: 0 })),
       // Filtered stats for the period/years display
@@ -234,8 +234,8 @@ app.get("/api/stats", async c => {
 
     const stats = {
       total_events: finalTotal,
-+     year_min: (yearsStats as any)?.min_yr || "—",
-+     year_max: (yearsStats as any)?.max_yr || "—",
+      year_min: (yearsStats as any)?.min_yr || "—",
+      year_max: (yearsStats as any)?.max_yr || "—",
       airports_covered: Object.keys(AIRPORTS).length,
       sources: (sources?.results && sources.results.length > 0)
         ? sources.results.map(r => r.source_name)
