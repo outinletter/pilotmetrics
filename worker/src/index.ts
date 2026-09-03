@@ -82,7 +82,7 @@ app.get("/api/briefing/:flightNumber", async c => {
 
   // ── 편명 처리 (KE629, OZ202 등) ──────────────────────────────────────────
   const fn = normalizeFlightNumber(raw);
-  const [flight, flightMsg] = await getFlight(fn, c.env.AVIATIONSTACK_API_KEY);
+  const [flight, flightMsg] = await getFlight(fn, c.env.AVIATIONSTACK_API_KEY, c.env.AIRPORTAL_SERVICE_KEY);
   const depIcao = iataToIcao(flight.departure_iata as string);
   const arrIcao = iataToIcao(flight.arrival_iata as string);
   const depIata = (flight.departure_iata as string) ?? "UNKNOWN";
