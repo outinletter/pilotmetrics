@@ -2,6 +2,7 @@ export type Env = {
   DB: D1Database;
   AI: Ai;
   AVIATIONSTACK_API_KEY: string;
+  AIRPORTAL_SERVICE_KEY?: string; // 한국공항공사 국제선 운항 스케줄 (공공데이터포털)
   FAA_NOTAM_API_KEY?: string;   // legacy: "client_id:client_secret"
   NMS_CLIENT_ID?: string;       // NMS-API OAuth2 client_id
   NMS_CLIENT_SECRET?: string;   // NMS-API OAuth2 client_secret
