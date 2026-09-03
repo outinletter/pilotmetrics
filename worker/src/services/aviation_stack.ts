@@ -1,5 +1,6 @@
 import { LOCAL_ROUTES } from "../data/routes";
 import { ROUTE_PAIRS } from "../data/route_pairs";
+import { KAC_CSV_SCHEDULE } from "../data/kac_csv_schedule";
 
 export function normalizeFlightNumber(fn: string): string {
   const value = fn.toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -206,6 +207,27 @@ async function airportalLookup(fn: string, serviceKey?: string) {
   return null;
 }
 
+function kacCsvLookup(fn: string) {
+  const q = normalizeFlightNumber(fn);
+  const match = KAC_CSV_SCHEDULE[q];
+  if (match) {
+    return {
+      flight_number: fn,
+      airline_iata: match.airline === "KAL" ? "KE" : (match.airline === "AAR" ? "OZ" : match.airline),
+      flight_iata: q,
+      departure_iata: match.dep,
+      arrival_iata: match.arr,
+      scheduled_departure: null,
+      scheduled_arrival: null,
+      estimated_departure: null,
+      estimated_arrival: null,
+      aircraft_type: null,
+      raw: { source: "kac_csv_20250922", ...match },
+    };
+  }
+  return null;
+}
+
 async function aviationstackLookup(fn: string, apiKey: string) {
   if (!apiKey) return null;
   // 1차: 실시간 flights (현재 비행 중인 편)
@@ -304,6 +326,17 @@ export async function getFlight(fn: string, apiKey: string, airportalKey?: strin
     const result = airportalFlight as unknown as Record<string, unknown>;
     applyFr24(result);
     return [result, null];
+  }
+
+  // 3순위: 한국공항공사 CSV 스케줄 목록 (신규)
+  const csvFlight = kacCsvLookup(fn);
+  if (csvFlight) {
+    const dep = csvFlight.departure_iata ?? "";
+    const arr = csvFlight.arrival_iata ?? "";
+    const pair = ROUTE_PAIRS[`${dep}-${arr}`];
+    if (pair) csvFlight.aircraft_type = pair.aircraft_type;
+    applyFr24(csvFlight as unknown as Record<string, unknown>);
+    return [csvFlight as unknown as Record<string, unknown>, null];
   }
 
   // 3순위: LOCAL_ROUTES (수동 매핑)
