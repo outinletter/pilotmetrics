@@ -206,7 +206,9 @@ app.get("/api/stats", async c => {
     let cacheKey: Request | null = null;
     try {
       cache = caches.default;
-      cacheKey = new Request(c.req.url, c.req.raw);
+      const cacheUrl = new URL(c.req.url);
+      cacheUrl.searchParams.set("_v", "2");
+      cacheKey = new Request(cacheUrl.toString(), c.req.raw);
       if (cache && cacheKey) {
         const cached = await cache.match(cacheKey);
         if (cached) {
