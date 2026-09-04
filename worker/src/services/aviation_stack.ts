@@ -1023,7 +1023,7 @@ export async function getFlight(
 
     return [
       kacResult.flight,
-      `Flight source: ${kacResult.source}.`,
+      null,
     ];
   }
 
@@ -1051,7 +1051,7 @@ export async function getFlight(
 
       return [
         csvFlight,
-        "Flight source: KAC international flight schedule CSV.",
+        null,
       ];
     }
   } catch (error) {
@@ -1133,12 +1133,12 @@ export async function getFlight(
   if (hasRoute) {
     return [
       fallback,
-      `KAC_GW and KAC_INTERNATIONAL_CSV did not contain ${normalized}. ROUTE_PAIRS fallback used: ${keGuess!.departure_iata}→${keGuess!.arrival_iata}.`,
+      `Route information for ${normalized} not found in schedule database. Using fallback: ${keGuess!.departure_iata}→${keGuess!.arrival_iata}.`,
     ];
   }
 
   return [
     fallback,
-    `KAC_GW and KAC_INTERNATIONAL_CSV did not contain ${normalized}. ROUTE_PAIRS could not determine the route.`,
+    `Route information for ${normalized} not found in schedule database.`,
   ];
 }

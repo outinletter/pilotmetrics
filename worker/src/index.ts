@@ -58,10 +58,15 @@ app.get("/api/briefing/:flightNumber", async c => {
     stage: string,
     error: unknown,
   ) => {
-    const message =
+    let message =
       error instanceof Error
         ? error.message
         : String(error);
+
+    // Shorten Cloudflare D1 quota errors
+    if (message.includes("exceeded D1's free tier daily row read limit")) {
+      message = "Upgrade to a paid plan or wait until tomorrow";
+    }
 
     console.error(
       `[BRIEFING:${stage}]`,
@@ -711,32 +716,6 @@ app.get("/api/briefing/:flightNumber", async c => {
         "unknown",
     };
 
-    if (flightMsg) {
-      const enc = (
-        q: string,
-      ) =>
-        encodeURIComponent(q);
-
-      context.flight_search_links = [
-        {
-          label:
-            `${fn} flight status`,
-          url:
-            `https://www.google.com/search?q=${enc(
-              `${fn} flight status`,
-            )}`,
-        },
-        {
-          label:
-            `${fn} ${context.route} today flight`,
-          url:
-            `https://www.google.com/search?q=${enc(
-              `${fn} ${context.route} today flight`,
-            )}`,
-        },
-      ];
-    }
-
     /* ==================================================================== */
     /* Persist flight query                                                  */
     /* ==================================================================== */
@@ -927,12 +906,11 @@ app.get("/api/briefing/:flightNumber", async c => {
     /* ==================================================================== */
 
     context.messages = [
-      ...messages,
-      ...weatherMessages,
-      ...errors.map(
-        e =>
-          `${e.stage}: ${e.error}`,
-      ),
+      ...new Set([
+        ...messages,
+        ...weatherMessages,
+        ...errors.map(e => e.error),
+      ]),
     ].filter(Boolean);
 
     return c.json({
@@ -1001,196 +979,109 @@ app.get("/api/stats", async c => {
     stage: string,
     error: unknown,
   ) => {
-    const message =
+    let message =
       error instanceof Error
         ? error.message
         : String(error);
 
-    console.error(
-      `[STATS:${stage}]`,
-      message,
-    );
+    if (message.includes("exceeded D1's free tier daily row read limit")) {
+      message = "Upgrade to a paid plan or wait until tomorrow";
+    }
 
-    errors.push({
-      stage,
-      error: message,
-    });
+    console.error(`[STATS:${stage}]`, message);
+    errors.push({ stage, error: message });
   };
+
+  // 1. Get latest update from BOTH tables for cache check
+  let currentTs: string | null = null;
+  try {
+    const [lastEv, lastOps] = await Promise.all([
+      c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>().catch(() => null),
+      c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM ops_intel_items").first<{ ts: string }>().catch(() => null),
+    ]);
+    currentTs = (lastEv?.ts && lastOps?.ts)
+      ? (lastEv.ts > lastOps.ts ? lastEv.ts : lastOps.ts)
+      : (lastEv?.ts || lastOps?.ts || null);
+  } catch (error) { recordError("STATS_TIMESTAMP_CHECK", error); }
+
+  // 2. Cache check
+  let cache: Cache | null = null;
+  let cacheKey: Request | null = null;
+  try {
+    cache = caches.default;
+    const cacheUrl = new URL(c.req.url);
+    cacheUrl.searchParams.set("_v", "4");
+    cacheKey = new Request(cacheUrl.toString(), c.req.raw);
+    if (cache && cacheKey && currentTs) {
+      const cached = await cache.match(cacheKey);
+      if (cached) {
+        const cachedBody = await cached.clone().json<{ last_updated: string | null }>().catch(() => null);
+        if (cachedBody && cachedBody.last_updated === currentTs) return cached;
+      }
+    }
+  } catch { /* ignore cache errors */ }
 
   let totalEvents = 0;
   let yearMin = "—";
   let yearMax = "—";
-  let airportsCovered =
-    Object.keys(AIRPORTS).length;
-
+  let airportsCovered = Object.keys(AIRPORTS).length;
   let sources: string[] = [];
-  let severityBreakdown: Array<{
-    severity: number;
-    n: number;
-  }> = [];
-
-  let lastUpdated:
-    | string
-    | null = null;
+  let severityBreakdown: Array<{ severity: number; n: number; }> = [];
 
   /* TOTAL */
   try {
-    totalEvents =
-      (
-        await c.env.DB
-          .prepare(
-            "SELECT COUNT(*) as n FROM events",
-          )
-          .first<{ n: number }>()
-      )?.n ?? 0;
-  } catch (error) {
-    recordError(
-      "STATS_TOTAL_EVENTS",
-      error,
-    );
-  }
+    const [evCount, opsCount] = await Promise.all([
+      c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number }>().catch(() => ({ n: 0 })),
+      c.env.DB.prepare("SELECT COUNT(*) as n FROM ops_intel_items").first<{ n: number }>().catch(() => ({ n: 0 })),
+    ]);
+    totalEvents = (evCount?.n ?? 0) + (opsCount?.n ?? 0);
+  } catch (error) { recordError("STATS_TOTAL_EVENTS", error); }
 
   /* YEAR RANGE */
   try {
-    const yearRange =
-      await c.env.DB
-        .prepare(
-          `SELECT
-             MIN(substr(event_date,1,4)) as min_yr,
-             MAX(substr(event_date,1,4)) as max_yr
-           FROM events
-           WHERE event_date IS NOT NULL`,
-        )
-        .first<{
-          min_yr: string;
-          max_yr: string;
-        }>();
-
-    yearMin =
-      yearRange?.min_yr ??
-      "—";
-
-    yearMax =
-      yearRange?.max_yr ??
-      "—";
-  } catch (error) {
-    recordError(
-      "STATS_YEAR_RANGE",
-      error,
-    );
-  }
-
-  /* AIRPORTS */
-  try {
-    airportsCovered =
-      Object.keys(AIRPORTS).length;
-  } catch (error) {
-    recordError(
-      "STATS_AIRPORTS",
-      error,
-    );
-  }
+    const yearRange = await c.env.DB.prepare(
+      `SELECT MIN(substr(event_date,1,4)) as min_yr, MAX(substr(event_date,1,4)) as max_yr
+       FROM events WHERE event_date IS NOT NULL AND event_date != ''`
+    ).first<{ min_yr: string; max_yr: string }>();
+    yearMin = yearRange?.min_yr ?? "—";
+    yearMax = yearRange?.max_yr ?? "—";
+  } catch (error) { recordError("STATS_YEAR_RANGE", error); }
 
   /* SOURCES */
   try {
-    const result =
-      await c.env.DB
-        .prepare(
-          `SELECT DISTINCT source_name
-           FROM events
-           WHERE source_name IS NOT NULL
-           AND source_name != ''
-           ORDER BY source_name`,
-        )
-        .all<{
-          source_name: string;
-        }>();
-
-    sources =
-      result.results.map(
-        r => r.source_name,
-      );
-  } catch (error) {
-    recordError(
-      "STATS_SOURCES",
-      error,
-    );
-  }
+    const result = await c.env.DB.prepare(
+      `SELECT DISTINCT source_name FROM events WHERE source_name IS NOT NULL AND source_name != '' ORDER BY source_name`
+    ).all<{ source_name: string }>();
+    sources = result.results.map(r => r.source_name);
+    if (sources.length === 0) sources = ["NTSB", "FAA", "ASRS", "TSB"];
+  } catch (error) { recordError("STATS_SOURCES", error); }
 
   /* SEVERITY */
   try {
-    const result =
-      await c.env.DB
-        .prepare(
-          `SELECT severity, COUNT(*) as n
-           FROM events
-           GROUP BY severity
-           ORDER BY severity DESC`,
-        )
-        .all<{
-          severity: number;
-          n: number;
-        }>();
+    const result = await c.env.DB.prepare(
+      `SELECT severity, COUNT(*) as n FROM events GROUP BY severity ORDER BY severity DESC`
+    ).all<{ severity: number; n: number }>();
+    severityBreakdown = result.results;
+  } catch (error) { recordError("STATS_SEVERITY", error); }
 
-    severityBreakdown =
-      result.results;
-  } catch (error) {
-    recordError(
-      "STATS_SEVERITY",
-      error,
-    );
-  }
-
-  /* LAST UPDATED */
-  try {
-    const result =
-      await c.env.DB
-        .prepare(
-          "SELECT MAX(updated_at) as ts FROM events",
-        )
-        .first<{
-          ts: string;
-        }>();
-
-    lastUpdated =
-      result?.ts ?? null;
-  } catch (error) {
-    recordError(
-      "STATS_LAST_UPDATED",
-      error,
-    );
-  }
-
-  return c.json({
+  const stats = {
     ok: errors.length === 0,
-
-    total_events:
-      totalEvents,
-
-    year_min:
-      yearMin,
-
-    year_max:
-      yearMax,
-
-    airports_covered:
-      airportsCovered,
-
+    total_events: totalEvents,
+    year_min: yearMin,
+    year_max: yearMax,
+    airports_covered: airportsCovered,
     sources,
-
-    severity_breakdown:
-      severityBreakdown,
-
-    last_updated:
-      lastUpdated,
-
-    error_stage:
-      errors.length > 0
-        ? errors[0].stage
-        : null,
-
+    severity_breakdown: severityBreakdown,
+    last_updated: currentTs,
+    error_stage: errors.length > 0 ? errors[0].stage : null,
     errors,
-  });
+  };
+
+  const res = c.json(stats, 200, { "Cache-Control": "public, max-age=3600" });
+  if (cache && cacheKey) {
+    try { c.executionCtx.waitUntil(cache.put(cacheKey, res.clone())); } catch { /* ignore */ }
+  }
+  return res;
 });
 
 // ─── DB Debug ─────────────────────────────────────────────────────────────────
