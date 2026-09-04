@@ -239,12 +239,15 @@ function formatNotamTime(iso) {
   } catch { return iso; }
 }
 
-function renderNotamThreats(notams) {
+function renderNotamThreats(notams, icao) {
   const container = document.getElementById("notamBoxContainer");
   const content = document.getElementById("notamInnerContent");
   if (!container || !content) return;
 
   const activeNotams = (notams || []);
+  const now = new Date();
+  const timeStr = `${now.getUTCHours().toString().padLeft(2,'0')}:${now.getUTCMinutes().toString().padLeft(2,'0')}Z`;
+  const dateStr = now.toISOString().slice(0, 10);
 
   if (activeNotams.length === 0) {
     content.innerHTML = `
@@ -253,8 +256,9 @@ function renderNotamThreats(notams) {
           <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span>No significant NOTAM threats detected for arrival.</span>
-      </div>`;
+        <span>No significant NOTAM threats detected for ${esc(icao || 'arrival')}.</span>
+      </div>
+      <div class="notam-meta-footer">Checked at ${dateStr} ${timeStr}</div>`;
     return;
   }
 
@@ -264,6 +268,11 @@ function renderNotamThreats(notams) {
   }
 
   content.innerHTML = `
+    <div class="notam-info-header">
+      <span class="notam-info-icao">${esc(icao)}</span>
+      <span class="notam-info-sep">|</span>
+      <span class="notam-info-date">FETCHED: ${dateStr} ${timeStr}</span>
+    </div>
     <div class="notam-mini-list">
       ${activeNotams.map(n => `
         <div class="notam-mini-card notam-${n.severity.toLowerCase()}">
@@ -420,7 +429,7 @@ async function loadBriefing(flightNum) {
 
     renderContext(data.flight_context);
     renderThreats(data.top_threats || []);
-    renderNotamThreats(data.notam_threats || []);
+    renderNotamThreats(data.notam_threats || [], data.flight_context.arrival_icao);
 
     heroSection.classList.add("hidden");
     resultsWrap.classList.remove("hidden");

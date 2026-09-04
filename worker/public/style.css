@@ -1225,13 +1225,45 @@ details summary::marker { content: ""; }
   padding: 10px 0;
 }
 
+.notam-info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border);
+}
+.notam-info-icao {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sky-400);
+}
+.notam-info-sep {
+  color: var(--border);
+  font-size: 12px;
+}
+.notam-info-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--subtle);
+  letter-spacing: 0.05em;
+}
+
 .notam-clear-msg {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 0;
+  padding: 12px 0 4px;
   font-size: 14px;
   color: var(--muted);
+}
+.notam-meta-footer {
+  font-size: 10px;
+  color: var(--subtle);
+  opacity: 0.6;
+  text-align: right;
+  font-family: var(--font-mono);
 }
 
 .notam-mini-list {
