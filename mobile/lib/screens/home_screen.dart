@@ -247,7 +247,7 @@ class _StatsBar extends StatelessWidget {
 
     if (stats['total_events'] != null) {
       items.add(_StatItem(
-        label: 'Incidents',
+        label: 'Total Threat Event',
         value: _fmt(stats['total_events']),
         icon: Icons.storage,
       ));
