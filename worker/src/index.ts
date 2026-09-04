@@ -985,16 +985,18 @@ app.get("/api/stats", async c => {
     errors.push({ stage, error: message });
   };
 
-  // 1. Get latest update from BOTH tables for cache check
+  // 1. Get latest update from BOTH tables and last run
   let currentTs: string | null = null;
   try {
-    const [lastEv, lastOps] = await Promise.all([
+    const [lastEv, lastOps, lastRun] = await Promise.all([
       c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM events").first<{ ts: string }>().catch(() => null),
       c.env.DB.prepare("SELECT MAX(updated_at) as ts FROM ops_intel_items").first<{ ts: string }>().catch(() => null),
+      c.env.DB.prepare("SELECT MAX(finished_at) as ts FROM ops_intel_runs WHERE status = 'complete'").first<{ ts: string }>().catch(() => null),
     ]);
-    currentTs = (lastEv?.ts && lastOps?.ts)
+    // Use last successful run time as primary update indicator
+    currentTs = lastRun?.ts || (lastEv?.ts && lastOps?.ts
       ? (lastEv.ts > lastOps.ts ? lastEv.ts : lastOps.ts)
-      : (lastEv?.ts || lastOps?.ts || null);
+      : (lastEv?.ts || lastOps?.ts || null));
   } catch (error) { recordError("STATS_TIMESTAMP_CHECK", error); }
 
   // 2. Cache check
@@ -1003,13 +1005,14 @@ app.get("/api/stats", async c => {
   try {
     cache = caches.default;
     const cacheUrl = new URL(c.req.url);
-    cacheUrl.searchParams.set("_v", "4");
+    cacheUrl.searchParams.set("_v", "5"); // Increment version to bust potentially corrupt cache
     cacheKey = new Request(cacheUrl.toString(), c.req.raw);
     if (cache && cacheKey && currentTs) {
       const cached = await cache.match(cacheKey);
       if (cached) {
-        const cachedBody = await cached.clone().json<{ last_updated: string | null }>().catch(() => null);
-        if (cachedBody && cachedBody.last_updated === currentTs) return cached;
+        const cachedBody = await cached.clone().json<{ last_updated: string | null; total_events: number }>().catch(() => null);
+        // Ensure cached body is not reporting 0 if we have a valid timestamp
+        if (cachedBody && cachedBody.last_updated === currentTs && (cachedBody.total_events || 0) > 0) return cached;
       }
     }
   } catch { /* ignore cache errors */ }
@@ -1024,10 +1027,10 @@ app.get("/api/stats", async c => {
   /* TOTAL */
   try {
     const [evCount, opsCount] = await Promise.all([
-      c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number }>().catch(() => ({ n: 0 })),
-      c.env.DB.prepare("SELECT COUNT(*) as n FROM ops_intel_items").first<{ n: number }>().catch(() => ({ n: 0 })),
+      c.env.DB.prepare("SELECT COUNT(*) as n FROM events").first<{ n: number | string }>().catch(() => ({ n: 0 })),
+      c.env.DB.prepare("SELECT COUNT(*) as n FROM ops_intel_items").first<{ n: number | string }>().catch(() => ({ n: 0 })),
     ]);
-    totalEvents = (evCount?.n ?? 0) + (opsCount?.n ?? 0);
+    totalEvents = Number(evCount?.n ?? 0) + Number(opsCount?.n ?? 0);
   } catch (error) { recordError("STATS_TOTAL_EVENTS", error); }
 
   /* YEAR RANGE */
