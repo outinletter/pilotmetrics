@@ -176,9 +176,9 @@ function renderContext(ctx) {
     </div>
     <div class="ctx-body">
       <div class="ctx-chip-row">
-        <span class="chip">${esc(ctx.destination_runway || "RWY TBD")}</span>
-        <span class="chip">${esc(ctx.weather || "—")}</span>
-        ${ctx.arrival_weather_time ? `<span class="chip">${esc(ctx.arrival_weather_time)}</span>` : ""}
+        <span class="chip chip-rwy">${esc(ctx.destination_runway || "RWY TBD")}</span>
+        ${(ctx.weather || "").split("/").filter(Boolean).map(w => `<span class="chip chip-weather">${esc(w.replace(/_/g, " "))}</span>`).join("")}
+        ${ctx.arrival_weather_time ? `<span class="chip chip-time">${esc(ctx.arrival_weather_time)}</span>` : ""}
       </div>
       ${msgs}
       ${links ? `<div class="ctx-links">${links}</div>` : ""}
