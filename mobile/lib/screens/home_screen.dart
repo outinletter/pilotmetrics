@@ -18,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _error;
   List<String> _recent = [];
   Map<String, dynamic>? _stats;
+  DateTime? _lastStatsUpdate;
 
   @override
   void initState() {
@@ -43,7 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchStats() async {
     try {
       final stats = await _api.getStats();
-      if (mounted) setState(() => _stats = stats);
+      if (mounted) {
+        setState(() {
+          _stats = stats;
+          _lastStatsUpdate = DateTime.now();
+        });
+      }
     } catch (_) {}
   }
 
@@ -79,10 +85,13 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Pilot Briefing'),
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            const SizedBox(height: 8),
+        child: RefreshIndicator(
+          onRefresh: _fetchStats,
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              const SizedBox(height: 8),
 
             // Header
             Text(
@@ -178,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
             // Stats bar
             if (_stats != null) ...[
               const SizedBox(height: 24),
-              _StatsBar(stats: _stats!),
+              _StatsBar(stats: _stats!, lastUpdated: _lastStatsUpdate),
             ],
 
             // Recent searches
@@ -229,7 +238,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _StatsBar extends StatelessWidget {
   final Map<String, dynamic> stats;
-  const _StatsBar({required this.stats});
+  final DateTime? lastUpdated;
+  const _StatsBar({required this.stats, this.lastUpdated});
 
   @override
   Widget build(BuildContext context) {
@@ -259,15 +269,59 @@ class _StatsBar extends StatelessWidget {
 
     if (items.isEmpty) return const SizedBox.shrink();
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: items,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'INTEL SUMMARY',
+              style: TextStyle(
+                fontSize: 10,
+                letterSpacing: 0.8,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withOpacity(0.45),
+              ),
+            ),
+            if (lastUpdated != null)
+              Text(
+                'AS OF ${_formatDate(lastUpdated!)}',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 0.2,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.4),
+                ),
+              ),
+          ],
         ),
-      ),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: items,
+            ),
+          ),
+        ),
+      ],
     );
+  }
+
+  String _formatDate(DateTime dt) {
+    final months = [
+      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+    ];
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
   String _fmt(dynamic v) {
