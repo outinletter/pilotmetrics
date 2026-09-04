@@ -450,59 +450,91 @@ flightInput.addEventListener("keydown", e => { if (e.key === "Enter") loadBriefi
 const SEV_LABELS = { 5: "Critical", 4: "High", 3: "Medium", 2: "Low", 1: "Info" };
 const SEV_COLORS = { 5: "#ef4444", 4: "#f97316", 3: "#f59e0b", 2: "#22c55e", 1: "#38bdf8" };
 
-let _lastStatsTs = null;
-
-async function loadStats({ force = false } = {}) {
+async function loadStats() {
   try {
-    const res = await fetch("/api/stats");
+    const res = await fetch("/api/stats", {
+      cache: "no-store"
+    });
+
     if (!res.ok) return;
+
     const d = await res.json();
 
-    // last_updated가 바뀌었을 때만 렌더링 (force=true이면 무조건 렌더)
-    if (!force && d.last_updated === _lastStatsTs) return;
-    _lastStatsTs = d.last_updated ?? null;
+    document.getElementById("statTotal").textContent =
+      Number(d.total_events || 0).toLocaleString();
 
-    document.getElementById("statTotal").textContent = Number(d.total_events || 0).toLocaleString();
     document.getElementById("statYears").textContent =
-      (d.year_min && d.year_min !== "—") && (d.year_max && d.year_max !== "—")
+      (d.year_min && d.year_min !== "—") &&
+      (d.year_max && d.year_max !== "—")
         ? `${d.year_min} – ${d.year_max}`
         : "—";
-    document.getElementById("statAirports").textContent = (d.airports_covered || 0).toLocaleString();
+
+    document.getElementById("statAirports").textContent =
+      Number(d.airports_covered || 0).toLocaleString();
+
     const sourcesEl = document.getElementById("statSources");
-    const sourceNames = Array.isArray(d.sources) ? d.sources : [];
-    sourcesEl.innerHTML = sourceNames.map(s =>
-      `<span class="db-source-tag">${esc(s)}</span>`
-    ).join("");
+    const sourceNames = Array.isArray(d.sources)
+      ? d.sources
+      : [];
+
+    sourcesEl.innerHTML = sourceNames
+      .map(s => `<span class="db-source-tag">${esc(s)}</span>`)
+      .join("");
 
     if (d.last_updated) {
-      // SQLite datetime('now') is "YYYY-MM-DD HH:MM:SS".
-      // Replace space with T for better cross-browser Date parsing.
       const dateStr = String(d.last_updated).replace(" ", "T");
       const dt = new Date(dateStr);
-      if (!isNaN(dt)) {
-        document.getElementById("statUpdated").textContent = dt.toISOString().slice(0, 10);
-      } else {
-        document.getElementById("statUpdated").textContent = String(d.last_updated).slice(0, 10);
-      }
+
+      document.getElementById("statUpdated").textContent =
+        !isNaN(dt)
+          ? dt.toISOString().slice(0, 10)
+          : String(d.last_updated).slice(0, 10);
     }
 
-    const sevData = (d.severity_breakdown || []).sort((a, b) => b.severity - a.severity);
-    const maxN = Math.max(...sevData.map(s => s.n), 1);
-    const barsEl = document.getElementById("statSevBars");
-    barsEl.innerHTML = sevData.map(s => {
-      const pct = Math.round((s.n / maxN) * 100);
-      const label = SEV_LABELS[s.severity] || `Sev ${s.severity}`;
-      const color = SEV_COLORS[s.severity] || "#8fa3b8";
-      return `<div class="db-sev-row">
-        <span class="db-sev-name">${label}</span>
-        <div class="db-sev-bar-wrap"><div class="db-sev-bar" style="width:${pct}%;background:${color}"></div></div>
-        <span class="db-sev-count">${s.n}</span>
-      </div>`;
-    }).join("");
-  } catch { /* silent */ }
+    const sevData =
+      (d.severity_breakdown || [])
+        .sort((a, b) => b.severity - a.severity);
+
+    const maxN =
+      Math.max(...sevData.map(s => s.n), 1);
+
+    const barsEl =
+      document.getElementById("statSevBars");
+
+    barsEl.innerHTML = sevData
+      .map(s => {
+        const pct =
+          Math.round((s.n / maxN) * 100);
+
+        const label =
+          SEV_LABELS[s.severity] ||
+          `Sev ${s.severity}`;
+
+        const color =
+          SEV_COLORS[s.severity] ||
+          "#8fa3b8";
+
+        return `
+          <div class="db-sev-row">
+            <span class="db-sev-name">${label}</span>
+            <div class="db-sev-bar-wrap">
+              <div
+                class="db-sev-bar"
+                style="width:${pct}%;background:${color}">
+              </div>
+            </div>
+            <span class="db-sev-count">${s.n}</span>
+          </div>
+        `;
+      })
+      .join("");
+
+  } catch (error) {
+    console.error("[STATS] Failed to load database statistics:", error);
+  }
 }
 
-// 최초 로드
-loadStats({ force: true });
-// 30초마다 last_updated 확인 — 변경됐을 때만 UI 갱신
-setInterval(loadStats, 30 * 1000);
+// 페이지 로드 시 1회만 D1 통계 조회
+loadStats();
+
+
