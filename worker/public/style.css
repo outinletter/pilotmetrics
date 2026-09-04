@@ -1389,8 +1389,11 @@ details summary::marker { content: ""; }
   .search-input { font-size: 20px; }
   .search-btn { width: 100%; height: 52px; border-radius: 10px; margin-top: 8px; }
 
+  /* Container */
+  .container { padding: 12px 8px 40px; }
+
   /* ctx-panel overflow protection */
-  .ctx-panel { overflow: hidden; }
+  .ctx-panel { overflow: hidden; border-radius: 0 0 12px 12px; }
 
   /* ctx-header: 2-row layout */
   .ctx-header { padding: 16px 14px 14px; margin-top: 8px; gap: 8px; }
@@ -1410,7 +1413,8 @@ details summary::marker { content: ""; }
   .risk-badge { font-size: 13px; padding: 4px 10px; }
 
   /* ctx-body */
-  .ctx-body { padding: 14px; grid-template-columns: 1fr; gap: 10px; }
+  .ctx-body { padding: 10px 8px; grid-template-columns: 1fr; gap: 10px; }
+  .ctx-block { padding: 12px 10px; }
   .ctx-block-label { font-size: 12px; }
   .ctx-weather-text { font-size: 13px; }
 

@@ -59,9 +59,10 @@ app.get("/api/briefing/:flightNumber", async c => {
     error: unknown,
   ) => {
     let message =
-      error instanceof Error
+      (error instanceof Error
         ? error.message
-        : String(error);
+        : String(error)
+      ).trim();
 
     // Shorten Cloudflare D1 quota errors
     if (message.includes("exceeded D1's free tier daily row read limit")) {
@@ -672,10 +673,7 @@ app.get("/api/briefing/:flightNumber", async c => {
       airport_event_count:
         airportEventCount,
 
-      messages: [
-        ...messages,
-        ...weatherMessages,
-      ].filter(Boolean),
+      messages: [], // Will be populated at the end
 
       arrival_weather_time:
         arrivalTime,
@@ -905,31 +903,25 @@ app.get("/api/briefing/:flightNumber", async c => {
     /* Final response                                                        */
     /* ==================================================================== */
 
-    context.messages = [
-      ...new Set([
-        ...messages,
-        ...weatherMessages,
-        ...errors.map(e => e.error),
-      ]),
-    ].filter(Boolean);
+    context.messages = Array.from(
+      new Set(
+        [
+          ...(context.messages as string[]),
+          ...messages,
+          ...weatherMessages,
+          ...errors.map(e => e.error),
+        ]
+          .map(m => String(m || "").trim())
+          .filter(Boolean),
+      ),
+    );
 
     return c.json({
       ok: errors.length === 0,
-
-      flight_context:
-        context,
-
-      top_threats:
-        threats,
-
-      notam_threats:
-        notamThreats,
-
-      error_stage:
-        errors.length > 0
-          ? errors[0].stage
-          : null,
-
+      flight_context: context,
+      top_threats: threats,
+      notam_threats: notamThreats,
+      error_stage: errors.length > 0 ? errors[0].stage : null,
       errors,
     });
   } catch (error) {
@@ -980,9 +972,10 @@ app.get("/api/stats", async c => {
     error: unknown,
   ) => {
     let message =
-      error instanceof Error
+      (error instanceof Error
         ? error.message
-        : String(error);
+        : String(error)
+      ).trim();
 
     if (message.includes("exceeded D1's free tier daily row read limit")) {
       message = "Upgrade to a paid plan or wait until tomorrow";
