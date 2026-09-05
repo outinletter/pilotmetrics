@@ -282,7 +282,7 @@ app.get("/api/briefing/:flightNumber", async c => {
       ];
 
       return c.json({
-        ok: errors.length === 0,
+        ok: !errors.some(e => ["AIRPORT_CODE", "BRIEFING_UNHANDLED"].includes(e.stage)),
         flight_context: context,
         top_threats: threats,
         notam_threats:
@@ -917,7 +917,7 @@ app.get("/api/briefing/:flightNumber", async c => {
     );
 
     return c.json({
-      ok: errors.length === 0,
+      ok: !errors.some(e => ["GET_FLIGHT", "AIRPORT_CODE", "BRIEFING_UNHANDLED"].includes(e.stage)),
       flight_context: context,
       top_threats: threats,
       notam_threats: notamThreats,

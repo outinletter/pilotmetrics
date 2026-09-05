@@ -328,33 +328,39 @@ export async function rankedEventsWithLLM(
   context: Record<string, unknown>,
   tags: string[],
 ): Promise<[EventRow, number, Set<string>][]> {
-  const candidates = (await rankedEventsWithTags(db, context, tags)).slice(0, 30);
-  if (candidates.length === 0) return [];
-
-  const queryText = contextText(context, tags);
-  const texts = [queryText, ...candidates.map(([e]) => eventText(e))];
-
-  let embeddings: number[][] | null = null;
   try {
-    const result = await Promise.race([
-      (ai as unknown as { run: (m: string, p: unknown) => Promise<{ data: number[][] }> })
-        .run("@cf/baai/bge-base-en-v1.5", { text: texts }),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
-    ]);
-    embeddings = result.data;
-  } catch {
-    return candidates.slice(0, 18);
+    const candidates = (await rankedEventsWithTags(db, context, tags)).slice(0, 30);
+    if (candidates.length === 0) return [];
+
+    const queryText = contextText(context, tags);
+    const texts = [queryText, ...candidates.map(([e]) => eventText(e))];
+
+    let embeddings: number[][] | null = null;
+    try {
+      const result = await Promise.race([
+        (ai as unknown as { run: (m: string, p: unknown) => Promise<{ data: number[][] }> })
+          .run("@cf/baai/bge-base-en-v1.5", { text: texts }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
+      ]);
+      embeddings = result.data;
+    } catch (e) {
+      console.error("[rankedEventsWithLLM:AI_FAIL]", e);
+      return candidates.slice(0, 18);
+    }
+
+    if (!embeddings || embeddings.length < 2) return candidates.slice(0, 18);
+
+    const queryEmb = embeddings[0];
+    const reranked: [EventRow, number, Set<string>][] = candidates.map(([event, mfScore, eTags], i) => {
+      const sim = embeddings![i + 1] ? cosine(queryEmb, embeddings![i + 1]) : 0;
+      // 블렌딩: 다중요소 점수 50% + 코사인 유사도 50% (0-100 정규화)
+      const blended = Math.min(100, Math.round(0.5 * mfScore + 50 * sim));
+      return [event, blended, eTags];
+    });
+
+    return reranked.sort(([, a], [, b]) => b - a);
+  } catch (e) {
+    console.error("[rankedEventsWithLLM:CRITICAL_FAIL]", e);
+    return [];
   }
-
-  if (!embeddings || embeddings.length < 2) return candidates.slice(0, 18);
-
-  const queryEmb = embeddings[0];
-  const reranked: [EventRow, number, Set<string>][] = candidates.map(([event, mfScore, eTags], i) => {
-    const sim = embeddings![i + 1] ? cosine(queryEmb, embeddings![i + 1]) : 0;
-    // 블렌딩: 다중요소 점수 50% + 코사인 유사도 50% (0-100 정규화)
-    const blended = Math.min(100, Math.round(0.5 * mfScore + 50 * sim));
-    return [event, blended, eTags];
-  });
-
-  return reranked.sort(([, a], [, b]) => b - a);
 }
