@@ -106,7 +106,7 @@ interface NmsNotamItem {
 interface NmsResponse {
   status?: string;
   data?: {
-    geojson?: NmsNotamItem[];
+    geojson?: any; // Can be FeatureCollection or array of items
     aixm?: string[];
   };
 }
@@ -147,7 +147,13 @@ async function fetchFromNms(
 
   if (!res.ok) throw new Error(`NMS-API HTTP ${res.status}`);
   const data = await res.json() as NmsResponse;
-  return data.data?.geojson ?? [];
+
+  const geo = data.data?.geojson;
+  if (geo && typeof geo === "object" && !Array.isArray(geo)) {
+    // GeoJSON FeatureCollection handles
+    return (geo as any).features ?? [];
+  }
+  return (geo as any) ?? [];
 }
 
 // ── Legacy FAA API Fetch ─────────────────────────────────────────────────────
@@ -183,21 +189,28 @@ function extractNotamFields(item: NmsNotamItem): {
   start: string;
   end: string;
 } {
-  const core = item.properties?.coreNOTAMData?.notam;
-  const trans = item.properties?.coreNOTAMData?.notamTranslation;
+  const props = (item as any).properties || {};
+  const core = props.coreNOTAMData?.notam || item;
+  const trans = props.coreNOTAMData?.notamTranslation;
 
-  // Try to find the best text available (some international NOTAMs might be in notamTranslation)
-  let text = core?.text ?? item.notamText ?? "";
+  // Try all possible locations for text
+  let text = core.text ?? item.notamText ?? props.text ?? "";
   if (!text && trans && trans.length > 0) {
-    text = trans[0].simpleText ?? trans[0].domestic_message ?? "";
+    text = trans[0].simpleText ?? trans[0].domestic_message ?? trans[0].formattedText ?? "";
   }
 
-  return {
-    id:    core?.number ?? core?.id ?? item.notamNumber ?? item.id ?? "UNKNOWN",
-    text:  text,
-    start: core?.effectiveStart ?? item.effectiveStartDate ?? "",
-    end:   core?.effectiveEnd   ?? item.effectiveEndDate   ?? "",
-  };
+  // Clean ICAO field identifiers (e.g. "E) ", "A) ")
+  text = text.replace(/^[A-G]\)\s*/i, "").trim();
+
+  // Try all possible locations for dates
+  const start = core.effectiveStart ?? item.effectiveStartDate ?? core.effectiveStartDate ?? props.effectiveStart ?? "";
+  const end = core.effectiveEnd ?? item.effectiveEndDate ?? core.effectiveEndDate ?? props.effectiveEnd ?? "";
+
+  // Try all possible locations for number/ID
+  const id = core.number ?? core.id ?? item.notamNumber ?? item.id ?? props.id ??
+             (text ? `HASH-${text.slice(0, 16)}` : "UNKNOWN");
+
+  return { id, text, start, end };
 }
 
 // ── Classifier Rules ─────────────────────────────────────────────────────────
@@ -213,22 +226,34 @@ interface Rule {
 
 const RULES: Rule[] = [
   {
+    pattern: /AD\s*(?:CLOSED|CLSD)/i,
+    category: "OTHER", severity: "CRITICAL", riskScore: 98,
+    tag: "AIRPORT_CLOSURE",
+    headline: () => "Aerodrome closed to all traffic",
+  },
+  {
     pattern: /RWY\s*([\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)\s*(?:.*?\s+)?(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE|UNUSABLE)/i,
     category: "RUNWAY", severity: "CRITICAL", riskScore: 92,
     tag: "RUNWAY_CLOSURE",
     headline: m => `Runway ${m[1]} closed / unserviceable`,
   },
   {
-    pattern: /RWY\s*([\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)\s*(?:.*?\s+)?(?:RESTRICTED|AVBL\s*\d+M|WIP|WORK\s+IN\s+PROGRESS|LIMIT)/i,
+    pattern: /RWY\s*([\d]{2}[LRC]?)\s*THR\s*DISPLACED\s*(\d+)/i,
+    category: "RUNWAY", severity: "HIGH", riskScore: 65,
+    tag: "RUNWAY_THRESHOLD_DISPLACED",
+    headline: m => `Runway ${m[1]} threshold displaced by ${m[2]}ft`,
+  },
+  {
+    pattern: /RWY\s*([\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)\s*(?:.*?\s+)?(?:RESTRICTED|AVBL\s*\d+M|WIP|WORK\s+IN\s+PROGRESS|LIMIT|WINGSPAN)/i,
     category: "RUNWAY", severity: "HIGH", riskScore: 72,
     tag: "RUNWAY_RESTRICTION",
     headline: m => `Runway ${m[1]} work in progress / restricted`,
   },
   {
-    pattern: /ILS\s+(?:OR\s+LOC\s+)?(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:.*?\s+)?(?:U\/S|OTS|UNMON|OUT\s*OF\s*SVC|NOT\s*AVBL|OUT\s*OF\s*SERVICE|NA)/i,
+    pattern: /(?:NAV\s+)?ILS\s+(?:OR\s+LOC\s+)?(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:.*?\s+)?(?:U\/S|OTS|UNMON|OUT\s*OF\s*SVC|NOT\s*AVBL|OUT\s*OF\s*SERVICE|NA|IM|MM|OM|GS|GP)/i,
     category: "ILS_NAVAID", severity: "HIGH", riskScore: 78,
     tag: "ILS_OUTAGE",
-    headline: () => "ILS out of service — precision approach unavailable",
+    headline: m => `ILS/Instrument approach outage reported`,
   },
   {
     pattern: /TWY\s*([A-Z][\w\s,\/-]*?)\s*(?:.*?\s+)?(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE|UNUSABLE|LIMIT)/i,
@@ -237,7 +262,7 @@ const RULES: Rule[] = [
     headline: m => `Taxiway ${m[1]} closed / restricted`,
   },
   {
-    pattern: /(?:APRON|RAMP|SPOT)\s*(.*?\s+)?(?:CLSD|CLOSED|OTS|U\/S|LIMIT)/i,
+    pattern: /(?:APRON|RAMP|SPOT)\s*(.*?\s+)?(?:CLSD|CLOSED|OTS|U\/S|LIMIT|RELOCATED)/i,
     category: "OTHER", severity: "LOW", riskScore: 15,
     tag: "APRON_CLOSURE",
     headline: m => `Apron/Ramp area ${m[1] || ''} closed or restricted`,
@@ -347,31 +372,47 @@ function classifyNotam(text: string): {
 function parseFaaDate(dateStr: string): number {
   if (!dateStr || dateStr === "PERM") return Infinity;
 
-  // Standard ISO attempt
-  let t = new Date(dateStr.includes("T") ? dateStr : dateStr.replace(" ", "T")).getTime();
+  const clean = dateStr.trim().toUpperCase();
+  if (clean === "PERM") return Infinity;
+
+  // 1. Standard ISO attempt
+  let t = new Date(clean.includes("T") ? clean : clean.replace(" ", "T")).getTime();
   if (!isNaN(t)) return t;
 
-  // FAA format: MM/DD/YYYY HHMM (e.g. 09/01/2026 1201)
-  const m = dateStr.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2})(\d{2})/);
-  if (m) {
-    const [_, month, day, year, hour, min] = m;
+  // 2. FAA format: MM/DD/YYYY HHMM (e.g. 09/01/2026 1201)
+  const mFaa = clean.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2})(\d{2})/);
+  if (mFaa) {
+    const [_, month, day, year, hour, min] = mFaa;
     return Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(min));
+  }
+
+  // 3. ICAO format: YYMMDDHHMM (e.g. 2609071200)
+  const mIcao = clean.match(/^(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
+  if (mIcao) {
+    const [_, yy, mm, dd, hh, min] = mIcao;
+    const year = 2000 + parseInt(yy);
+    return Date.UTC(year, parseInt(mm) - 1, parseInt(dd), parseInt(hh), parseInt(min));
   }
 
   return NaN;
 }
 
-function overlapsEta(startStr: string, endStr: string, etaMs: number, windowMs = 24 * 60 * 60 * 1000): boolean {
+function overlapsEta(startStr: string, endStr: string, etaMs: number, windowMs = 48 * 60 * 60 * 1000): boolean {
   try {
     const s = parseFaaDate(startStr);
     const e = parseFaaDate(endStr);
 
-    if (isNaN(s)) return true; // Safety: show if start date is unparseable
+    // If start date is unknown, assume it might be relevant
+    if (isNaN(s)) return true;
 
-    const actualEnd = isNaN(e) || endStr === "PERM" ? etaMs + windowMs + 1 : e;
+    // Expand window to 48h to account for timezone differences and early briefings
+    const windowStart = etaMs - windowMs;
+    const windowEnd = etaMs + windowMs;
 
-    // Check if current time/ETA falls within the NOTAM window (with 24h buffer)
-    return s <= etaMs + windowMs && actualEnd >= etaMs - windowMs;
+    const actualEnd = (isNaN(e) || endStr.includes("PERM")) ? Infinity : e;
+
+    // Active if the NOTAM starts before our window ends AND ends after our window starts
+    return s <= windowEnd && actualEnd >= windowStart;
   } catch { return true; }
 }
 

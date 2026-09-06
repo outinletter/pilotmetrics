@@ -65,7 +65,7 @@ app.get("/api/briefing/:flightNumber", async c => {
 
     // Shorten Cloudflare D1 quota errors
     if (message.includes("exceeded D1's free tier daily row read limit")) {
-      message = "Upgrade to a paid plan or wait until tomorrow";
+      message = "D1 Quota Exceeded: Daily row read limit reached. The database is intact, but access is restricted until the next reset or upgrade.";
     }
 
     console.error(
@@ -240,7 +240,7 @@ app.get("/api/stats", async c => {
       ).trim();
 
     if (message.includes("exceeded D1's free tier daily row read limit")) {
-      message = "Upgrade to a paid plan or wait until tomorrow";
+      message = "D1 Quota Exceeded: Daily row read limit reached. The database is intact, but access is restricted until the next reset or upgrade.";
     }
 
     console.error(`[STATS:${stage}]`, message);
