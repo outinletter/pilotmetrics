@@ -213,19 +213,19 @@ interface Rule {
 
 const RULES: Rule[] = [
   {
-    pattern: /RWY\s*([\d]{2}[LRC]?)\s*(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE)/i,
+    pattern: /RWY\s*([\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)\s*(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE)/i,
     category: "RUNWAY", severity: "CRITICAL", riskScore: 92,
     tag: "RUNWAY_CLOSURE",
     headline: m => `Runway ${m[1]} closed / unserviceable`,
   },
   {
-    pattern: /RWY\s*([\d]{2}[LRC]?)\s*(?:RESTRICTED|AVBL\s*\d+M|WIP|WORK\s+IN\s+PROGRESS)/i,
+    pattern: /RWY\s*([\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)\s*(?:RESTRICTED|AVBL\s*\d+M|WIP|WORK\s+IN\s+PROGRESS)/i,
     category: "RUNWAY", severity: "HIGH", riskScore: 72,
     tag: "RUNWAY_RESTRICTION",
     headline: m => `Runway ${m[1]} work in progress / restricted`,
   },
   {
-    pattern: /ILS\s+(?:OR\s+LOC\s+)?(?:RWY\s*[\d]{2}[LRC]?)?\s*(?:GP|GLIDE\s*PATH|GLIDESLOPE)?\s*(?:U\/S|OTS|UNMON|OUT\s*OF\s*SVC|NOT\s*AVBL|OUT\s*OF\s*SERVICE)/i,
+    pattern: /ILS\s+(?:OR\s+LOC\s+)?(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:GP|GLIDE\s*PATH|GLIDESLOPE)?\s*(?:U\/S|OTS|UNMON|OUT\s*OF\s*SVC|NOT\s*AVBL|OUT\s*OF\s*SERVICE)/i,
     category: "ILS_NAVAID", severity: "HIGH", riskScore: 78,
     tag: "ILS_OUTAGE",
     headline: () => "ILS out of service — precision approach unavailable",
@@ -237,7 +237,7 @@ const RULES: Rule[] = [
     headline: () => "ILS glidepath unmonitored — non-precision approach only",
   },
   {
-    pattern: /LOC\s+(?:RWY\s*[\d]{2}[LRC]?)?\s*(?:U\/S|OTS|UNMON|NOT\s*AVBL|OUT\s*OF\s*SERVICE)/i,
+    pattern: /LOC\s+(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:U\/S|OTS|UNMON|NOT\s*AVBL|OUT\s*OF\s*SERVICE)/i,
     category: "ILS_NAVAID", severity: "HIGH", riskScore: 65,
     tag: "LOC_OUTAGE",
     headline: () => "Localizer unserviceable",
@@ -255,7 +255,7 @@ const RULES: Rule[] = [
     headline: () => "Airspace restriction / active military exercise",
   },
   {
-    pattern: /(PAPI|VASI|MALSR|SSALR|REIL|ODALS|ALS|LIGHTS|APCH\s+LGT)\s*(?:RWY\s*[\d]{2}[LRC]?)?\s*(?:U\/S|OTS|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE)/i,
+    pattern: /(PAPI|VASI|MALSR|SSALR|REIL|ODALS|ALS|LIGHTS|APCH\s+LGT)\s*(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:U\/S|OTS|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE)/i,
     category: "LIGHTING", severity: "MEDIUM", riskScore: 42,
     tag: "APPROACH_LIGHTING_OUTAGE",
     headline: m => `${m[1]} lighting out of service`,
@@ -279,7 +279,7 @@ const RULES: Rule[] = [
     headline: () => "Bird/wildlife activity hazard reported",
   },
   {
-    pattern: /TWY\s*([A-Z][\w\s,]*)\s*(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE)/i,
+    pattern: /TWY\s*([A-Z][\w\s,\/-]*)\s*(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE)/i,
     category: "TAXIWAY", severity: "LOW", riskScore: 15,
     tag: "TAXIWAY_CLOSURE",
     headline: m => `Taxiway ${m[1]} closed`,
@@ -331,16 +331,16 @@ function classifyNotam(text: string): {
 
   // Very broad catch-all for any NOTAM that looks like it has operational impact
   // This ensures we don't show "No threats" when there are actually NOTAMs
-  if (/(?:RWY|ILS|TWY|CLSD|OTS|U\/S|CLOSED|OUT\s*OF\s*SERVICE|LIMIT|RESTRICT|UNUSABLE|NOT\s*AVBL|AVBL|WIP|WORK|LGT|LIGHT|OBST|CRANE|BIRD|PROC|SID|STAR|IAC|APCH|MIN|ALT|FREQ|RADIO)/i.test(upper)) {
+  if (/(?:RWY|ILS|TWY|CLSD|OTS|U\/S|CLOSED|OUT\s*OF\s*SERVICE|LIMIT|RESTRICT|UNUSABLE|NOT\s*AVBL|AVBL|WIP|WORK|LGT|LIGHT|OBST|CRANE|BIRD|PROC|SID|STAR|IAC|APCH|MIN|ALT|FREQ|RADIO|CONSTRUCTION|MEN\s+WORKING)/i.test(upper)) {
     // Extract first 60 chars as a pseudo-headline
     const cleanText = text.replace(/\s+/g, " ").trim();
-    let head = cleanText.slice(0, 60);
-    if (cleanText.length > 60) head += "...";
+    let head = cleanText.slice(0, 70);
+    if (cleanText.length > 70) head += "...";
 
     return {
       category: "OTHER",
       severity: "LOW",
-      riskScore: 5,
+      riskScore: 10,
       tag: "OP_NOTICE",
       headline: head,
     };
