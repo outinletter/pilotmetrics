@@ -144,17 +144,9 @@ function renderContext(ctx) {
       <div class="ctx-header-inner">
         <div class="ctx-header-center">
         <div class="ctx-flight-row">
-          <span class="ctx-flight">${esc(ctx.flight_number)}</span>
-          <span class="ctx-flight-sep">·</span>
-          <span class="ctx-route-inline">${esc(ctx.route)}</span>
-          <span class="risk-badge ctx-risk-badge ${riskLow}">${esc(ctx.risk_level || "LOW")}</span>
-        </div>
-        <div class="ctx-icao-row">
-          ${(() => {
-            const arrIcao = esc(ctx.arrival_icao || "—");
-            const arrIata = ctx.arrival_iata ? ` (${esc(ctx.arrival_iata)})` : "";
-            return `<span class="ctx-icao-seg">${arrIcao}${arrIata}</span>`;
-          })()}
+          <span class="ctx-flight">${esc(ctx.route)}</span>
+          <span class="ctx-icao-seg" style="font-family: var(--font-mono); font-size: 18px; color: rgba(255,255,255,0.5); margin-left: 8px;">(${esc(ctx.arrival_icao || ctx.arrival_iata)})</span>
+          <span class="risk-badge ctx-risk-badge ${riskLow}" style="margin-left: 12px;">${esc(ctx.risk_level || "LOW")}</span>
         </div>
         ${ctx.arrival_weather_brief ? `<div class="ctx-wx-brief">${esc(ctx.arrival_weather_brief)}</div>` : ""}
         ${(ctx.arrival_tags && ctx.arrival_tags.length > 0) ? `
