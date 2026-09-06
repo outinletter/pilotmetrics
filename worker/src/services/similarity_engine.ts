@@ -154,9 +154,18 @@ function sourceQualityMultiplier(sourceName: string | null, aircraftType: string
 function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: string[], eTags: Set<string>): number {
   let score = 0;
 
-  // 1. 도착 공항 일치 (최고 우선순위) — 매칭되면 높은 점수 부여
-  if (event.airport_icao && event.airport_icao === context.arrival_icao) score += 25;
-  else if (event.airport_iata && event.airport_iata === context.arrival_iata)  score += 20;
+  // 1. 공항 일치 여부 (최고 우선순위 및 필터링 요소)
+  const isAirportMatch = (event.airport_icao && event.airport_icao === context.arrival_icao) ||
+                         (event.airport_iata && event.airport_iata === context.arrival_iata);
+
+  if (isAirportMatch) {
+    score += 40; // 공항 일치 시 기본 점수 대폭 상향
+  } else if (context.arrival_icao || context.arrival_iata) {
+    // 공항 중심 검색 모드인데 공항이 일치하지 않는 경우
+    // BKK 검색 시 ICN 사고가 나오는 것을 방지하기 위해 점수를 대폭 삭감하거나 0 처리
+    return 0;
+  }
+
   if (event.runway && event.runway === context.destination_runway) score += 10;
 
   // 2. 도착 시간대 TAF 날씨 태그 (패밀리 중복 제거 후 가중치 적용)
@@ -245,18 +254,17 @@ async function fetchCandidates(db: D1Database, context: Record<string, unknown>)
   const arrIcao = (context.arrival_icao as string | undefined) ?? "";
   const arrIata = (context.arrival_iata as string | undefined) ?? "";
 
-  // 1차: 공항 일치 이벤트 (소규모 → 빠름)
-  const airportRows: EventRow[] = [];
+  // 공항 중심 검색 모드: 해당 공항에서 발생한 사고만 검색
   if (arrIcao || arrIata) {
     const { results } = await db.prepare(
       `SELECT * FROM events WHERE aircraft_category = 'JET'
-       AND (airport_icao = ? OR airport_iata = ?) LIMIT 300`
+       AND (airport_icao = ? OR airport_iata = ?)
+       ORDER BY event_date DESC LIMIT 500`
     ).bind(arrIcao || "", arrIata || "").all<EventRow>();
-    airportRows.push(...results);
+    return results;
   }
 
-  // 2차: 전체 JET 풀 (공항 무관 — 날씨/유사 태그 매칭용)
-  // 35년 이내 + severity >= 2 로 후보를 800건 이하로 제한 (스케일링 감사 P1)
+  // 폴백: 일반 검색 (기존 로직 유지)
   const { results: jetRows } = await db.prepare(
     `SELECT * FROM events
      WHERE aircraft_category = 'JET'
@@ -265,11 +273,7 @@ async function fetchCandidates(db: D1Database, context: Record<string, unknown>)
      ORDER BY severity DESC, event_date DESC
      LIMIT 800`
   ).all<EventRow>();
-
-  // 병합 — 공항 일치 행 우선, ID 기준 중복 제거
-  const seen = new Set<string>(airportRows.map(r => r.id));
-  for (const r of jetRows) if (!seen.has(r.id)) { seen.add(r.id); airportRows.push(r); }
-  return airportRows;
+  return jetRows;
 }
 
 export async function rankedEvents(db: D1Database, context: Record<string, unknown>, tags: string[]): Promise<[EventRow, number][]> {
