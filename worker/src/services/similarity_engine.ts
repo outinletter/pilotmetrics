@@ -155,14 +155,27 @@ function scoreEvent(event: EventRow, context: Record<string, unknown>, tags: str
   let score = 0;
 
   // 1. 공항 일치 여부 (최고 우선순위 및 필터링 요소)
-  const isAirportMatch = (event.airport_icao && event.airport_icao === context.arrival_icao) ||
-                         (event.airport_iata && event.airport_iata === context.arrival_iata);
+  const targetIcao = (context.arrival_icao as string || "").toUpperCase();
+  const targetIata = (context.arrival_iata as string || "").toUpperCase();
+
+  const isAirportMatch = (event.airport_icao && event.airport_icao === targetIcao) ||
+                         (event.airport_iata && event.airport_iata === targetIata);
 
   if (isAirportMatch) {
-    score += 40; // 공항 일치 시 기본 점수 대폭 상향
-  } else if (context.arrival_icao || context.arrival_iata) {
-    // 공항 중심 검색 모드인데 공항이 일치하지 않는 경우
-    // BKK 검색 시 ICN 사고가 나오는 것을 방지하기 위해 점수를 대폭 삭감하거나 0 처리
+    score += 40;
+
+    // [보안책] 이중 검증: 요약문에 다른 공항에서의 사고임이 명시된 경우 필터링
+    // 예: "accident at Muan (MWX)"인데 출발지가 BKK라 BKK로 태깅된 경우 제외
+    const summary = (event.summary || "").toUpperCase();
+    const otherAirportMatch = summary.match(/ACCIDENT AT\s+([A-Z]{3,4})/);
+    if (otherAirportMatch) {
+      const detectedCode = otherAirportMatch[1];
+      if (detectedCode !== targetIcao && detectedCode !== targetIata) {
+        // 검색한 공항이 아닌 다른 곳에서의 사고임이 명시됨 -> 제외
+        return 0;
+      }
+    }
+  } else if (targetIcao || targetIata) {
     return 0;
   }
 
