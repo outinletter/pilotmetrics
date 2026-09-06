@@ -246,7 +246,7 @@ function renderNotamThreats(notams, icao) {
 
   const activeNotams = (notams || []);
   const now = new Date();
-  const timeStr = `${now.getUTCHours().toString().padLeft(2,'0')}:${now.getUTCMinutes().toString().padLeft(2,'0')}Z`;
+  const timeStr = `${now.getUTCHours().toString().padStart(2,'0')}:${now.getUTCMinutes().toString().padStart(2,'0')}Z`;
   const dateStr = now.toISOString().slice(0, 10);
 
   if (activeNotams.length === 0) {
