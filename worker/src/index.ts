@@ -202,6 +202,22 @@ app.get("/api/briefing/:flightNumber", async c => {
       error_stage: "INVALID_INPUT",
       errors: [{ stage: "INPUT_VALIDATION", error: "Input must be a 3 or 4 letter airport code." }]
     });
+  } catch (error) {
+    recordError("BRIEFING_UNHANDLED", error);
+    return c.json({
+      ok: false,
+      flight_context: {
+        flight_number: raw,
+        route: "UNKNOWN-UNKNOWN",
+        aircraft: "Unknown",
+        messages: errors.map(e => `${e.stage}: ${e.error}`),
+      },
+      top_threats: [],
+      notam_threats: [],
+      error_stage: "BRIEFING_UNHANDLED",
+      errors,
+    });
+  }
 });
 
 
