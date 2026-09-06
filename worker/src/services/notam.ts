@@ -213,37 +213,37 @@ interface Rule {
 
 const RULES: Rule[] = [
   {
-    pattern: /RWY\s*([\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)\s*(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE)/i,
+    pattern: /RWY\s*([\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)\s*(?:.*?\s+)?(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE|UNUSABLE)/i,
     category: "RUNWAY", severity: "CRITICAL", riskScore: 92,
     tag: "RUNWAY_CLOSURE",
     headline: m => `Runway ${m[1]} closed / unserviceable`,
   },
   {
-    pattern: /RWY\s*([\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)\s*(?:RESTRICTED|AVBL\s*\d+M|WIP|WORK\s+IN\s+PROGRESS)/i,
+    pattern: /RWY\s*([\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)\s*(?:.*?\s+)?(?:RESTRICTED|AVBL\s*\d+M|WIP|WORK\s+IN\s+PROGRESS|LIMIT)/i,
     category: "RUNWAY", severity: "HIGH", riskScore: 72,
     tag: "RUNWAY_RESTRICTION",
     headline: m => `Runway ${m[1]} work in progress / restricted`,
   },
   {
-    pattern: /ILS\s+(?:OR\s+LOC\s+)?(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:GP|GLIDE\s*PATH|GLIDESLOPE)?\s*(?:U\/S|OTS|UNMON|OUT\s*OF\s*SVC|NOT\s*AVBL|OUT\s*OF\s*SERVICE)/i,
+    pattern: /ILS\s+(?:OR\s+LOC\s+)?(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:.*?\s+)?(?:U\/S|OTS|UNMON|OUT\s*OF\s*SVC|NOT\s*AVBL|OUT\s*OF\s*SERVICE|NA)/i,
     category: "ILS_NAVAID", severity: "HIGH", riskScore: 78,
     tag: "ILS_OUTAGE",
     headline: () => "ILS out of service — precision approach unavailable",
   },
   {
-    pattern: /(?:GP|GLIDE\s*(?:PATH|SLOPE))\s*(?:U\/S|OTS|UNMON|NOT\s*AVBL|OUT\s*OF\s*SERVICE)/i,
-    category: "ILS_NAVAID", severity: "HIGH", riskScore: 68,
-    tag: "ILS_GP_OUTAGE",
-    headline: () => "ILS glidepath unmonitored — non-precision approach only",
+    pattern: /TWY\s*([A-Z][\w\s,\/-]*?)\s*(?:.*?\s+)?(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE|UNUSABLE|LIMIT)/i,
+    category: "TAXIWAY", severity: "MEDIUM", riskScore: 35,
+    tag: "TAXIWAY_CLOSURE",
+    headline: m => `Taxiway ${m[1]} closed / restricted`,
   },
   {
-    pattern: /LOC\s+(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:U\/S|OTS|UNMON|NOT\s*AVBL|OUT\s*OF\s*SERVICE)/i,
-    category: "ILS_NAVAID", severity: "HIGH", riskScore: 65,
-    tag: "LOC_OUTAGE",
-    headline: () => "Localizer unserviceable",
+    pattern: /(?:APRON|RAMP|SPOT)\s*(.*?\s+)?(?:CLSD|CLOSED|OTS|U\/S|LIMIT)/i,
+    category: "OTHER", severity: "LOW", riskScore: 15,
+    tag: "APRON_CLOSURE",
+    headline: m => `Apron/Ramp area ${m[1] || ''} closed or restricted`,
   },
   {
-    pattern: /(VOR|NDB|DME|TACAN)\s*(?:[\w]{2,4}\s*)?(?:U\/S|OTS|UNMON|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE)/i,
+    pattern: /(?:VOR|NDB|DME|TACAN)\s*(?:[\w]{2,4}\s*)?(?:U\/S|OTS|UNMON|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE)/i,
     category: "VOR_NDB", severity: "MEDIUM", riskScore: 48,
     tag: "NAVAID_OUTAGE",
     headline: m => `${m[1]} navaid unserviceable`,
@@ -255,7 +255,7 @@ const RULES: Rule[] = [
     headline: () => "Airspace restriction / active military exercise",
   },
   {
-    pattern: /(PAPI|VASI|MALSR|SSALR|REIL|ODALS|ALS|LIGHTS|APCH\s+LGT)\s*(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:U\/S|OTS|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE)/i,
+    pattern: /(PAPI|VASI|MALSR|SSALR|REIL|ODALS|ALS|LIGHTS|APCH\s+LGT|RAI)\s*(?:RWY\s*[\d]{2}[LRC]?(?:\/[\d]{2}[LRC]?)?)?\s*(?:U\/S|OTS|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE)/i,
     category: "LIGHTING", severity: "MEDIUM", riskScore: 42,
     tag: "APPROACH_LIGHTING_OUTAGE",
     headline: m => `${m[1]} lighting out of service`,
@@ -279,22 +279,16 @@ const RULES: Rule[] = [
     headline: () => "Bird/wildlife activity hazard reported",
   },
   {
-    pattern: /TWY\s*([A-Z][\w\s,\/-]*)\s*(?:CLSD|CLOSED|OTS|U\/S|OUT\s*OF\s*SERVICE)/i,
-    category: "TAXIWAY", severity: "LOW", riskScore: 15,
-    tag: "TAXIWAY_CLOSURE",
-    headline: m => `Taxiway ${m[1]} closed`,
-  },
-  {
     pattern: /(?:WIP|WORK\s+IN\s+PROGRESS|CONSTRUCTION|MEN\s+WORKING)/i,
     category: "OTHER", severity: "LOW", riskScore: 15,
     tag: "WIP_NOTICE",
     headline: () => "Work in progress / Construction reported",
   },
   {
-    pattern: /(?:VHF|UHF|RADIO|FREQ|COMMUNICATION)\s*(?:U\/S|OTS|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE)/i,
+    pattern: /(?:VHF|UHF|RADIO|FREQ|COMMUNICATION)\s*(?:U\/S|OTS|NOT\s*AVBL|OUT\s*OF\s*SVC|OUT\s*OF\s*SERVICE|CHANGED)/i,
     category: "COMM", severity: "MEDIUM", riskScore: 35,
     tag: "COMM_OUTAGE",
-    headline: () => "Communication facility outage",
+    headline: () => "Communication facility outage or change",
   },
   {
     pattern: /(?:LVP|LOW\s*VISIBILITY\s*PROC)\s*(?:ACT|ACTIVE|FORCE|EFFECT)/i,
@@ -303,7 +297,7 @@ const RULES: Rule[] = [
     headline: () => "Low Visibility Procedures (LVP) active / standby",
   },
   {
-    pattern: /(?:PROC|SID|STAR|IAC|APCH|INSTRUMENT\s+APPROACH)\s*(?:CHANGED|AMENDED|SUSPENDED|NOT\s*AVBL)/i,
+    pattern: /(?:PROC|SID|STAR|IAP|IAC|APCH|INSTRUMENT\s+APPROACH)\s*(?:CHANGED|AMENDED|SUSPENDED|NOT\s*AVBL|NA)/i,
     category: "OTHER", severity: "MEDIUM", riskScore: 40,
     tag: "PROC_CHANGE",
     headline: () => "Instrument procedure change / suspension",
@@ -349,20 +343,35 @@ function classifyNotam(text: string): {
   return null;
 }
 
-// ── ETA Overlap ──────────────────────────────────────────────────────────────
+// ── Date Parsing Safety ──────────────────────────────────────────────────────
+function parseFaaDate(dateStr: string): number {
+  if (!dateStr || dateStr === "PERM") return Infinity;
 
-function overlapsEta(startIso: string, endIso: string, etaMs: number, windowMs = 24 * 60 * 60 * 1000): boolean {
+  // Standard ISO attempt
+  let t = new Date(dateStr.includes("T") ? dateStr : dateStr.replace(" ", "T")).getTime();
+  if (!isNaN(t)) return t;
+
+  // FAA format: MM/DD/YYYY HHMM (e.g. 09/01/2026 1201)
+  const m = dateStr.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2})(\d{2})/);
+  if (m) {
+    const [_, month, day, year, hour, min] = m;
+    return Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(min));
+  }
+
+  return NaN;
+}
+
+function overlapsEta(startStr: string, endStr: string, etaMs: number, windowMs = 24 * 60 * 60 * 1000): boolean {
   try {
-    // Standardize date string for parsing (replace space with T)
-    const sStr = startIso.includes("T") ? startIso : startIso.replace(" ", "T");
-    const eStr = endIso.includes("T") ? endIso : endIso.replace(" ", "T");
+    const s = parseFaaDate(startStr);
+    const e = parseFaaDate(endStr);
 
-    const s = new Date(sStr).getTime();
-    const e = (eStr === "PERM" || !eStr) ? etaMs + windowMs + 1 : new Date(eStr).getTime();
+    if (isNaN(s)) return true; // Safety: show if start date is unparseable
 
-    if (isNaN(s)) return true; // Safety: show if date is weird
-    // Increased window to 24 hours for better briefing awareness
-    return s <= etaMs + windowMs && e >= etaMs - windowMs;
+    const actualEnd = isNaN(e) || endStr === "PERM" ? etaMs + windowMs + 1 : e;
+
+    // Check if current time/ETA falls within the NOTAM window (with 24h buffer)
+    return s <= etaMs + windowMs && actualEnd >= etaMs - windowMs;
   } catch { return true; }
 }
 
@@ -382,37 +391,47 @@ export async function fetchNotamThreats(
 ): Promise<NotamThreat[]> {
   if (!icao) return [];
 
-  // 하위 호환: 문자열로 넘어오면 legacy key로 처리
   const creds: NotamCredentials = typeof credOrKey === "string"
     ? { legacyKey: credOrKey }
     : credOrKey;
 
   const etaMs = etaIso ? new Date(etaIso).getTime() : Date.now();
-  let items: NmsNotamItem[] = [];
 
-  // 1순위: NMS-API OAuth2
-  if (creds.nmsClientId && creds.nmsClientSecret) {
-    try {
-      const env = creds.nmsEnv === "prod" ? "prod" : "staging";
-      items = await fetchFromNms(icao, creds.nmsClientId, creds.nmsClientSecret, env);
-    } catch (e) {
-      console.warn("[NOTAM] NMS-API failed, trying legacy:", e);
-      // 폴백
-      if (creds.legacyKey) {
-        try { items = await fetchFromLegacyFaa(icao, creds.legacyKey); } catch { /* both failed */ }
+  // US Airport logic: FAA stores NOTAMs under the 3-letter ID (e.g., DFW)
+  // instead of the 4-letter ICAO (e.g., KDFW) for domestic NOTAMs.
+  const locations = [icao.toUpperCase()];
+  if (icao.toUpperCase().startsWith("K") && icao.length === 4) {
+    locations.push(icao.toUpperCase().slice(1));
+  }
+
+  let allItems: NmsNotamItem[] = [];
+
+  for (const loc of locations) {
+    let items: NmsNotamItem[] = [];
+    // 1순위: NMS-API OAuth2
+    if (creds.nmsClientId && creds.nmsClientSecret) {
+      try {
+        const env = creds.nmsEnv === "prod" ? "prod" : "staging";
+        items = await fetchFromNms(loc, creds.nmsClientId, creds.nmsClientSecret, env);
+      } catch (e) {
+        console.warn(`[NOTAM] NMS-API failed for ${loc}, trying legacy:`, e);
+        if (creds.legacyKey) {
+          try { items = await fetchFromLegacyFaa(loc, creds.legacyKey); } catch { }
+        }
       }
+    } else if (creds.legacyKey) {
+      try { items = await fetchFromLegacyFaa(loc, creds.legacyKey); } catch { }
     }
-  } else if (creds.legacyKey) {
-    // NMS 크리덴셜 없으면 legacy만
-    try { items = await fetchFromLegacyFaa(icao, creds.legacyKey); } catch { /* no data */ }
-  } else {
-    return [];
+    allItems = allItems.concat(items);
   }
 
   const threats: NotamThreat[] = [];
-  for (const item of items) {
+  const seenIds = new Set<string>();
+
+  for (const item of allItems) {
     const { id, text, start, end } = extractNotamFields(item);
-    if (!text) continue;
+    if (!text || seenIds.has(id)) continue;
+    seenIds.add(id);
 
     const classification = classifyNotam(text);
     if (!classification) continue;
