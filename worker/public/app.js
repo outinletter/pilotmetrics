@@ -239,7 +239,7 @@ function formatNotamTime(iso) {
   } catch { return iso; }
 }
 
-function renderNotamThreats(notams, icao) {
+function renderNotamThreats(notams, icao, ctx) {
   const container = document.getElementById("notamBoxContainer");
   const content = document.getElementById("notamInnerContent");
   if (!container || !content) return;
@@ -249,14 +249,48 @@ function renderNotamThreats(notams, icao) {
   const timeStr = `${now.getUTCHours().toString().padStart(2,'0')}:${now.getUTCMinutes().toString().padStart(2,'0')}Z`;
   const dateStr = now.toISOString().slice(0, 10);
 
+  // Always show airport information if available in context
+  let airportInfoHtml = "";
+  if (ctx && ctx.arrival_icao) {
+    const elev = ctx.elevation_ft ? `${ctx.elevation_ft} ft` : "TBD";
+    const rwys = (ctx.runways && ctx.runways.length > 0) ? ctx.runways.map(r => String(r).padStart(2, '0')).join(", ") : "TBD";
+    const terrain = esc(ctx.terrain_type || "Standard");
+    const risks = (ctx.fixed_risks && ctx.fixed_risks.length > 0) ? ctx.fixed_risks.map(r => r.replace(/_/g, ' ')).join(", ") : "None specified";
+
+    airportInfoHtml = `
+      <div class="airport-info-box">
+        <div class="airport-info-title">Airport Information: ${esc(ctx.arrival_icao)}</div>
+        <div class="airport-info-grid">
+          <div class="airport-info-item">
+            <span class="info-label">Elevation:</span>
+            <span class="info-value">${elev}</span>
+          </div>
+          <div class="airport-info-item">
+            <span class="info-label">Runways:</span>
+            <span class="info-value">${rwys}</span>
+          </div>
+          <div class="airport-info-item">
+            <span class="info-label">Terrain:</span>
+            <span class="info-value">${terrain}</span>
+          </div>
+          <div class="airport-info-item">
+            <span class="info-label">Fixed Risks:</span>
+            <span class="info-value">${risks}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   if (activeNotams.length === 0) {
     content.innerHTML = `
+      ${airportInfoHtml}
       <div class="notam-clear-msg">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color: var(--green-500); opacity: 0.6;">
           <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span>No significant NOTAM threats detected for ${esc(icao || 'arrival')}.</span>
+        <span>No significant NOTAM threats detected. Review full list in official briefing.</span>
       </div>
       <div class="notam-meta-footer">Checked at ${dateStr} ${timeStr}</div>`;
     return;
@@ -268,6 +302,7 @@ function renderNotamThreats(notams, icao) {
   }
 
   content.innerHTML = `
+    ${airportInfoHtml}
     <div class="notam-info-header">
       <span class="notam-info-icao">${esc(icao)}</span>
       <span class="notam-info-sep">|</span>
@@ -411,10 +446,12 @@ function isAirportCode(fn) {
 
 async function loadBriefing(flightNum) {
   const fn = normalizeInput(flightNum || flightInput.value);
-  if (!fn) { statusEl.textContent = "Enter a flight number or airport code."; return; }
+  if (!fn) { statusEl.textContent = "Enter an airport code."; return; }
+
+  // Now strictly enforcing airport code (3 or 4 letters)
   const isAirport = isAirportCode(fn);
-  if (!isAirport && (!fn.startsWith("KE") || !/^KE\d{1,4}$/.test(fn))) {
-    statusEl.textContent = "Enter a Korean Air flight number (KE + digits) or airport code (LAX, KLAX).";
+  if (!isAirport) {
+    statusEl.textContent = "Please enter a 3 or 4 letter airport code (e.g., RKSI, VTBS, LAX).";
     return;
   }
 
@@ -427,9 +464,13 @@ async function loadBriefing(flightNum) {
     if (!res.ok) throw new Error("Briefing unavailable");
     const data = await res.json();
 
+    if (!data.ok && data.error_stage === "INVALID_INPUT") {
+      throw new Error(data.flight_context.messages[0]);
+    }
+
     renderContext(data.flight_context);
     renderThreats(data.top_threats || []);
-    renderNotamThreats(data.notam_threats || [], data.flight_context.arrival_icao);
+    renderNotamThreats(data.notam_threats || [], data.flight_context.arrival_icao, data.flight_context);
 
     heroSection.classList.add("hidden");
     resultsWrap.classList.remove("hidden");
@@ -437,7 +478,7 @@ async function loadBriefing(flightNum) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   } catch (err) {
     console.error("[loadBriefing]", err);
-    statusEl.textContent = "Unable to load briefing. Please try again.";
+    statusEl.textContent = err.message || "Unable to load briefing. Please try again.";
   } finally {
     searchBtn.disabled = false;
     searchBtnTxt.textContent = "Analyze";

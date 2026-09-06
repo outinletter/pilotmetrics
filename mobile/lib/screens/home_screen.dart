@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Enter a flight number to generate an AI-powered safety briefing.',
+              'Enter a destination airport code to generate an AI-powered safety briefing.',
               style: TextStyle(
                 fontSize: 13,
                 color:
@@ -120,8 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     controller: _controller,
                     textCapitalization: TextCapitalization.characters,
                     decoration: const InputDecoration(
-                      hintText: 'e.g. KE695, AAL100',
-                      prefixIcon: Icon(Icons.flight_takeoff, size: 18),
+                      hintText: 'e.g. RKSI, VTBS, LAX',
+                      prefixIcon: Icon(Icons.location_on, size: 18),
                     ),
                     onSubmitted: _search,
                   ),

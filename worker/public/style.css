@@ -1515,3 +1515,42 @@ details summary::marker { content: ""; }
   .nav-status { display: none; }
   .nav-new-search { font-size: 13px; padding: 4px 10px; }
 }
+
+/* Airport Information Box */
+.airport-info-box {
+  background: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.airport-info-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sky-400);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.airport-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+.airport-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.info-label {
+  font-size: 11px;
+  color: var(--subtle);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.info-value {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 500;
+  font-family: var(--font-mono);
+}
