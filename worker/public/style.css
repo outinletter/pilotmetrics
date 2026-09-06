@@ -884,6 +884,12 @@ details[open] > .event-summary {
   font-weight: 800;
   letter-spacing: -0.5px;
 }
+.score-num small {
+  font-size: 0.6em;
+  font-weight: 700;
+  margin-left: 1px;
+  opacity: 0.8;
+}
 .score-label {
   font-size: 9px;
   font-weight: 700;

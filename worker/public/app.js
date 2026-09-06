@@ -351,7 +351,7 @@ function renderThreats(threats) {
           <details class="event-item">
             <summary class="event-summary">
               <div class="score-box ${scol}">
-                <span class="score-num">${pct}</span>
+                <span class="score-num">${pct}<small>%</small></span>
                 <span class="score-label">MATCH</span>
               </div>
               <div class="event-summary-body">
