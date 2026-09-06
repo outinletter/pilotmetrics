@@ -435,7 +435,8 @@ async function loadBriefing(flightNum) {
     resultsWrap.classList.remove("hidden");
     statusEl.textContent = "";
     window.scrollTo({ top: 0, behavior: "smooth" });
-  } catch {
+  } catch (err) {
+    console.error("[loadBriefing]", err);
     statusEl.textContent = "Unable to load briefing. Please try again.";
   } finally {
     searchBtn.disabled = false;
