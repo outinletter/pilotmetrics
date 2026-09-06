@@ -151,19 +151,9 @@ function renderContext(ctx) {
         </div>
         <div class="ctx-icao-row">
           ${(() => {
-            const dep   = esc(ctx.departure_icao || "—");
-            const arr   = esc(ctx.arrival_icao   || "—");
-            const depT  = fmtTime(ctx.estimated_departure ?? ctx.scheduled_departure);
-            const arrT  = fmtTime(ctx.estimated_arrival  ?? ctx.scheduled_arrival);
-            const fn    = esc(ctx.flight_number ?? "");
-            const gLink = t => `https://www.google.com/search?q=${encodeURIComponent(t)}`;
-            const depSeg = depT
-              ? `<span class="ctx-icao-seg">${dep}<span class="ctx-time-paren">(${depT})</span></span>`
-              : `<a class="ctx-icao-seg ctx-icao-search" href="${gLink(fn + ' departure time')}" target="_blank" rel="noreferrer">${dep}<span class="ctx-time-paren ctx-search-icon">🔍</span></a>`;
-            const arrSeg = arrT
-              ? `<span class="ctx-icao-seg">${arr}<span class="ctx-time-paren">(${arrT})</span></span>`
-              : `<a class="ctx-icao-seg ctx-icao-search" href="${gLink(fn + ' arrival time')}" target="_blank" rel="noreferrer">${arr}<span class="ctx-time-paren ctx-search-icon">🔍</span></a>`;
-            return `${depSeg}<span class="ctx-icao-arrow">→</span>${arrSeg}`;
+            const arrIcao = esc(ctx.arrival_icao || "—");
+            const arrIata = ctx.arrival_iata ? ` (${esc(ctx.arrival_iata)})` : "";
+            return `<span class="ctx-icao-seg">${arrIcao}${arrIata}</span>`;
           })()}
         </div>
         ${ctx.arrival_weather_brief ? `<div class="ctx-wx-brief">${esc(ctx.arrival_weather_brief)}</div>` : ""}
