@@ -68,6 +68,16 @@ const US_CITY_AIRPORTS: Record<string, [string, string]> = {
   "spokane,washington": ["GEG","KGEG"],
   "long island,new york": ["JFK","KJFK"],
   "cerritos,california": ["LAX","KLAX"],
+  "palm coast,florida": ["DAB","KDAB"], "prescott,arizona": ["PRC","KPRC"],
+  "hibbing,minnesota": ["HIB","KHIB"], "eek,alaska": ["EEK","PAEE"],
+  "lebanon,tennessee": ["BNA","KBNA"], "moab,utah": ["CNY","KCNY"],
+  "sacramento,california": ["SMF","KSMF"], "kotlik,alaska": ["KOT","PFKO"],
+  "roanoke,virginia": ["ROA","KROA"], "soldotna,alaska": ["SXQ","PASX"],
+  "las cruces,new mexico": ["LRU","KLRU"], "appleton,wisconsin": ["ATW","KATW"],
+  "gulkana,alaska": ["GKN","PAGK"], "yakutat,alaska": ["YAK","PAYA"],
+  "north charleston,south carolina": ["CHS","KCHS"], "minot,north dakota": ["MOT","KMOT"],
+  "santa barbara,california": ["SBA","KSBA"], "freeland,michigan": ["MBS","KMBS"],
+  "monterey,california": ["MRY","KMRY"], "san bernardino,california": ["SBD","KSBD"],
   // 국가 없이 도시만 있는 경우
   "mexico city": ["MEX","MMMX"],
   "toronto": ["YYZ","CYYZ"],
@@ -95,6 +105,17 @@ const US_CITY_AIRPORTS: Record<string, [string, string]> = {
   "bali": ["DPS","WADD"],
   "sydney": ["SYD","YSSY"],
   "auckland": ["AKL","NZAA"],
+  "bogota": ["BOG","SKBO"], "punta cana": ["PUJ","MDPC"],
+  "antofagasta": ["ANF","SCFA"], "bari": ["BRI","LIBD"],
+  "san miguel de cozumel": ["CZM","MMCZ"], "les cayes": ["CYA","MTCA"],
+  "marrakech": ["RAK","GMMX"], "cologne": ["CGN","EDDK"],
+  "antalya": ["AYT","LTAI"], "benin city": ["BNI","DNBE"],
+  "canberra": ["CBR","YSCB"], "misawa": ["MSJ","RJSM"],
+  "almaty": ["ALA","UAAA"], "makassar": ["UPG","WAAA"],
+  "bologna": ["BLQ","LIPE"], "nassau": ["NAS","MYNN"],
+  "kuantan": ["KUA","WMKD"], "bickenhill": ["BHX","EGBB"],
+  "leeds": ["LBA","EGNM"], "krakow": ["KRK","EPKK"],
+  "chennai": ["MAA","VOMM"],
 };
 
 const INTL_CITY_AIRPORTS: Record<string, [string, string]> = {
@@ -145,6 +166,8 @@ const INTL_CITY_AIRPORTS: Record<string, [string, string]> = {
   // 캐나다
   "vancouver,canada": ["YVR","CYVR"], "richmond,canada": ["YVR","CYVR"],
   "toronto,canada": ["YYZ","CYYZ"],
+  "bagram,afghanistan": ["OAI","OAIX"],
+  "batam island,indonesia": ["BTH","WIDD"],
 };
 
 const US_STATE_ABBREV: Record<string, string> = {
