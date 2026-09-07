@@ -267,7 +267,7 @@ app.get("/api/stats", async c => {
   try {
     cache = caches.default;
     const cacheUrl = new URL(c.req.url);
-    cacheUrl.searchParams.set("_v", "5"); // Increment version to bust potentially corrupt cache
+    cacheUrl.searchParams.set("_v", "6"); // Increment version to bust potentially corrupt cache
     cacheKey = new Request(cacheUrl.toString(), c.req.raw);
     if (cache && cacheKey && currentTs) {
       const cached = await cache.match(cacheKey);
@@ -282,7 +282,7 @@ app.get("/api/stats", async c => {
   let totalEvents = 0;
   let yearMin = "—";
   let yearMax = "—";
-  let airportsCovered = Object.keys(AIRPORTS).length;
+  let airportsCovered = 0;
   let sources: string[] = [];
   let severityBreakdown: Array<{ severity: number; n: number; }> = [];
 
@@ -304,6 +304,14 @@ app.get("/api/stats", async c => {
     yearMin = yearRange?.min_yr ?? "—";
     yearMax = yearRange?.max_yr ?? "—";
   } catch (error) { recordError("STATS_YEAR_RANGE", error); }
+
+  /* AIRPORTS */
+  try {
+    const result = await c.env.DB.prepare(
+      "SELECT COUNT(DISTINCT CASE WHEN airport_icao != '' THEN airport_icao ELSE airport_iata END) as n FROM events WHERE (airport_icao IS NOT NULL AND airport_icao != '') OR (airport_iata IS NOT NULL AND airport_iata != '')"
+    ).first<{ n: number }>();
+    airportsCovered = result?.n ?? 0;
+  } catch (error) { recordError("STATS_AIRPORTS", error); }
 
   /* SOURCES */
   try {

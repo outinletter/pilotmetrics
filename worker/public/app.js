@@ -497,6 +497,8 @@ async function loadStats() {
     document.getElementById("statAirports").textContent =
       Number(d.airports_covered || 0).toLocaleString();
 
+
+
     const sourcesEl = document.getElementById("statSources");
     const sourceNames = Array.isArray(d.sources)
       ? d.sources

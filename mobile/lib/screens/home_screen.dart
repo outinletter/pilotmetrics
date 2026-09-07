@@ -254,7 +254,7 @@ class _StatsBar extends StatelessWidget {
     }
     if (stats['airports_covered'] != null) {
       items.add(_StatItem(
-        label: 'Airports',
+        label: 'Covered Airports',
         value: _fmt(stats['airports_covered']),
         icon: Icons.flight_land,
       ));
