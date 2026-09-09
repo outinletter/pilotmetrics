@@ -134,7 +134,11 @@ function acFamilyLabel(acType) {
 function renderContext(ctx) {
   const riskLow = (ctx.risk_level || "low").toLowerCase();
   navNewSearch.classList.remove("hidden");
-  const msgs = (ctx.messages || []).map(m => `<p class="ctx-msg">${esc(m)}</p>`).join("");
+
+  // Filter out NOTAM errors from top messages (they will be moved to NOTAM box)
+  const displayMsgs = (ctx.messages || []).filter(m => !m.startsWith("NOTAM:"));
+  const msgs = displayMsgs.map(m => `<p class="ctx-msg">${esc(m)}</p>`).join("");
+
   const links = (ctx.flight_search_links || []).map(l =>
     `<a class="ctx-link" href="${esc(l.url)}" target="_blank" rel="noreferrer">${esc(l.label)}</a>`
   ).join("");
@@ -262,6 +266,23 @@ function renderNotamThreats(notams, icao, ctx) {
         </div>
       </div>
     `;
+  }
+
+  // Check for NOTAM fetch errors in context messages
+  const notamError = (ctx.messages || []).find(m => m.startsWith("NOTAM:"));
+
+  if (notamError) {
+    content.innerHTML = `
+      ${airportInfoHtml}
+      <div class="notam-clear-msg notam-error-msg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color: var(--orange-500); opacity: 0.8;">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span style="color: var(--orange-200);">${esc(notamError)}</span>
+      </div>
+      <div class="notam-meta-footer">Check official sources manually.</div>`;
+    return;
   }
 
   if (activeNotams.length === 0) {
