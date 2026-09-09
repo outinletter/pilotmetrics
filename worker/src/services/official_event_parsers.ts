@@ -1359,10 +1359,12 @@ const ASN_COMMERCIAL_NATURE = new Set([
 
 function parseAsnAirport(field: string | undefined): { iata: string; icao: string } {
   if (!field) return { iata: "", icao: "" };
-  const m = field.match(/\(([A-Z]{3})\/([A-Z]{4})\)/);
+  const m = field.match(/\(([A-Z]{3})\s*\/\s*([A-Z]{4})\)/);
   if (m) return { iata: m[1], icao: m[2] };
   const icaoOnly = field.match(/\(([A-Z]{4})\)/);
   if (icaoOnly) return { iata: "", icao: icaoOnly[1] };
+  const iataOnly = field.match(/\(([A-Z]{3})\)/);
+  if (iataOnly) return { iata: iataOnly[1], icao: "" };
   return { iata: "", icao: "" };
 }
 
