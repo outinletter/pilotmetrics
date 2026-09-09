@@ -272,6 +272,12 @@ function renderNotamThreats(notams, icao, ctx) {
   const notamError = (ctx.messages || []).find(m => m.startsWith("NOTAM:"));
 
   if (notamError) {
+    const isRksi = icao === 'RKSI';
+    const aisLink = isRksi
+      ? 'https://aim.koca.go.kr/ais/'
+      : 'https://notams.aim.faa.gov/notamSearch/';
+    const aisName = isRksi ? 'Korea AIS' : 'FAA NOTAM Search';
+
     content.innerHTML = `
       ${airportInfoHtml}
       <div class="notam-clear-msg notam-error-msg">
@@ -279,7 +285,12 @@ function renderNotamThreats(notams, icao, ctx) {
           <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span style="color: var(--orange-200);">${esc(notamError)}</span>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <span style="color: var(--orange-200); font-weight: 500;">${esc(notamError)}</span>
+          <a href="${aisLink}" target="_blank" class="ctx-link" style="margin:0; font-size:12px; display:inline-block; width:fit-content;">
+            Open ${aisName} (Manual Check) ↗
+          </a>
+        </div>
       </div>
       <div class="notam-meta-footer">Check official sources manually.</div>`;
     return;

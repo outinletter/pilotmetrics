@@ -166,7 +166,7 @@ app.get("/api/briefing/:flightNumber", async c => {
       try {
         const hasNotam = !!arrIcao && !!(c.env.NMS_CLIENT_ID || c.env.FAA_NOTAM_API_KEY);
         if (hasNotam) {
-          notamThreats = await fetchNotamThreats(arrIcao!, null, {
+          notamThreats = await fetchNotamThreats(c.env.DB, arrIcao!, null, {
             nmsClientId: c.env.NMS_CLIENT_ID,
             nmsClientSecret: c.env.NMS_CLIENT_SECRET,
             nmsEnv: c.env.NMS_ENV,

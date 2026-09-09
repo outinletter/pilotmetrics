@@ -426,11 +426,13 @@ export interface NotamCredentials {
 }
 
 export async function fetchNotamThreats(
+  db: D1Database,
   icao: string,
   etaIso: string | null,
   credOrKey: string | NotamCredentials,
 ): Promise<NotamThreat[]> {
   if (!icao) return [];
+  icao = icao.toUpperCase();
 
   const creds: NotamCredentials = typeof credOrKey === "string"
     ? { legacyKey: credOrKey }
@@ -438,15 +440,14 @@ export async function fetchNotamThreats(
 
   const etaMs = etaIso ? new Date(etaIso).getTime() : Date.now();
 
-  // US Airport logic: FAA stores NOTAMs under the 3-letter ID (e.g., DFW)
-  // instead of the 4-letter ICAO (e.g., KDFW) for domestic NOTAMs.
-  const locations = [icao.toUpperCase()];
-  if (icao.toUpperCase().startsWith("K") && icao.length === 4) {
-    locations.push(icao.toUpperCase().slice(1));
+  const locations = [icao];
+  if (icao.startsWith("K") && icao.length === 4) {
+    locations.push(icao.slice(1));
   }
 
   let allItems: NmsNotamItem[] = [];
   const fetchErrors: string[] = [];
+  let useCache = false;
 
   for (const loc of locations) {
     let items: NmsNotamItem[] = [];
@@ -455,20 +456,47 @@ export async function fetchNotamThreats(
         const env = creds.nmsEnv === "prod" ? "prod" : "staging";
         items = await fetchFromNms(loc, creds.nmsClientId, creds.nmsClientSecret, env);
       } catch (e) {
-        console.warn(`[NOTAM] NMS-API failed for ${loc}, trying legacy:`, e);
+        console.warn(`[NOTAM] NMS-API failed for ${loc}:`, e);
         fetchErrors.push(`NMS-API(${loc}): ${e instanceof Error ? e.message : String(e)}`);
-        if (creds.legacyKey) {
-          try { items = await fetchFromLegacyFaa(loc, creds.legacyKey); } catch (e2) {
-            fetchErrors.push(`Legacy(${loc}): ${e2 instanceof Error ? e2.message : String(e2)}`);
-          }
-        }
       }
-    } else if (creds.legacyKey) {
-      try { items = await fetchFromLegacyFaa(loc, creds.legacyKey); } catch (e2) {
+    }
+
+    // NMS 실패 시 또는 설정 안된 경우 Legacy 시도
+    if (items.length === 0 && creds.legacyKey) {
+      try {
+        items = await fetchFromLegacyFaa(loc, creds.legacyKey);
+      } catch (e2) {
         fetchErrors.push(`Legacy(${loc}): ${e2 instanceof Error ? e2.message : String(e2)}`);
       }
     }
+
     allItems = allItems.concat(items);
+  }
+
+  // API 호출이 완전히 실패한 경우 캐시 확인
+  if (allItems.length === 0 && fetchErrors.length > 0) {
+    try {
+      const cached = await db.prepare("SELECT raw_data, created_at FROM notam_cache WHERE icao = ? ORDER BY created_at DESC LIMIT 1")
+        .bind(icao).first<{ raw_data: string; created_at: string }>();
+
+      if (cached) {
+        allItems = JSON.parse(cached.raw_data);
+        useCache = true;
+        console.log(`[NOTAM] API failed. Using cached data for ${icao} from ${cached.created_at}`);
+      }
+    } catch (dbErr) {
+      console.error("[NOTAM] Cache read failed:", dbErr);
+    }
+  }
+
+  // API 호출 성공 시 캐시 업데이트
+  if (allItems.length > 0 && !useCache) {
+    try {
+      await db.prepare("INSERT OR REPLACE INTO notam_cache (icao, raw_data, created_at) VALUES (?, ?, ?)")
+        .bind(icao, JSON.stringify(allItems), new Date().toISOString()).run();
+    } catch (dbErr) {
+      console.error("[NOTAM] Cache write failed:", dbErr);
+    }
   }
 
   if (allItems.length === 0 && fetchErrors.length > 0) {
