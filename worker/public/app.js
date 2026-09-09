@@ -310,16 +310,15 @@ function renderNotamThreats(notams, icao, ctx) {
     return;
   }
 
-  // 1. 통계 및 그룹화 (Headline 기반 중복 제거)
+  // 1. 통계 및 그룹화 (Raw Text 기반 중복 제거)
   const stats = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
-  const groups = {}; // { category: { headline: [notams] } }
+  const groups = {}; // { category: { rawText: [notams] } }
 
   activeNotams.forEach(n => {
     stats[n.severity]++;
     if (!groups[n.category]) groups[n.category] = {};
 
-    // 헤드라인이 같으면 같은 항목으로 묶음
-    const key = n.headline;
+    const key = n.rawText;
     if (!groups[n.category][key]) groups[n.category][key] = [];
     groups[n.category][key].push(n);
   });
@@ -334,7 +333,7 @@ function renderNotamThreats(notams, icao, ctx) {
   if (hasCritical) container.classList.add("notam-block-critical");
 
   const totalCount = activeNotams.length;
-  // 목록이 길면 (10개 초과) 프리뷰 모드로 표시
+  // 목록이 길면 프리뷰 모드로 표시
   const isTooLong = totalCount > 10;
 
   let html = `
@@ -354,31 +353,31 @@ function renderNotamThreats(notams, icao, ctx) {
 
     <div class="notam-grouped-list ${isTooLong ? 'list-preview' : ''}">
       ${sortedCats.map(cat => {
-        const headlineGroups = groups[cat];
+        const rawGroups = groups[cat];
         return `
         <div class="notam-group">
           <div class="notam-group-title">
             ${NOTAM_CATEGORY_ICON[cat] || NOTAM_CATEGORY_ICON.OTHER}
             <span>${cat.replace(/_/g, ' ')}</span>
-            <span class="notam-group-count">${Object.keys(headlineGroups).length} types</span>
+            <span class="notam-group-count">${Object.keys(rawGroups).length} types</span>
           </div>
           <div class="notam-mini-cards">
-            ${Object.keys(headlineGroups).map(headline => {
-              const items = headlineGroups[headline];
+            ${Object.keys(rawGroups).map(rawText => {
+              const items = rawGroups[rawText];
               const first = items[0];
               const ids = items.map(it => it.notamId).join(", ");
 
-              // [보완] 활주로/유도로 및 핵심 상태 키워드 시각화 강화
-              const displayHeadline = headline
+              // [보완] 전문(Raw Text)을 목록에 바로 표시하고 시각화 강화
+              const displayContent = rawText
                 .replace(/(CLOSED|CLSD|U\/S|OUT OF SERVICE|NOT AVBL|UNUSABLE|NA|OTS)/gi, '<b class="highlight">$1</b>')
                 .replace(/\b([\d]{2}[LRC]?)\b/g, '<span class="id-tag runway-id">$1</span>')
                 .replace(/\b(TWY\s+[A-Z]\d?)\b/gi, '<span class="id-tag taxiway-id">$1</span>')
                 .replace(/(WORK IN PROGRESS|WIP|CONSTRUCTION)/gi, '<span class="wip-tag">$1</span>');
 
               return `
-              <div class="notam-mini-card compact notam-${first.severity.toLowerCase()}" onclick="showNotamDetail('${esc(ids)}', '${esc(first.rawText)}')">
+              <div class="notam-mini-card compact static notam-${first.severity.toLowerCase()}">
                 <div class="notam-mini-main">
-                  <div class="notam-mini-headline">${displayHeadline}</div>
+                  <div class="notam-mini-headline raw-style">${displayContent}</div>
                   <div class="notam-mini-id">${esc(ids)} ${items.length > 1 ? `(+${items.length-1} more identical)` : ''}</div>
                 </div>
                 <div class="notam-mini-score">+${Math.round(first.riskScore)}</div>
