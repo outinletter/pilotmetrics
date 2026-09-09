@@ -271,7 +271,7 @@ async function fetchCandidates(db: D1Database, context: Record<string, unknown>)
   if (arrIcao || arrIata) {
     const { results } = await db.prepare(
       `SELECT * FROM events WHERE aircraft_category = 'JET'
-       AND (airport_icao = ? OR airport_iata = ?)
+       AND ((airport_icao = ? AND airport_icao != '') OR (airport_iata = ? AND airport_iata != ''))
        ORDER BY event_date DESC LIMIT 500`
     ).bind(arrIcao || "", arrIata || "").all<EventRow>();
     return results;
