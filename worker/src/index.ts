@@ -229,6 +229,31 @@ app.get("/api/admin/backfill-asn", async c => {
   return c.json({ ok: true, ...result });
 });
 
+app.get("/api/admin/test-notam", async c => {
+  const { fetchNotamThreats } = await import("./services/notam");
+  const icao = c.req.query("icao") || "RKSI";
+
+  try {
+    const threats = await fetchNotamThreats(c.env.DB, icao, null, {
+      nmsClientId: c.env.NMS_CLIENT_ID,
+      nmsClientSecret: c.env.NMS_CLIENT_SECRET,
+      nmsEnv: c.env.NMS_ENV,
+      legacyKey: c.env.FAA_NOTAM_API_KEY,
+    });
+    return c.json({ ok: true, icao, count: threats.length, threats });
+  } catch (err) {
+    return c.json({
+      ok: false,
+      icao,
+      error: err instanceof Error ? err.message : String(err),
+      env_present: {
+        nms: !!c.env.NMS_CLIENT_ID,
+        legacy: !!c.env.FAA_NOTAM_API_KEY
+      }
+    });
+  }
+});
+
 // ─── Stats ────────────────────────────────────────────────────────────────────
 
 app.get("/api/stats", async c => {

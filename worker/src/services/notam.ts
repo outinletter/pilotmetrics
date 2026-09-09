@@ -168,13 +168,33 @@ async function fetchFromLegacyFaa(
   icao: string,
   apiKey: string,
 ): Promise<NmsNotamItem[]> {
-  const [clientId, clientSecret] = apiKey.split(":");
+  // 1. 키 파싱 (id:secret 형식 또는 단일 키 대응)
+  let clientId: string;
+  let clientSecret: string;
+
+  if (apiKey.includes(":")) {
+    [clientId, clientSecret] = apiKey.split(":");
+  } else {
+    clientId = apiKey;
+    clientSecret = apiKey; // 단일 키일 경우 동일하게 설정
+  }
+
   const url = `https://external-api.faa.gov/notamapi/v1/notams?` +
     `icaoLocation=${icao.toUpperCase()}&pageSize=100&pageNum=1`;
+
   const res = await fetch(url, {
-    headers: { client_id: clientId, client_secret: clientSecret ?? clientId },
-    signal: AbortSignal.timeout(8000),
+    headers: {
+      "client_id": clientId,
+      "client_secret": clientSecret,
+      "Accept": "application/json"
+    },
+    signal: AbortSignal.timeout(10000),
   });
+
+  if (res.status === 401) {
+    throw new Error(`Legacy FAA API HTTP 401: Invalid Credentials (check client_id/secret)`);
+  }
+
   if (!res.ok) throw new Error(`Legacy FAA API HTTP ${res.status}`);
   const data = await res.json() as LegacyFaaResponse;
   return data.items ?? [];
