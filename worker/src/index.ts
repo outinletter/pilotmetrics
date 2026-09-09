@@ -221,6 +221,14 @@ app.get("/api/briefing/:flightNumber", async c => {
 });
 
 
+// ─── Maintenance ─────────────────────────────────────────────────────────────
+
+app.get("/api/admin/backfill-asn", async c => {
+  const { backfillAsnAirports } = await import("./services/official_event_parsers");
+  const result = await backfillAsnAirports(c.env.DB, 500); // 한 번에 500개씩 처리
+  return c.json({ ok: true, ...result });
+});
+
 // ─── Stats ────────────────────────────────────────────────────────────────────
 
 app.get("/api/stats", async c => {
