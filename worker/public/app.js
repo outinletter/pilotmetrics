@@ -310,34 +310,68 @@ function renderNotamThreats(notams, icao, ctx) {
     return;
   }
 
-  const hasCritical = activeNotams.some(n => n.severity === "CRITICAL" || n.severity === "HIGH");
-  if (hasCritical) {
-    container.classList.add("notam-block-critical");
-  }
+  // 1. 통계 계산
+  const stats = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+  activeNotams.forEach(n => stats[n.severity]++);
 
-  content.innerHTML = `
+  // 2. 카테고리별 그룹화
+  const groups = {};
+  activeNotams.forEach(n => {
+    if (!groups[n.category]) groups[n.category] = [];
+    groups[n.category].push(n);
+  });
+
+  // 카테고리 정렬 순서 정의
+  const CAT_ORDER = ["RUNWAY", "ILS_NAVAID", "VOR_NDB", "AIRSPACE", "LIGHTING", "TAXIWAY", "OBSTACLE", "COMM", "OTHER"];
+  const sortedCats = Object.keys(groups).sort((a, b) => {
+    return (CAT_ORDER.indexOf(a) === -1 ? 99 : CAT_ORDER.indexOf(a)) -
+           (CAT_ORDER.indexOf(b) === -1 ? 99 : CAT_ORDER.indexOf(b));
+  });
+
+  const hasCritical = stats.CRITICAL > 0 || stats.HIGH > 0;
+  if (hasCritical) container.classList.add("notam-block-critical");
+
+  let html = `
     ${airportInfoHtml}
     <div class="notam-info-header">
       <span class="notam-info-icao">${esc(icao)}</span>
       <span class="notam-info-sep">|</span>
       <span class="notam-info-date">FETCHED: ${dateStr} ${timeStr}</span>
     </div>
-    <div class="notam-mini-list">
-      ${activeNotams.map(n => `
-        <div class="notam-mini-card notam-${n.severity.toLowerCase()}">
-          <div class="notam-mini-top">
-            <span class="notam-mini-icon ${NOTAM_SEV_CLASS[n.severity]}">${NOTAM_CATEGORY_ICON[n.category] || NOTAM_CATEGORY_ICON.OTHER}</span>
-            <div class="notam-mini-main">
-              <div class="notam-mini-headline">${esc(n.headline)}</div>
-              <div class="notam-mini-id">${esc(n.notamId)}</div>
-            </div>
-            <div class="notam-mini-score">+${Math.round(n.riskScore)}</div>
+
+    <div class="notam-stats-bar">
+      ${stats.CRITICAL ? `<span class="notam-stat-badge sev-critical">CRITICAL ${stats.CRITICAL}</span>` : ""}
+      ${stats.HIGH ? `<span class="notam-stat-badge sev-high">HIGH ${stats.HIGH}</span>` : ""}
+      ${stats.MEDIUM ? `<span class="notam-stat-badge sev-medium">MED ${stats.MEDIUM}</span>` : ""}
+      ${stats.LOW ? `<span class="notam-stat-badge sev-low">LOW ${stats.LOW}</span>` : ""}
+    </div>
+
+    <div class="notam-grouped-list">
+      ${sortedCats.map(cat => `
+        <div class="notam-group">
+          <div class="notam-group-title">
+            ${NOTAM_CATEGORY_ICON[cat] || NOTAM_CATEGORY_ICON.OTHER}
+            <span>${cat.replace(/_/g, ' ')}</span>
+            <span class="notam-group-count">${groups[cat].length}</span>
+          </div>
+          <div class="notam-mini-cards">
+            ${groups[cat].map(n => `
+              <div class="notam-mini-card compact notam-${n.severity.toLowerCase()}">
+                <div class="notam-mini-main">
+                  <div class="notam-mini-headline">${n.headline.replace(/(CLOSED|CLSD|U\/S|OUT OF SERVICE|NOT AVBL|UNUSABLE|NA)/gi, '<b class="highlight">$1</b>')}</div>
+                  <div class="notam-mini-id">${esc(n.notamId)}</div>
+                </div>
+                <div class="notam-mini-score">+${Math.round(n.riskScore)}</div>
+              </div>
+            `).join("")}
           </div>
         </div>
       `).join("")}
-      <p class="notam-footer-note">Review full NOTAMs in official flight folder.</p>
     </div>
+    <p class="notam-footer-note">Review full NOTAMs in official flight folder.</p>
   `;
+
+  content.innerHTML = html;
 }
 
 function renderThreats(threats) {
