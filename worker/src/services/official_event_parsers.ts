@@ -1408,8 +1408,20 @@ async function upsertAsnEvent(db: D1Database, rec: AsnRecord): Promise<boolean> 
   if (eventAirport.icao || eventAirport.iata) {
     const targetCode = (eventAirport.icao || eventAirport.iata).toUpperCase();
     const otherAptMatch = narrative.match(/(?:accident at|landing at|approach to|diverted to)\s+.*?\(([A-Z]{3,4})\)/i);
+
     if (otherAptMatch && otherAptMatch[1].toUpperCase() !== targetCode) {
-      return false; // 실제 사고지가 아닌 공항으로 태깅되는 것 방지
+      return false; // 코드 불일치 시 거름
+    }
+
+    // [보완] 코드 없이 이름만 나온 경우에도 현재 공항과 다르면 거름 (예: "approach to Daegu" 인데 현재 RKPC인 경우)
+    if (phase === "APPROACH" || phase === "LANDING") {
+      const departureCity = (rec.departure_airport || "").split("-")[0].toLowerCase().trim();
+      const destinationCity = (rec.destination_airport || "").split("-")[0].toLowerCase().trim();
+
+      // 사고가 도착지에서 났는데 요약문에 출발지 이름만 강하게 나온 경우 등 체크 (정밀도 향상)
+      if (destinationCity && narrative.includes(`approach to ${departureCity}`) && !narrative.includes(destinationCity)) {
+        return false;
+      }
     }
   }
 
