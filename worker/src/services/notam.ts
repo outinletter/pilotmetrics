@@ -446,24 +446,33 @@ export async function fetchNotamThreats(
   }
 
   let allItems: NmsNotamItem[] = [];
+  const fetchErrors: string[] = [];
 
   for (const loc of locations) {
     let items: NmsNotamItem[] = [];
-    // 1순위: NMS-API OAuth2
     if (creds.nmsClientId && creds.nmsClientSecret) {
       try {
         const env = creds.nmsEnv === "prod" ? "prod" : "staging";
         items = await fetchFromNms(loc, creds.nmsClientId, creds.nmsClientSecret, env);
       } catch (e) {
         console.warn(`[NOTAM] NMS-API failed for ${loc}, trying legacy:`, e);
+        fetchErrors.push(`NMS-API(${loc}): ${e instanceof Error ? e.message : String(e)}`);
         if (creds.legacyKey) {
-          try { items = await fetchFromLegacyFaa(loc, creds.legacyKey); } catch { }
+          try { items = await fetchFromLegacyFaa(loc, creds.legacyKey); } catch (e2) {
+            fetchErrors.push(`Legacy(${loc}): ${e2 instanceof Error ? e2.message : String(e2)}`);
+          }
         }
       }
     } else if (creds.legacyKey) {
-      try { items = await fetchFromLegacyFaa(loc, creds.legacyKey); } catch { }
+      try { items = await fetchFromLegacyFaa(loc, creds.legacyKey); } catch (e2) {
+        fetchErrors.push(`Legacy(${loc}): ${e2 instanceof Error ? e2.message : String(e2)}`);
+      }
     }
     allItems = allItems.concat(items);
+  }
+
+  if (allItems.length === 0 && fetchErrors.length > 0) {
+    throw new Error(`NOTAM fetch failed for all sources: ${fetchErrors.join(" | ")}`);
   }
 
   const threats: NotamThreat[] = [];
