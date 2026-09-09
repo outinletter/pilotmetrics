@@ -1395,6 +1395,9 @@ async function upsertAsnEvent(db: D1Database, rec: AsnRecord): Promise<boolean> 
   const dest = parseAsnAirport(rec.destination_airport);
   const phase = ASN_PHASE_MAP[(rec.phase ?? "").trim().toLowerCase()] ?? "";
 
+  // 착륙/접근 단계 사고는 실제로 목적지 공항에서 발생 — 출발공항 고정 태깅 방지
+  const eventAirport = (phase === "APPROACH" || phase === "LANDING") && (dest.iata || dest.icao) ? dest : dep;
+
   const tags: string[] = ["ASN", "PART_121_135_RELEVANT", ...(fatal > 0 ? ["FATAL"] : []), ...(dmgUpper.includes("DESTROY") ? ["AIRCRAFT_DESTROYED"] : dmgUpper.includes("SUBSTANTIAL") ? ["SUBSTANTIAL_DAMAGE"] : [])];
   const summary = (rec.narrative ?? "").trim() || `ASN accident ${idMatch[1]} — ${rec.type ?? "unknown aircraft"} at ${rec.location ?? "unknown location"}.`;
   const timeStr = (rec.time ?? "").match(/^(\d{2}:\d{2})/)?.[1] ?? "";
@@ -1403,7 +1406,7 @@ async function upsertAsnEvent(db: D1Database, rec: AsnRecord): Promise<boolean> 
     id: eventId, source_name: "ASN (Aviation Safety Network)", source_url: rec.url,
     event_date: eventDate, event_time: timeStr,
     operation_type: rec.nature ?? "",
-    airport_iata: dep.iata, airport_icao: dep.icao,
+    airport_iata: eventAirport.iata, airport_icao: eventAirport.icao,
     destination_iata: dest.iata, destination_icao: dest.icao,
     flight_phase: phase,
     aircraft_type: rec.type ?? "",
