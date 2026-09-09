@@ -1394,9 +1394,24 @@ async function upsertAsnEvent(db: D1Database, rec: AsnRecord): Promise<boolean> 
   const dep = parseAsnAirport(rec.departure_airport);
   const dest = parseAsnAirport(rec.destination_airport);
   const phase = ASN_PHASE_MAP[(rec.phase ?? "").trim().toLowerCase()] ?? "";
+  const narrative = (rec.narrative ?? "").toLowerCase();
 
   // 착륙/접근 단계 사고는 실제로 목적지 공항에서 발생 — 출발공항 고정 태깅 방지
-  const eventAirport = (phase === "APPROACH" || phase === "LANDING") && (dest.iata || dest.icao) ? dest : dep;
+  // UNKNOWN 페이즈라도 요약문에 landing/approach 표현이 있으면 목적지 우선
+  const isArrivalPhase = phase === "APPROACH" || phase === "LANDING" ||
+    (phase === "UNKNOWN" && (narrative.includes("landing at") || narrative.includes("approach to")));
+
+  const eventAirport = isArrivalPhase && (dest.iata || dest.icao) ? dest : dep;
+
+  // 이중 검증: 요약문에 다른 공항이 명시되어 있다면 오매칭 위험이 높으므로 제외
+  // 예: "ACCIDENT AT XXX", "landing at YYY" 패턴이 있는데 현재 선택된 공항과 다르면 거름
+  if (eventAirport.icao || eventAirport.iata) {
+    const targetCode = (eventAirport.icao || eventAirport.iata).toUpperCase();
+    const otherAptMatch = narrative.match(/(?:accident at|landing at|approach to|diverted to)\s+.*?\(([A-Z]{3,4})\)/i);
+    if (otherAptMatch && otherAptMatch[1].toUpperCase() !== targetCode) {
+      return false; // 실제 사고지가 아닌 공항으로 태깅되는 것 방지
+    }
+  }
 
   const tags: string[] = ["ASN", "PART_121_135_RELEVANT", ...(fatal > 0 ? ["FATAL"] : []), ...(dmgUpper.includes("DESTROY") ? ["AIRCRAFT_DESTROYED"] : dmgUpper.includes("SUBSTANTIAL") ? ["SUBSTANTIAL_DAMAGE"] : [])];
   const summary = (rec.narrative ?? "").trim() || `ASN accident ${idMatch[1]} — ${rec.type ?? "unknown aircraft"} at ${rec.location ?? "unknown location"}.`;
@@ -1432,6 +1447,43 @@ export async function ingestAsnBatch(db: D1Database, records: AsnRecord[]): Prom
     } catch { /* skip invalid record */ }
   }
   return { checked: records.length, created };
+}
+
+// ── ASN 공항 코드 백필 ────────────────────────────────────────────────────────
+// 잘못 저장된(항상 출발지 고정) 기존 ASN 레코드를 비행 단계에 맞춰 재조정
+export async function backfillAsnAirports(db: D1Database, limit = 100): Promise<Record<string, unknown>> {
+  const { results } = await db.prepare(`
+    SELECT id, summary, flight_phase, airport_icao, airport_iata, destination_icao, destination_iata
+    FROM events
+    WHERE source_name = 'ASN (Aviation Safety Network)'
+      AND flight_phase IN ('APPROACH', 'LANDING')
+      AND (destination_icao IS NOT NULL OR destination_iata IS NOT NULL)
+    LIMIT ?
+  `).bind(limit).all<{
+    id: string; summary: string; flight_phase: string;
+    airport_icao: string; airport_iata: string;
+    destination_icao: string; destination_iata: string;
+  }>();
+
+  let updated = 0;
+  for (const row of results) {
+    // 현재 주 공항이 목적지와 다르면 (출발지로 설정되어 있다면) 업데이트
+    const isMismatched = (row.destination_icao && row.airport_icao !== row.destination_icao) ||
+                        (row.destination_iata && row.airport_iata !== row.destination_iata);
+
+    if (isMismatched) {
+      await db.prepare(`
+        UPDATE events
+        SET airport_icao = COALESCE(destination_icao, airport_icao),
+            airport_iata = COALESCE(destination_iata, airport_iata),
+            updated_at = datetime('now')
+        WHERE id = ?
+      `).bind(row.id).run();
+      updated++;
+    }
+  }
+
+  return { checked: results.length, updated };
 }
 
 // ── EASA Annual Safety Review ─────────────────────────────────────────────────
