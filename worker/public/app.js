@@ -310,18 +310,20 @@ function renderNotamThreats(notams, icao, ctx) {
     return;
   }
 
-  // 1. 통계 계산
+  // 1. 통계 및 그룹화 (Headline 기반 중복 제거)
   const stats = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
-  activeNotams.forEach(n => stats[n.severity]++);
+  const groups = {}; // { category: { headline: [notams] } }
 
-  // 2. 카테고리별 그룹화
-  const groups = {};
   activeNotams.forEach(n => {
-    if (!groups[n.category]) groups[n.category] = [];
-    groups[n.category].push(n);
+    stats[n.severity]++;
+    if (!groups[n.category]) groups[n.category] = {};
+
+    // 헤드라인이 같으면 같은 항목으로 묶음
+    const key = n.headline;
+    if (!groups[n.category][key]) groups[n.category][key] = [];
+    groups[n.category][key].push(n);
   });
 
-  // 카테고리 정렬 순서 정의
   const CAT_ORDER = ["RUNWAY", "ILS_NAVAID", "VOR_NDB", "AIRSPACE", "LIGHTING", "TAXIWAY", "OBSTACLE", "COMM", "OTHER"];
   const sortedCats = Object.keys(groups).sort((a, b) => {
     return (CAT_ORDER.indexOf(a) === -1 ? 99 : CAT_ORDER.indexOf(a)) -
@@ -330,6 +332,10 @@ function renderNotamThreats(notams, icao, ctx) {
 
   const hasCritical = stats.CRITICAL > 0 || stats.HIGH > 0;
   if (hasCritical) container.classList.add("notam-block-critical");
+
+  const totalCount = activeNotams.length;
+  // 목록이 길면 (10개 초과) 프리뷰 모드로 표시
+  const isTooLong = totalCount > 10;
 
   let html = `
     ${airportInfoHtml}
@@ -346,32 +352,101 @@ function renderNotamThreats(notams, icao, ctx) {
       ${stats.LOW ? `<span class="notam-stat-badge sev-low">LOW ${stats.LOW}</span>` : ""}
     </div>
 
-    <div class="notam-grouped-list">
-      ${sortedCats.map(cat => `
+    <div class="notam-grouped-list ${isTooLong ? 'list-preview' : ''}">
+      ${sortedCats.map(cat => {
+        const headlineGroups = groups[cat];
+        return `
         <div class="notam-group">
           <div class="notam-group-title">
             ${NOTAM_CATEGORY_ICON[cat] || NOTAM_CATEGORY_ICON.OTHER}
             <span>${cat.replace(/_/g, ' ')}</span>
-            <span class="notam-group-count">${groups[cat].length}</span>
+            <span class="notam-group-count">${Object.keys(headlineGroups).length} types</span>
           </div>
           <div class="notam-mini-cards">
-            ${groups[cat].map(n => `
-              <div class="notam-mini-card compact notam-${n.severity.toLowerCase()}">
+            ${Object.keys(headlineGroups).map(headline => {
+              const items = headlineGroups[headline];
+              const first = items[0];
+              const ids = items.map(it => it.notamId).join(", ");
+
+              // [보완] 활주로/유도로 및 핵심 상태 키워드 시각화 강화
+              const displayHeadline = headline
+                .replace(/(CLOSED|CLSD|U\/S|OUT OF SERVICE|NOT AVBL|UNUSABLE|NA|OTS)/gi, '<b class="highlight">$1</b>')
+                .replace(/\b([\d]{2}[LRC]?)\b/g, '<span class="id-tag runway-id">$1</span>')
+                .replace(/\b(TWY\s+[A-Z]\d?)\b/gi, '<span class="id-tag taxiway-id">$1</span>')
+                .replace(/(WORK IN PROGRESS|WIP|CONSTRUCTION)/gi, '<span class="wip-tag">$1</span>');
+
+              return `
+              <div class="notam-mini-card compact notam-${first.severity.toLowerCase()}" onclick="showNotamDetail('${esc(ids)}', '${esc(first.rawText)}')">
                 <div class="notam-mini-main">
-                  <div class="notam-mini-headline">${n.headline.replace(/(CLOSED|CLSD|U\/S|OUT OF SERVICE|NOT AVBL|UNUSABLE|NA)/gi, '<b class="highlight">$1</b>')}</div>
-                  <div class="notam-mini-id">${esc(n.notamId)}</div>
+                  <div class="notam-mini-headline">${displayHeadline}</div>
+                  <div class="notam-mini-id">${esc(ids)} ${items.length > 1 ? `(+${items.length-1} more identical)` : ''}</div>
                 </div>
-                <div class="notam-mini-score">+${Math.round(n.riskScore)}</div>
+                <div class="notam-mini-score">+${Math.round(first.riskScore)}</div>
               </div>
-            `).join("")}
+              `;
+            }).join("")}
           </div>
-        </div>
-      `).join("")}
+        </div>`;
+      }).join("")}
     </div>
+
+    ${isTooLong ? `
+      <div class="notam-expand-wrap">
+        <button class="notam-view-all-btn" onclick="toggleNotamExpand(this)">View All ${totalCount} NOTAMs ↕</button>
+      </div>` : ""}
     <p class="notam-footer-note">Review full NOTAMs in official flight folder.</p>
   `;
 
   content.innerHTML = html;
+}
+
+function toggleNotamExpand(btn) {
+  const list = btn.closest('.ctx-block').querySelector('.notam-grouped-list');
+  if (list.classList.contains('list-preview')) {
+    list.classList.remove('list-preview');
+    btn.textContent = "Show Less ↕";
+  } else {
+    list.classList.add('list-preview');
+    btn.textContent = `View All NOTAMs ↕`;
+    const container = document.getElementById('notamBoxContainer');
+    if (container) {
+      window.scrollTo({ top: container.offsetTop - 80, behavior: 'smooth' });
+    }
+  }
+}
+
+function showNotamDetail(id, raw) {
+  // 모달 오버레이 생성
+  const overlay = document.createElement('div');
+  overlay.className = 'notam-modal-overlay';
+  overlay.innerHTML = `
+    <div class="notam-modal">
+      <div class="notam-modal-header">
+        <div class="notam-modal-title">NOTAM Detail</div>
+        <div class="notam-modal-subtitle">${id}</div>
+        <button class="notam-modal-close" onclick="this.closest('.notam-modal-overlay').remove()">×</button>
+      </div>
+      <div class="notam-modal-body">
+        <pre class="notam-raw-text">${esc(raw)}</pre>
+      </div>
+      <div class="notam-modal-footer">
+        <button class="notam-modal-btn" onclick="this.closest('.notam-modal-overlay').remove()">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // 외부 클릭 시 닫기
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+  // ESC 키로 닫기
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 }
 
 function renderThreats(threats) {
