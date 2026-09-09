@@ -235,7 +235,7 @@ function renderNotamThreats(notams, icao, ctx) {
   let airportInfoHtml = "";
   if (ctx && ctx.arrival_icao) {
     const elev = ctx.elevation_ft ? `${ctx.elevation_ft} ft` : "TBD";
-    const rwys = (ctx.runways && ctx.runways.length > 0) ? ctx.runways.map(r => String(r).padStart(2, '0')).join(", ") : "TBD";
+    const rwys = (ctx.runways && ctx.runways.length > 0) ? ctx.runways.map(r => 'RWY' + String(Math.round(r / 10)).padStart(2, '0')).join(", ") : "TBD";
     const terrain = esc(ctx.terrain_type || "Standard");
     const risks = (ctx.fixed_risks && ctx.fixed_risks.length > 0) ? ctx.fixed_risks.map(r => r.replace(/_/g, ' ')).join(", ") : "None specified";
 
