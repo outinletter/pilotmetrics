@@ -110,7 +110,7 @@ app.get("/api/briefing/:flightNumber", async c => {
       try {
         if (arrIcao) {
           airportEventCount = (await c.env.DB
-            .prepare("SELECT COUNT(*) as n FROM events WHERE airport_icao = ? OR airport_iata = ?")
+            .prepare("SELECT COUNT(*) as n FROM events WHERE (airport_icao = ? AND airport_icao != '') OR (airport_iata = ? AND airport_iata != '')")
             .bind(arrIcao, arrIata)
             .first<{ n: number }>())?.n ?? 0;
         }
