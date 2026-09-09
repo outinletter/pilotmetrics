@@ -2,7 +2,7 @@ export const AIRPORTS: Record<string, string> = {
   // 한국
   ICN: "RKSI", GMP: "RKSS", PUS: "RKPK", CJU: "RKPC",
   TAE: "RKTN", RSU: "RKJW", KPO: "RKTH", KWJ: "RKJJ",
-  CJJ: "RKNC", USN: "RKPU", WJU: "RKNW", HIN: "RKPS",
+  CJJ: "RKTU", USN: "RKPU", WJU: "RKNW", HIN: "RKPS",
   // 미주
   JFK: "KJFK", LAX: "KLAX", SFO: "KSFO", SEA: "KSEA",
   ORD: "KORD", ATL: "KATL", DFW: "KDFW", IAD: "KIAD",
