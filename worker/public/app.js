@@ -333,8 +333,6 @@ function renderNotamThreats(notams, icao, ctx) {
   if (hasCritical) container.classList.add("notam-block-critical");
 
   const totalCount = activeNotams.length;
-  // 목록이 길면 프리뷰 모드로 표시
-  const isTooLong = totalCount > 10;
 
   let html = `
     ${airportInfoHtml}
@@ -351,23 +349,30 @@ function renderNotamThreats(notams, icao, ctx) {
       ${stats.LOW ? `<span class="notam-stat-badge sev-low">LOW ${stats.LOW}</span>` : ""}
     </div>
 
-    <div class="notam-grouped-list ${isTooLong ? 'list-preview' : ''}">
-      ${sortedCats.map(cat => {
+    <div class="notam-collapsible-list">
+      ${sortedCats.map((cat, idx) => {
         const rawGroups = groups[cat];
+        const groupItems = Object.keys(rawGroups);
+        const groupCount = groupItems.length;
+
+        // 첫 번째 카테고리(보통 RUNWAY)만 열어둠
+        const isOpen = idx === 0 ? 'open' : '';
+
         return `
-        <div class="notam-group">
-          <div class="notam-group-title">
-            ${NOTAM_CATEGORY_ICON[cat] || NOTAM_CATEGORY_ICON.OTHER}
-            <span>${cat.replace(/_/g, ' ')}</span>
-            <span class="notam-group-count">${Object.keys(rawGroups).length} types</span>
-          </div>
+        <details class="notam-group-collapsible" ${isOpen}>
+          <summary class="notam-group-summary">
+            <div class="notam-group-title">
+              ${NOTAM_CATEGORY_ICON[cat] || NOTAM_CATEGORY_ICON.OTHER}
+              <span>${cat.replace(/_/g, ' ')}</span>
+              <span class="notam-group-count">${groupCount} types</span>
+            </div>
+          </summary>
           <div class="notam-mini-cards">
-            ${Object.keys(rawGroups).map(rawText => {
+            ${groupItems.map(rawText => {
               const items = rawGroups[rawText];
               const first = items[0];
               const ids = items.map(it => it.notamId).join(", ");
 
-              // [보완] 전문(Raw Text)을 목록에 바로 표시하고 시각화 강화
               const displayContent = rawText
                 .replace(/(CLOSED|CLSD|U\/S|OUT OF SERVICE|NOT AVBL|UNUSABLE|NA|OTS)/gi, '<b class="highlight">$1</b>')
                 .replace(/\b([\d]{2}[LRC]?)\b/g, '<span class="id-tag runway-id">$1</span>')
@@ -385,14 +390,10 @@ function renderNotamThreats(notams, icao, ctx) {
               `;
             }).join("")}
           </div>
-        </div>`;
+        </details>`;
       }).join("")}
     </div>
 
-    ${isTooLong ? `
-      <div class="notam-expand-wrap">
-        <button class="notam-view-all-btn" onclick="toggleNotamExpand(this)">View All ${totalCount} NOTAMs ↕</button>
-      </div>` : ""}
     <p class="notam-footer-note">Review full NOTAMs in official flight folder.</p>
   `;
 

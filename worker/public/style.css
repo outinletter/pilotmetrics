@@ -1525,14 +1525,14 @@ details summary::marker { content: ""; }
   border-radius: 2px;
 }
 .airport-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px 28px;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 14px 28px !important;
 }
 .airport-info-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 8px;
 }
@@ -1552,10 +1552,10 @@ details summary::marker { content: ""; }
   text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
 }
 @media (max-width: 500px) {
-  .airport-info-grid { grid-template-columns: 1fr; gap: 10px; }
+  .airport-info-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
 }
 
-/* ── NOTAM UI Improvements ── */
+/* ── NOTAM Collapsible Improvements ── */
 .notam-stats-bar {
   display: flex;
   flex-wrap: wrap;
@@ -1575,32 +1575,50 @@ details summary::marker { content: ""; }
 .notam-stat-badge.sev-medium { background: rgba(245,158,11,0.25); color: #f59e0b; border: 1px solid rgba(245,158,11,0.4); }
 .notam-stat-badge.sev-low { background: rgba(34,197,94,0.25); color: #4ade80; border: 1px solid rgba(34,197,94,0.4); }
 
-.notam-group {
-  margin-bottom: 24px;
+.notam-group-collapsible {
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  overflow: hidden;
 }
+.notam-group-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: background 0.2s;
+}
+.notam-group-summary::-webkit-details-marker { display: none; }
+.notam-group-summary:hover { background: rgba(255, 255, 255, 0.05); }
+
 .notam-group-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 10px 16px;
+}
+.notam-group-title span:first-of-type {
   font-size: 13px;
   font-weight: 700;
   color: var(--sky-400);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 12px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  letter-spacing: 0.08em;
 }
 .notam-group-count {
   margin-left: auto;
-  font-size: 11px;
-  opacity: 0.6;
+  font-size: 10px;
   color: var(--muted);
-  background: rgba(255,255,255,0.05);
-  padding: 1px 6px;
-  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+  padding: 2px 8px;
+  border-radius: 12px;
 }
+.notam-group-collapsible[open] .notam-group-summary {
+  border-bottom: 1px solid var(--border);
+  background: rgba(56, 189, 248, 0.05);
+}
+
 .notam-mini-cards {
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1613,33 +1631,20 @@ details summary::marker { content: ""; }
   border-left: 4px solid transparent;
   background: rgba(255,255,255,0.04);
   border-radius: 10px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .notam-mini-card.compact.static { cursor: default; }
-.notam-mini-card.compact:not(.static):hover {
-  background: rgba(255,255,255,0.08);
-  transform: translateX(6px);
-}
 .notam-mini-card.notam-critical { border-left-color: var(--red-500); background: rgba(239,68,68,0.04); }
 .notam-mini-card.notam-high { border-left-color: var(--orange-500); }
 .notam-mini-card.notam-medium { border-left-color: var(--amber-500); }
 .notam-mini-card.notam-low { border-left-color: var(--green-500); }
 
-.notam-mini-main { flex: 1; min-width: 0; }
-.notam-mini-headline {
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  line-height: 1.6;
-  margin-bottom: 6px;
-}
 .notam-mini-headline.raw-style {
   font-family: var(--font-mono);
   font-size: 13px;
+  line-height: 1.6;
   color: #e2e8f0;
   white-space: pre-wrap;
   word-break: break-all;
-  letter-spacing: -0.01em;
 }
 .notam-mini-headline .highlight {
   color: #ff4d4d;
@@ -1656,63 +1661,7 @@ details summary::marker { content: ""; }
   font-size: 11px;
   font-weight: 700;
   margin: 0 3px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 .notam-mini-headline .runway-id { background: #0f4c81; color: #fff; border: 1px solid #1a6fab; }
 .notam-mini-headline .taxiway-id { background: #f59e0b; color: #000; }
 .notam-mini-headline .wip-tag { color: var(--amber-400); font-style: italic; border-bottom: 1px dashed var(--amber-500); }
-
-.notam-mini-id {
-  font-size: 11px;
-  color: var(--subtle);
-  font-family: var(--font-mono);
-  letter-spacing: 0.03em;
-  margin-top: 4px;
-  opacity: 0.8;
-}
-.notam-mini-score {
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--sky-400);
-  text-shadow: 0 0 8px rgba(56,189,248,0.4);
-}
-
-/* Modal and Expand adjustments removed as requested or integrated */
-.list-preview {
-  max-height: 600px;
-  overflow: hidden;
-  position: relative;
-}
-.list-preview::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 120px;
-  background: linear-gradient(to top, var(--bg) 20%, transparent);
-  pointer-events: none;
-}
-.notam-expand-wrap {
-  text-align: center;
-  margin: 16px 0;
-}
-.notam-view-all-btn {
-  width: 100%;
-  max-width: 320px;
-  padding: 14px;
-  background: rgba(56,189,248,0.1);
-  border: 1px dashed var(--sky-400);
-  color: var(--sky-400);
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.notam-view-all-btn:hover {
-  background: var(--sky-400);
-  color: var(--navy-900);
-  border-style: solid;
-}
