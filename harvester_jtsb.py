@@ -95,5 +95,9 @@ def upload(records):
             print(f" [!] Batch failed: {e}")
 
 if __name__ == "__main__":
-    data = collect()
-    if data: upload(data)
+    # Durable research path: raw evidence + checkpoint; export only by default.
+    import sys
+    from collect_research import main
+    if "--source" not in sys.argv:
+        sys.argv.extend(["--source", "jtsb"])
+    main()

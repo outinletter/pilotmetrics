@@ -1,6 +1,24 @@
 # PilotMetrics
 ## AI-Powered Aviation Safety & Threat Analysis Platform
 
+### Research collection: worldwide aviation occurrences since 2000
+
+The research pipeline preserves official source records, raw evidence, publication dates,
+and resumable checkpoints separately from the briefing `events` table.
+See [the research plan and verified database findings](docs/RESEARCH_PLAN.md).
+
+```powershell
+uv run --with requests --with beautifulsoup4 python collect_research.py --source jtsb --end 2026-09-13 --state work/research-jtsb --max-jobs 10 --max-seconds 120
+```
+
+Supported adapters: `jtsb`, `araib-ko`, `araib`, and `ntsb` (CAROL currently returns HTTP 500;
+failed work remains pending). Collection exports JSONL/SQL and does not upload automatically.
+Use a separate state directory for a different date range. `research_schema.sql` adds the D1
+research store. Source-record counts must not be interpreted as unique accident counts.
+
+For the NTSB CAROL fallback, run `uv run --with requests python collect_ntsb_bulk.py`; it downloads
+the official `avall.zip`, records a SHA-256 manifest, and lists the archive without inserting data.
+
 PilotMetrics is an aviation safety platform designed to help pilots identify potential operational threats before and during flight.
 
 It combines flight information, weather data, route information, operational constraints, and aviation safety knowledge to provide a concise and flight-specific threat briefing.

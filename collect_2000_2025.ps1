@@ -55,7 +55,7 @@ $totalChecked    = 0
 $skipped         = 0
 $consecutive503  = 0
 
-for ($yr = 2024; $yr -le 2025; $yr++) {
+for ($yr = 2000; $yr -le (Get-Date).Year; $yr++) {
     $isLeap = ($yr % 4 -eq 0 -and $yr % 100 -ne 0) -or ($yr % 400 -eq 0)
     if ($isLeap) {
         $monthEnd[2] = 29
@@ -63,21 +63,19 @@ for ($yr = 2024; $yr -le 2025; $yr++) {
         $monthEnd[2] = 28
     }
 
-    if ($yr -eq 2024) {
-        $startMo = 8
-    } else {
-        $startMo = 1
-    }
+    $startMo = 1
 
     for ($mo = $startMo; $mo -le 12; $mo++) {
+        if ($yr -eq (Get-Date).Year -and $mo -gt (Get-Date).Month) { break }
         $ms    = $mo.ToString("00")
         $me    = $monthEnd[$mo].ToString("00")
         $start = "$yr-$ms-01"
         $end   = "$yr-$ms-$me"
+        if ($end -gt (Get-Date -Format 'yyyy-MM-dd')) { $end = Get-Date -Format 'yyyy-MM-dd' }
         Write-Host "  $yr-$ms ..." -NoNewline
 
         $r = Invoke-Api "$BASE/api/ops-intel/collect-ntsb" "POST" @{ start = $start; end = $end }
-        if ($r -ne $null) {
+        if ($r -ne $null -and -not $r.error -and -not $r.errors -and $r.PSObject.Properties['checked'] -and $r.PSObject.Properties['created']) {
             $c  = Get-Val $r "created"
             $ch = Get-Val $r "checked"
             $totalCreated   = $totalCreated + $c

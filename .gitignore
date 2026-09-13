@@ -12,3 +12,4 @@ reports/
 node_modules/
 worker/.wrangler/
 dist/
+work/

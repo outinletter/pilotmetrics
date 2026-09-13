@@ -166,9 +166,10 @@ export async function collectOnce(db: D1Database, env?: Env): Promise<Record<str
     }
 
     const now = new Date().toISOString();
+    const status = officialResult.status === "complete" && results.every(r => r.status === "fulfilled" && r.value.statusCode < 400) && !llmResult.error ? "complete" : "partial";
     await db.prepare("UPDATE ops_intel_runs SET status=?,items_checked=?,items_saved=?,finished_at=? WHERE id=?")
-      .bind("complete", SOURCES.length, saved, now, runId).run();
-    return { status: "complete", items_checked: SOURCES.length, items_saved: saved, official_recent: officialResult, llm_enrichment: llmResult };
+      .bind(status, SOURCES.length, saved, now, runId).run();
+    return { status, items_checked: SOURCES.length, items_saved: saved, official_recent: officialResult, llm_enrichment: llmResult };
   } catch (err) {
     const now = new Date().toISOString();
     await db.prepare("UPDATE ops_intel_runs SET status=?,error=?,finished_at=? WHERE id=?")

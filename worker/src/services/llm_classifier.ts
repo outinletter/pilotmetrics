@@ -79,7 +79,7 @@ export async function enrichWithLLM(
   ai: Ai,
   db: D1Database,
   limit = 20,
-): Promise<{ processed: number; updated: number; errors: number }> {
+): Promise<{ processed: number; updated: number; errors: number; error_samples?: string[] }> {
   const { results } = await db.prepare(
     `SELECT id, source_url, title, summary, category, severity, operational_lesson
      FROM ops_intel_items

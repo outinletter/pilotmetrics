@@ -1,5 +1,5 @@
 # TSB Canada Aviation Occurrence - CSV download and ingest
-# Filters for CAR 705/704 (commercial aviation) from 2000 onward
+# All aviation operations from 2000 onward; retain unknown operation types.
 # On batch 400 error: retries records one by one to skip bad records
 
 $BASE       = "https://pilot-briefing.outinletter.workers.dev"
@@ -114,7 +114,7 @@ foreach ($ac in $acRows) {
 Write-Host "[Join] Aircraft map: $($acMap.Count) entries" -ForegroundColor DarkCyan
 
 # 4. Filter + Map
-Write-Host "`n[Filter] Extracting commercial aviation (705/704)..." -ForegroundColor Cyan
+Write-Host "`n[Filter] Extracting all aviation operations from 2000..." -ForegroundColor Cyan
 $records = [System.Collections.Generic.List[hashtable]]::new()
 
 foreach ($occ in $occRows) {
@@ -132,7 +132,7 @@ foreach ($occ in $occRows) {
     $carsSubpart   = if ($ac) { CleanStr $ac.CarsSubpartID_DisplayEng   50 } else { "" }
     $operationType = if ($ac) { CleanStr $ac.OperationTypeID_DisplayEng 50 } else { "" }
 
-    if (-not (($carsSubpart -match '705|704') -or ($operationType -match 'AIR TRANSPORT'))) { continue }
+    # Operation type is an analysis dimension, not a collection exclusion.
 
     $fatalCount = 0; $seriousCount = 0; $minorCount = 0
     [int]::TryParse((CleanStr $occ.TotalFatalCount   10), [ref]$fatalCount)   | Out-Null

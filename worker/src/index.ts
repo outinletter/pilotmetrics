@@ -710,7 +710,7 @@ app.post(
         .json<{
           limit?: number;
         }>()
-        .catch(() => ({}));
+        .catch(() => ({ limit: undefined }));
 
     return c.json(
       await enrichWithLLM(
@@ -741,7 +741,7 @@ app.post(
         .json<{
           limit?: number;
         }>()
-        .catch(() => ({}));
+        .catch(() => ({ limit: undefined }));
 
     return c.json(
       await enrichEventsWithThreats(
@@ -990,70 +990,36 @@ app.post(
   }
 );
 
-// ─── Generic event ingestion ──────────────────────────────────────────────────
-
-app.post(
-  "/api/ops-intel/ingest-events",
-  async c => {
-    const body =
-      await c.req
-        .json<{
-          records?: any[];
-        }>()
-        .catch(() => ({
-          records: [],
-        }));
-
-    if (
-      !Array.isArray(body.records) ||
-      body.records.length === 0
-    ) {
-      return c.json(
-        {
-          error:
-            "records array required",
-        },
-        400
-      );
-    }
-
-    const {
-      upsertEventRecord,
-    } = await import(
-      "./services/official_event_parsers"
-    );
-
-    let created = 0;
-
-    for (
-      const rec of body.records
-    ) {
-      try {
-        if (
-          await upsertEventRecord(
-            c.env.DB,
-            rec
-          )
-        ) {
-          created++;
-        }
-      } catch (e) {
-        console.error(
-          "Ingest failed for record:",
-          rec.id,
-          e
-        );
-      }
-    }
-
-    return c.json({
-      checked:
-        body.records.length,
-
-      created,
-    });
+// Bounded ingestion with explicit per-record acknowledgement.
+app.post("/api/ops-intel/ingest-events", async c => {
+  const body = await c.req.json<{ records?: unknown[] }>().catch(() => ({ records: undefined }));
+  if (!Array.isArray(body?.records) || body.records.length < 1 || body.records.length > 50) {
+    return c.json({ error: "records must contain 1 to 50 items" }, 400);
   }
-);
+  const { upsertEventRecord } = await import("./services/official_event_parsers");
+  const { validateIngestRecord } = await import("./services/ingest_validation");
+  let created = 0;
+  const accepted_ids: string[] = [];
+  const errors: { index: number; id: string | null; error: string }[] = [];
+  for (const [index, value] of body.records.entries()) {
+    const validation = validateIngestRecord(value);
+    if (validation) {
+      errors.push({ index, id: null, error: validation });
+      continue;
+    }
+    const rec = value as Parameters<typeof upsertEventRecord>[1];
+    try {
+      if (await upsertEventRecord(c.env.DB, rec)) created++;
+      accepted_ids.push(rec.id);
+    } catch (error) {
+      console.error("Ingest failed", rec.id, error);
+      errors.push({ index, id: rec.id, error: "storage_failed" });
+    }
+  }
+  return c.json({ status: errors.length ? "partial" : "complete", checked: body.records.length,
+    created, updated: accepted_ids.length - created, failed: errors.length, accepted_ids, errors },
+    errors.length ? 207 : 200);
+});
 
 // ─── DELETE EASA records ──────────────────────────────────────────────────────
 
@@ -1181,7 +1147,7 @@ app.post(
           limit?: number;
           dry_run?: boolean;
         }>()
-        .catch(() => ({}));
+        .catch(() => ({ limit: undefined }));
 
     const limit = Math.min(
       Number(body.limit ?? 30),
@@ -1207,7 +1173,7 @@ app.post(
         .json<{
           limit?: number;
         }>()
-        .catch(() => ({}));
+        .catch(() => ({ limit: undefined }));
 
     const limit = Math.min(
       Number(body.limit ?? 50),

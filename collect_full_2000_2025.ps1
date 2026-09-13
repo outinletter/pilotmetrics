@@ -27,7 +27,7 @@ $stats = Invoke-Api "$BASE/api/stats"
 Write-Host "[DB 현황] total=$($stats.total_events)  period=$($stats.year_min)-$($stats.year_max)" -ForegroundColor Cyan
 
 # 진행 로그 파일 (재실행 시 이미 성공한 구간 스킵)
-$logFile = "$PSScriptRoot\collect_progress.log"
+$logFile = "$PSScriptRoot\collect_progress_all_aviation_v2.log"
 $done = @{}
 if (Test-Path $logFile) {
     Get-Content $logFile | ForEach-Object { $done[$_] = $true }
@@ -36,12 +36,12 @@ if (Test-Path $logFile) {
 
 $totalCreated = 0; $totalChecked = 0; $skipped = 0; $consec503 = 0
 
-for ($yr = 2000; $yr -le 2025; $yr++) {
+for ($yr = 2000; $yr -le (Get-Date).Year; $yr++) {
     $isLeap = ($yr % 4 -eq 0 -and $yr % 100 -ne 0) -or ($yr % 400 -eq 0)
     $monthEnd[2] = if ($isLeap) { 29 } else { 28 }
 
     for ($mo = 1; $mo -le 12; $mo++) {
-        if ($yr -eq 2025 -and $mo -gt (Get-Date).Month) { break }
+        if ($yr -eq (Get-Date).Year -and $mo -gt (Get-Date).Month) { break }
 
         $key = "$yr-$($mo.ToString('00'))"
         if ($done[$key]) {
@@ -52,16 +52,18 @@ for ($yr = 2000; $yr -le 2025; $yr++) {
         $ms    = $mo.ToString("00")
         $start = "$yr-$ms-01"
         $end   = "$yr-$ms-$($monthEnd[$mo].ToString('00'))"
+        if ($end -gt (Get-Date -Format 'yyyy-MM-dd')) { $end = Get-Date -Format 'yyyy-MM-dd' }
         Write-Host "  $key ..." -NoNewline
 
         $r = Invoke-Api "$BASE/api/ops-intel/collect-ntsb" "POST" @{ start = $start; end = $end }
 
-        if ($r -ne $null) {
+        if ($r -ne $null -and -not $r.error -and -not $r.errors -and $r.PSObject.Properties['checked'] -and $r.PSObject.Properties['created']) {
             $c  = if ($r.PSObject.Properties["created"]) { $r.created } else { 0 }
             $ch = if ($r.PSObject.Properties["checked"]) { $r.checked } else { 0 }
             $totalCreated += $c; $totalChecked += $ch; $consec503 = 0
             Write-Host " chk=$ch new=$c [누적=$totalCreated]" -ForegroundColor Green
-            Add-Content $logFile $key   # 성공 기록
+            # Current month is incomplete and must be revisited on the next run.
+            if ($key -ne (Get-Date -Format 'yyyy-MM')) { Add-Content $logFile $key }
         } else {
             $skipped++; $consec503++
             Write-Host " SKIP (consec=$consec503)" -ForegroundColor Yellow
